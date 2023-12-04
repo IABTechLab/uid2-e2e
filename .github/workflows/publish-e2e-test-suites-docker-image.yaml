@@ -1,0 +1,27 @@
+name: Publish E2E Test Suites
+run-name: ${{ format('Publish {0} E2E Test Suites {1}', inputs.release_type) }}
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        type: choice
+        description: 'The type of release'
+        options:
+          - Major
+          - Minor
+          - Patch
+          - Snapshot
+      version_number_input:
+        description: If set, the version number will not be incremented and the given number will be used.
+        type: string
+        default: ''
+
+jobs:
+  Image:
+    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-publish-docker-versioned.yaml@v2.2.1
+    with:
+      release_type: ${{ inputs.release_type }}
+      version_number_input: ${{ inputs.version_number_input }}
+      cloud_provider: 'default'
+      force_release: 'yes'
+    secrets: inherit
