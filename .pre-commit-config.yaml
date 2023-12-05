@@ -12,6 +12,4 @@ repos:
           - /src/target
           - --skip-dirs
           - /src/.idea
-          - --skip-dirs
-          - /src/python/venv
           - .
