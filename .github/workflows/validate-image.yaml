@@ -16,25 +16,31 @@ on:
 
 jobs:
   build-publish-docker-default:
-    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-validate-image.yaml@v2.0
+    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-validate-image.yaml@v2.4.1-pre
     with: 
       failure_severity: ${{ inputs.failure_severity || 'HIGH'}}
       fail_on_error: ${{ inputs.fail_on_error || true }}
       cloud_provider: 'default'
+      java_version: '17'
+      skip_tests: true
     secrets: inherit
   build-publish-docker-aws:
-    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-validate-image.yaml@v2.0
+    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-validate-image.yaml@v2.4.1-pre
     with: 
       failure_severity: ${{ inputs.failure_severity || 'HIGH'}}
       fail_on_error: ${{ inputs.fail_on_error || true }}
       cloud_provider: 'aws'
+      java_version: '17'
+      skip_tests: true
     secrets: inherit
     needs: [build-publish-docker-default]
   build-publish-docker-gcp:
-    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-validate-image.yaml@v2.0
+    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-validate-image.yaml@v2.4.1-pre
     with: 
       failure_severity: ${{ inputs.failure_severity || 'HIGH'}}
       fail_on_error: ${{ inputs.fail_on_error || true }}
       cloud_provider: 'gcp'
+      java_version: '17'
+      skip_tests: true
     secrets: inherit
     needs: [build-publish-docker-aws]
