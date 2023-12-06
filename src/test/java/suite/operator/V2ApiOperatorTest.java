@@ -25,9 +25,11 @@ public class V2ApiOperatorTest {
     // The advertiser token will be different on every call due to randomness used in encryption,
     // so we can't assert on it
 
+    private static final String SITE_ID = EnvUtil.getEnv("UID2_E2E_SITE_ID");
+
     public static final String EMAIL_OPTOUT_ID = "optout@unifiedid.com";
     public static final String PHONE_OPTOUT_ID = "+00000000001";
-    private static final String SITE_ID = EnvUtil.getEnv("UID2_E2E_SITE_ID");
+
 
     @ParameterizedTest(name = "/v2/token/generate - {0} - {2}")
     @MethodSource({

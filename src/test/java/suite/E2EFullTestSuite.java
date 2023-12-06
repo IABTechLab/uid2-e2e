@@ -7,7 +7,7 @@ import org.junit.platform.suite.api.Suite;
 @SelectClasses({
         BasicTestSuite.class,
         OperatorTestSuite.class,
-        LogoutTestSuite.class,
+        OptoutTestSuite.class,
         ValidatorTestSuite.class
 })
 public class E2EFullTestSuite {

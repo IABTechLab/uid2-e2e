@@ -1,13 +1,11 @@
-package suite.logout;
+package suite.optout;
 
 import app.common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.client.IdentityTokens;
-import helper.DisableCondition;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.condition.DisabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -17,14 +15,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("unused")
-@DisabledIf(
-        value = "isDisabled",
-        disabledReason = "Optout not integrated to local dev env")
-public class BeforeLogoutTest {
-    // TODO: UID2-988 - Integrate optout into local dev env
+public class BeforeOptoutTest {
     // TODO: Test failure case
 
-    private static final int LOGOUT_DELAY_MS = 1000;
+    private static final int OPTOUT_DELAY_MS = 1000;
     private static List<String> outputs;
 
     @BeforeAll
@@ -41,11 +35,11 @@ public class BeforeLogoutTest {
 
     @ParameterizedTest(name = "/v2/token/logout with /v0/token/generate - {0} - {2}")
     @MethodSource({
-            "suite.logout.TestData#tokenEmailArgs"
+            "suite.optout.TestData#tokenEmailArgs"
     })
     public void testV2LogoutWithV0TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         JsonNode generateResponse = operator.v0TokenGenerate(type, identity);
-        Thread.sleep(LOGOUT_DELAY_MS);
+        Thread.sleep(OPTOUT_DELAY_MS);
         JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
 
         assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
@@ -61,12 +55,12 @@ public class BeforeLogoutTest {
 
     @ParameterizedTest(name = "/v2/token/logout with /v1/token/generate - {0} - {2}")
     @MethodSource({
-            "suite.logout.TestData#tokenEmailArgs",
-            "suite.logout.TestData#tokenPhoneArgs"
+            "suite.optout.TestData#tokenEmailArgs",
+            "suite.optout.TestData#tokenPhoneArgs"
     })
     public void testV2LogoutWithV1TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         JsonNode generateResponse = operator.v1TokenGenerate(type, identity);
-        Thread.sleep(LOGOUT_DELAY_MS);
+        Thread.sleep(OPTOUT_DELAY_MS);
         JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
 
         assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
@@ -82,12 +76,12 @@ public class BeforeLogoutTest {
 
     @ParameterizedTest(name = "/v2/token/logout with /v2/token/generate - {0} - {2}")
     @MethodSource({
-            "suite.logout.TestData#logoutTokenEmailArgs",
-            "suite.logout.TestData#logoutTokenPhoneArgs"
+            "suite.optout.TestData#optoutTokenEmailArgs",
+            "suite.optout.TestData#optoutTokenPhoneArgs"
     })
     public void testV2LogoutWithV2TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, false).getIdentity();
-        Thread.sleep(LOGOUT_DELAY_MS);
+        Thread.sleep(OPTOUT_DELAY_MS);
         JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
         assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
         addToken(
@@ -102,12 +96,12 @@ public class BeforeLogoutTest {
 
     @ParameterizedTest(name = "/v2/token/logout with /v2/token/generate - {0} - {2}")
     @MethodSource({
-            "suite.logout.TestData#logoutTokenEmailArgs",
-            "suite.logout.TestData#logoutTokenPhoneArgs"
+            "suite.optout.TestData#optoutTokenEmailArgsOldParticipant",
+            "suite.optout.TestData#optoutTokenPhoneArgsOldParticipant"
     })
     public void testV2LogoutWithV2TokenGenerateOldParticipant(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, true).getIdentity();
-        Thread.sleep(LOGOUT_DELAY_MS);
+        Thread.sleep(OPTOUT_DELAY_MS);
         JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
         assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
         addToken(
@@ -125,9 +119,5 @@ public class BeforeLogoutTest {
                         label, operatorName, tokenGenerateVersion, tokenLogoutVersion, refreshToken, refreshResponseKey
                 )
         );
-    }
-
-    private static boolean isDisabled() {
-        return DisableCondition.isLocal();
     }
 }
