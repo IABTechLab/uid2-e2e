@@ -1,7 +1,7 @@
 ######################
 # Build dependencies #
 ######################
-FROM maven:3.9.1-eclipse-temurin-17
+FROM maven:3.9.5-eclipse-temurin-17
 
 WORKDIR /app
 
