@@ -26,15 +26,10 @@ ENV UID2_E2E_PIPELINE_OPERATOR_URL ""
 ENV UID2_E2E_PIPELINE_OPERATOR_TYPE ""
 ENV UID2_E2E_PIPELINE_OPERATOR_CLOUD_PROVIDER ""
 
-# TODO: UID2-988 - Delete LOCAL_PUBLIC case after optout is integrated into local dev env
 CMD \
-  if [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" != "LOCAL_PUBLIC" ] && [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" != "PUBLIC" ] && [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" != "PRIVATE" ] ; \
+  if [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" != "PUBLIC" ] && [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" != "PRIVATE" ] ; \
   then \
     echo "ERROR: Incorrect operator type: $UID2_E2E_PIPELINE_OPERATOR_TYPE" ; \
-  elif [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" = "LOCAL_PUBLIC" ] ; \
-  then \
-    export UID2_E2E_PIPELINE_OPERATOR_TYPE="PUBLIC" ; \
-    mvn test -Dtest="E2ELocalPublicOperatorTestSuite" ; \
   elif [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" = "PUBLIC" ] ; \
   then \
     mvn test -Dtest="E2EPublicOperatorTestSuite" ; \
