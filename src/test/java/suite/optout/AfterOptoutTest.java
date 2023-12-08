@@ -57,7 +57,7 @@ public class AfterOptoutTest {
     private static Set<Arguments> refreshTokenArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
         Set<List<String>> refreshTokens = Set.of(
-                // Copy and paste BeforeLogoutTest output here
+                // Copy and paste BeforeOptoutTest output here
                 // WARNING: DO NOT COMMIT ANYTHING PASTED INTO THIS SET
         );
 
