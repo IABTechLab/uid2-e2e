@@ -1,4 +1,4 @@
-package suite.logout;
+package suite.optout;
 
 import app.AppsMap;
 import app.common.EnvUtil;
@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class TestData {
     private static final boolean PHONE_SUPPORT = Boolean.parseBoolean(EnvUtil.getEnv("UID2_E2E_PHONE_SUPPORT"));
@@ -31,7 +32,7 @@ public final class TestData {
         return args;
     }
 
-    public static Set<Arguments> logoutTokenEmailArgs() {
+    public static Set<Arguments> optoutTokenEmailArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
         Random random = new Random();
         int number = random.nextInt(100000000);
@@ -47,6 +48,10 @@ public final class TestData {
             }
         }
         return args;
+    }
+
+    public static Set<Arguments> optoutTokenEmailArgsOldParticipant() {
+        return filterPublicOperators(optoutTokenEmailArgs(), 1);
     }
 
     public static Set<Arguments> tokenPhoneArgs() {
@@ -66,7 +71,7 @@ public final class TestData {
         return args;
     }
 
-    public static Set<Arguments> logoutTokenPhoneArgs() {
+    public static Set<Arguments> optoutTokenPhoneArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
         Random random = new Random();
         StringBuilder phone = new StringBuilder(String.valueOf(random.nextLong((10000000000L - 1000000000L) +1) + 1000000000L));
@@ -89,6 +94,9 @@ public final class TestData {
         return args;
     }
 
+    public static Set<Arguments> optoutTokenPhoneArgsOldParticipant() {
+        return filterPublicOperators(optoutTokenPhoneArgs(), 1);
+    }
 
     private static String getRandomString(int minLength, int maxLength) {
         String alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -100,5 +108,11 @@ public final class TestData {
             s.append(alphabet.charAt(index));
         }
         return s.toString();
+    }
+
+    private static Set<Arguments> filterPublicOperators(Set<Arguments> arguments, int operatorIndex) {
+        return arguments.stream()
+                .filter(args -> ((Operator) args.get()[operatorIndex]).getType() == Operator.Type.PUBLIC)
+                .collect(Collectors.toSet());
     }
 }

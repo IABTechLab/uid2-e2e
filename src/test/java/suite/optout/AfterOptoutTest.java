@@ -1,4 +1,4 @@
-package suite.logout;
+package suite.optout;
 
 import app.AppsMap;
 import app.common.Mapper;
@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 
 // Tests in this class are currently run manually
 @SuppressWarnings("unused")
-public class AfterLogoutTest {
-    @ParameterizedTest(name = "/v0/token/refresh after {3} generate and {4} logout - {0}")
+public class AfterOptoutTest {
+    @ParameterizedTest(name = "/v0/token/refresh after {3} generate and {4} logout - {0} - {2}")
     @MethodSource({
             "refreshTokenArgs"
     })
@@ -30,7 +30,7 @@ public class AfterLogoutTest {
         assertThat(response).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"advertisement_token\":\"\",\"advertising_token\":\"\",\"refresh_token\":\"\"}"));
     }
 
-    @ParameterizedTest(name = "/v1/token/refresh after {3} generate and {4} logout - {0}")
+    @ParameterizedTest(name = "/v1/token/refresh after {3} generate and {4} logout - {0} - {2}")
     @MethodSource({
             "refreshTokenArgs"
     })
@@ -42,7 +42,7 @@ public class AfterLogoutTest {
         assertThat(response).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"status\":\"optout\"}"));
     }
 
-    @ParameterizedTest(name = "/v2/token/refresh after {3} generate and {4} logout - {0}")
+    @ParameterizedTest(name = "/v2/token/refresh after {3} generate and {4} logout - {0} - {2}")
     @MethodSource({
             "refreshTokenArgs"
     })
@@ -57,7 +57,7 @@ public class AfterLogoutTest {
     private static Set<Arguments> refreshTokenArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
         Set<List<String>> refreshTokens = Set.of(
-                // Copy and paste BeforeLogoutTest output here
+                // Copy and paste BeforeOptoutTest output here
                 // WARNING: DO NOT COMMIT ANYTHING PASTED INTO THIS SET
         );
 
