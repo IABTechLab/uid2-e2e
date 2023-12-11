@@ -43,7 +43,7 @@ public final class TestData {
     }
 
     public static Set<Arguments> tokenEmailArgsSpecialOptout() {
-        Set<Operator> operators = getPublicOperators();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
@@ -54,7 +54,7 @@ public final class TestData {
     }
 
     public static Set<Arguments> tokenEmailArgsSpecialRefreshOptout() {
-        Set<Operator> operators = getPublicOperators();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
@@ -81,7 +81,7 @@ public final class TestData {
     }
 
     public static Set<Arguments> tokenPhoneArgsSpecialOptout() {
-        Set<Operator> operators = getPublicOperators();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         Set<Arguments> args = new HashSet<>();
         if (PHONE_SUPPORT) {
@@ -93,14 +93,8 @@ public final class TestData {
         return args;
     }
 
-    private static Set<Operator> getPublicOperators() {
-        return AppsMap.getApps(Operator.class).stream()
-                .filter(s -> s.getType() != Operator.Type.PRIVATE)
-                .collect(Collectors.toSet());
-    }
-
     public static Set<Arguments> tokenPhoneArgsSpecialRefreshOptout() {
-        Set<Operator> operators = getPublicOperators();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         Set<Arguments> args = new HashSet<>();
         if (PHONE_SUPPORT) {
@@ -488,5 +482,11 @@ public final class TestData {
             }
         }
         return args;
+    }
+
+    private static Set<Operator> getPublicOperators() {
+        return AppsMap.getApps(Operator.class).stream()
+                .filter(s -> s.getType() != Operator.Type.PRIVATE)
+                .collect(Collectors.toSet());
     }
 }

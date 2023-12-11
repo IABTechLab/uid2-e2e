@@ -7,8 +7,7 @@ import suite.operator.V2ApiOperatorTest;
 @Suite
 @SelectClasses({
         BasicTestSuite.class,
-        V2ApiOperatorTest.class,
-        OptoutTestSuite.class
+        V2ApiOperatorTest.class
 })
 public class E2EPrivateOperatorTestSuite {
 }
