@@ -3,7 +3,6 @@ package suite.operator;
 import app.AppsMap;
 import app.common.EnvUtil;
 import app.component.Operator;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.HashSet;
@@ -94,10 +93,9 @@ public final class TestData {
         return args;
     }
 
-    @NotNull
     private static Set<Operator> getPublicOperators() {
         return AppsMap.getApps(Operator.class).stream()
-                .filter(s -> s.getType() != Operator.Type.PRIVATE) // removing the private operators
+                .filter(s -> s.getType() != Operator.Type.PRIVATE)
                 .collect(Collectors.toSet());
     }
 
