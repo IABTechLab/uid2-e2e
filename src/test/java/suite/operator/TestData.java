@@ -63,6 +63,16 @@ public final class TestData {
         return args;
     }
 
+    public static Set<Arguments> tokenEmailArgsLocalMockOptout() {
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            args.add(Arguments.of("optout local mock email", operator, operator.getName(), "email", "local-mock-optout@example.com", false));
+        }
+        return args;
+    }
+
     public static Set<Arguments> tokenPhoneArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
         Set<List<String>> inputs = Set.of(

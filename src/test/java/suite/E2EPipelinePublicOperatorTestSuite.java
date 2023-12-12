@@ -5,8 +5,6 @@ import org.junit.platform.suite.api.Suite;
 import suite.basic.BasicTest;
 import suite.operator.*;
 import suite.optout.BeforeOptoutTest;
-import suite.validator.V0ApiValidatorTest;
-import suite.validator.V2ApiValidatorTest;
 
 @Suite
 @SelectClasses({
@@ -14,8 +12,9 @@ import suite.validator.V2ApiValidatorTest;
         V0ApiOperatorTest.class,
         V1ApiOperatorTest.class,
         V2ApiOperatorTest.class,
+        V2ApiOperatorLocalOnlyTest.class,
         V2ApiOperatorPublicOnlyTest.class,
         BeforeOptoutTest.class
 })
-public class E2EPublicOperatorTestSuite {
+public class E2EPipelinePublicOperatorTestSuite {
 }

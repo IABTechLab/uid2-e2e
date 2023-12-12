@@ -9,7 +9,8 @@ import suite.operator.V2ApiOperatorTest;
 @Suite
 @SelectClasses({
         BasicTest.class,
-        V2ApiOperatorTest.class
+        V2ApiOperatorTest.class,
+        V2ApiOperatorLocalOnlyTest.class
 })
-public class E2EPrivateOperatorTestSuite {
+public class E2EPipelinePrivateOperatorTestSuite {
 }
