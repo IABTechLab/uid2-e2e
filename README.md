@@ -15,3 +15,9 @@ There are different test suites that can be run depending on the environment and
 | `E2EPipelinePublicOperatorTestSuite`  | Used when testing public operators in a pipeline.            |
 | `E2EPrivateOperatorTestSuite`         | Used when testing real private operators.                    |
 | `E2EPublicOperatorTestSuite`          | Used when testing real public operators.                     |
+
+## Running the Dockerfile
+
+`docker build -f Dockerfile -t uid2-e2e . && docker run --env <ENV>=<VAR> ... uid2-e2e`
+* Set each environment variable specified in the Dockerfile as `--env <ENV>=<VAR>`
+* If running the E2E tests against localhost, include the option `--network=host`
