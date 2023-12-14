@@ -32,7 +32,7 @@ CMD \
     echo "ERROR: Incorrect operator type: $UID2_E2E_PIPELINE_OPERATOR_TYPE" ; \
   elif [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" = "PUBLIC" ] ; \
   then \
-    mvn test -Dtest="E2EPipelinePublicOperatorTestSuite" ; \
+    mvn test -Dtest="E2EPublicOperatorTestSuite" ; \
   else \
-    mvn test -Dtest="E2EPipelinePrivateOperatorTestSuite" ; \
+    mvn test -Dtest="E2EPrivateOperatorTestSuite" ; \
   fi

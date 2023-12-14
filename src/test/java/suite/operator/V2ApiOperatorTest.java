@@ -5,6 +5,8 @@ import app.common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.client.*;
+import helper.EnabledCondition;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -73,6 +75,18 @@ public class V2ApiOperatorTest {
         TokenRefreshResponse refreshed = operator.v2TokenRefresh(currentIdentity);
 
         assertTrue(refreshed.isOptout());
+    }
+
+    @EnabledIf("helper.EnabledCondition#isLocal")
+    @ParameterizedTest(name = "/v2/token/generate - LOCAL MOCK OPTOUT - {0} - {2}")
+    @MethodSource({
+            "suite.operator.TestData#tokenEmailArgsLocalMockOptout"
+    })
+    public void testV2TokenGenerateLocalMockOptout(String label, Operator operator, String operatorName, String type, String identity) {
+        TokenGenerateResponse tokenGenerateResponse = operator.v2TokenGenerate(type, identity, false);
+        IdentityTokens currentIdentity = tokenGenerateResponse.getIdentity();
+
+        assertThat(currentIdentity).isNull();
     }
 
     @ParameterizedTest(name = "/v2/token/validate - {0} - {2}")
