@@ -24,7 +24,7 @@ services:
 
   core:
     container_name: core
-    image: ghcr.io/iabtechlab/uid2-core:<CORE_VERSION>
+    image: ghcr.io/iabtechlab/uid2-core:latest
     ports:
       - "127.0.0.1:8088:8088"
       - "127.0.0.1:9088:9088"
@@ -41,7 +41,7 @@ services:
 
   optout:
     container_name: optout
-    image: ghcr.io/iabtechlab/uid2-optout:<OPTOUT_VERSION>
+    image: ghcr.io/iabtechlab/uid2-optout:latest
     ports:
       - "127.0.0.1:8090:8081"
       - "127.0.0.1:5090:5005"
@@ -58,7 +58,7 @@ services:
 
   publicoperator:
     container_name: public_operator
-    image: ghcr.io/iabtechlab/uid2-operator:<OPERATOR_VERSION>
+    image: ghcr.io/iabtechlab/uid2-operator:latest
     ports:
       - "127.0.0.1:8080:8080"
       - "127.0.0.1:9080:9080"
