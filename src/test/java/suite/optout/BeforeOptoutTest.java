@@ -96,8 +96,8 @@ public class BeforeOptoutTest {
 
     @ParameterizedTest(name = "/v2/token/logout with /v2/token/generate - {0} - {2}")
     @MethodSource({
-            "suite.optout.TestData#optoutTokenEmailArgsOldParticipant",
-            "suite.optout.TestData#optoutTokenPhoneArgsOldParticipant"
+            "suite.optout.TestData#optoutTokenEmailArgs",
+            "suite.optout.TestData#optoutTokenPhoneArgs"
     })
     public void testV2LogoutWithV2TokenGenerateOldParticipant(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, true).getIdentity();

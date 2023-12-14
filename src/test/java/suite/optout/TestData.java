@@ -18,7 +18,7 @@ public final class TestData {
     }
 
     public static Set<Arguments> tokenEmailArgs() {
-        Set<Operator> operators = AppsMap.getApps(Operator.class);
+        Set<Operator> operators = getPublicOperators();
         Set<List<String>> inputs = Set.of(
                 List.of("good email", "email", "test.user1@thetradedesk.com")
         );
@@ -33,7 +33,7 @@ public final class TestData {
     }
 
     public static Set<Arguments> optoutTokenEmailArgs() {
-        Set<Operator> operators = AppsMap.getApps(Operator.class);
+        Set<Operator> operators = getPublicOperators();
         Random random = new Random();
         int number = random.nextInt(100000000);
         String email = "test.email" + number + "@" + getRandomString(2, 10) + "." + getRandomString(2, 10);
@@ -50,12 +50,8 @@ public final class TestData {
         return args;
     }
 
-    public static Set<Arguments> optoutTokenEmailArgsOldParticipant() {
-        return filterPublicOperators(optoutTokenEmailArgs(), 1);
-    }
-
     public static Set<Arguments> tokenPhoneArgs() {
-        Set<Operator> operators = AppsMap.getApps(Operator.class);
+        Set<Operator> operators = getPublicOperators();
         Set<List<String>> inputs = Set.of(
                 List.of("good phone", "phone", "+10000001111")
         );
@@ -72,7 +68,7 @@ public final class TestData {
     }
 
     public static Set<Arguments> optoutTokenPhoneArgs() {
-        Set<Operator> operators = AppsMap.getApps(Operator.class);
+        Set<Operator> operators = getPublicOperators();
         Random random = new Random();
         StringBuilder phone = new StringBuilder(String.valueOf(random.nextLong((10000000000L - 1000000000L) +1) + 1000000000L));
         while (phone.length() < 10) {
@@ -94,10 +90,6 @@ public final class TestData {
         return args;
     }
 
-    public static Set<Arguments> optoutTokenPhoneArgsOldParticipant() {
-        return filterPublicOperators(optoutTokenPhoneArgs(), 1);
-    }
-
     private static String getRandomString(int minLength, int maxLength) {
         String alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder s = new StringBuilder();
@@ -110,9 +102,9 @@ public final class TestData {
         return s.toString();
     }
 
-    private static Set<Arguments> filterPublicOperators(Set<Arguments> arguments, int operatorIndex) {
-        return arguments.stream()
-                .filter(args -> ((Operator) args.get()[operatorIndex]).getType() == Operator.Type.PUBLIC)
+    private static Set<Operator> getPublicOperators() {
+        return AppsMap.getApps(Operator.class).stream()
+                .filter(s -> s.getType() != Operator.Type.PRIVATE)
                 .collect(Collectors.toSet());
     }
 }

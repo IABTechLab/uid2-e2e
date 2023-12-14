@@ -15,7 +15,10 @@ import suite.validator.V2ApiValidatorTest;
         V1ApiOperatorTest.class,
         V2ApiOperatorTest.class,
         V2ApiOperatorPublicOnlyTest.class,
-        BeforeOptoutTest.class
+        BeforeOptoutTest.class,
+        V0ApiValidatorTest.class,
+        V1ApiOperatorTest.class,
+        V2ApiValidatorTest.class
 })
-public class E2EPublicOperatorTestSuite {
+public class E2ELocalFullTestSuite {
 }

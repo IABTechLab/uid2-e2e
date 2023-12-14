@@ -3,7 +3,6 @@ package suite.operator;
 import app.AppsMap;
 import app.common.EnvUtil;
 import app.component.Operator;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.HashSet;
@@ -44,7 +43,7 @@ public final class TestData {
     }
 
     public static Set<Arguments> tokenEmailArgsSpecialOptout() {
-        Set<Operator> operators = getPublicOperators();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
@@ -55,11 +54,21 @@ public final class TestData {
     }
 
     public static Set<Arguments> tokenEmailArgsSpecialRefreshOptout() {
-        Set<Operator> operators = getPublicOperators();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
             args.add(Arguments.of("optout refresh special email", operator, operator.getName(), "email", "refresh-optout@example.com"));
+        }
+        return args;
+    }
+
+    public static Set<Arguments> tokenEmailArgsLocalMockOptout() {
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            args.add(Arguments.of("optout local mock email", operator, operator.getName(), "email", "local-mock-optout@example.com", false));
         }
         return args;
     }
@@ -82,7 +91,7 @@ public final class TestData {
     }
 
     public static Set<Arguments> tokenPhoneArgsSpecialOptout() {
-        Set<Operator> operators = getPublicOperators();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         Set<Arguments> args = new HashSet<>();
         if (PHONE_SUPPORT) {
@@ -94,15 +103,8 @@ public final class TestData {
         return args;
     }
 
-    @NotNull
-    private static Set<Operator> getPublicOperators() {
-        return AppsMap.getApps(Operator.class).stream()
-                .filter(s -> s.getType() != Operator.Type.PRIVATE) // removing the private operators
-                .collect(Collectors.toSet());
-    }
-
     public static Set<Arguments> tokenPhoneArgsSpecialRefreshOptout() {
-        Set<Operator> operators = getPublicOperators();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         Set<Arguments> args = new HashSet<>();
         if (PHONE_SUPPORT) {
@@ -490,5 +492,11 @@ public final class TestData {
             }
         }
         return args;
+    }
+
+    private static Set<Operator> getPublicOperators() {
+        return AppsMap.getApps(Operator.class).stream()
+                .filter(s -> s.getType() != Operator.Type.PRIVATE)
+                .collect(Collectors.toSet());
     }
 }
