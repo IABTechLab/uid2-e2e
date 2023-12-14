@@ -59,6 +59,8 @@ services:
   publicoperator:
     container_name: public_operator
     image: ghcr.io/iabtechlab/uid2-operator:latest
+    profiles:
+      - public
     ports:
       - "127.0.0.1:8080:8080"
       - "127.0.0.1:9080:9080"
