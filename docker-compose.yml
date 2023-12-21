@@ -21,58 +21,71 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
+    networks:
+      - e2e_default
 
-  # core:
-  #   container_name: core
-  #   image: ghcr.io/iabtechlab/uid2-core:latest
-  #   ports:
-  #     - "127.0.0.1:8088:8088"
-  #     - "127.0.0.1:9088:9088"
-  #     - "127.0.0.1:5088:5005"
-  #   volumes:
-  #     - ./docker/uid2-core/conf/default-config.json:/app/conf/default-config.json
-  #     - ./docker/uid2-core/conf/local-e2e-docker-config.json:/app/conf/local-config.json
-  #   depends_on:
-  #     localstack:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: wget --tries=1 --spider http://localhost:8088/ops/healthcheck || exit 1
-  #     interval: 10s
+  core:
+    container_name: core
+    image: ghcr.io/iabtechlab/uid2-core:latest
+    ports:
+      - "127.0.0.1:8088:8088"
+      - "127.0.0.1:9088:9088"
+      - "127.0.0.1:5088:5005"
+    volumes:
+      - ./docker/uid2-core/conf/default-config.json:/app/conf/default-config.json
+      - ./docker/uid2-core/conf/local-e2e-docker-config.json:/app/conf/local-config.json
+    depends_on:
+      localstack:
+        condition: service_healthy
+    healthcheck:
+      test: wget --tries=1 --spider http://localhost:8088/ops/healthcheck || exit 1
+      interval: 10s
+    networks:
+      - e2e_default
 
-  # optout:
-  #   container_name: optout
-  #   image: ghcr.io/iabtechlab/uid2-optout:latest
-  #   ports:
-  #     - "127.0.0.1:8090:8081"
-  #     - "127.0.0.1:5090:5005"
-  #   volumes:
-  #     - ./docker/uid2-optout/conf/default-config.json:/app/conf/default-config.json
-  #     - ./docker/uid2-optout/conf/local-e2e-docker-config.json:/app/conf/local-config.json
-  #     - ./docker/uid2-optout/mount/:/opt/uid2/optout/
-  #   depends_on:
-  #     core:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: wget --tries=1 --spider http://localhost:8081/ops/healthcheck || exit 1
-  #     interval: 5s
+  optout:
+    container_name: optout
+    image: ghcr.io/iabtechlab/uid2-optout:latest
+    ports:
+      - "127.0.0.1:8090:8081"
+      - "127.0.0.1:5090:5005"
+    volumes:
+      - ./docker/uid2-optout/conf/default-config.json:/app/conf/default-config.json
+      - ./docker/uid2-optout/conf/local-e2e-docker-config.json:/app/conf/local-config.json
+      - ./docker/uid2-optout/mount/:/opt/uid2/optout/
+    depends_on:
+      core:
+        condition: service_healthy
+    healthcheck:
+      test: wget --tries=1 --spider http://localhost:8081/ops/healthcheck || exit 1
+      interval: 5s
+    networks:
+      - e2e_default
 
-  # publicoperator:
-  #   container_name: public_operator
-  #   image: ghcr.io/iabtechlab/uid2-operator:latest
-  #   profiles:
-  #     - public
-  #   ports:
-  #     - "127.0.0.1:8080:8080"
-  #     - "127.0.0.1:9080:9080"
-  #     - "127.0.0.1:5080:5005"
-  #   volumes:
-  #     - ./docker/uid2-operator/conf/default-config.json:/app/conf/default-config.json
-  #     - ./docker/uid2-operator/conf/local-e2e-docker-config.json:/app/conf/local-config.json
-  #   depends_on:
-  #     core:
-  #       condition: service_healthy
-  #     optout:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: wget --tries=1 --spider http://localhost:8080/ops/healthcheck || exit 1
-  #     interval: 5s
+  publicoperator:
+    container_name: public_operator
+    image: ghcr.io/iabtechlab/uid2-operator:latest
+    profiles:
+      - public
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:9080:9080"
+      - "127.0.0.1:5080:5005"
+    volumes:
+      - ./docker/uid2-operator/conf/default-config.json:/app/conf/default-config.json
+      - ./docker/uid2-operator/conf/local-e2e-docker-config.json:/app/conf/local-config.json
+    depends_on:
+      core:
+        condition: service_healthy
+      optout:
+        condition: service_healthy
+    healthcheck:
+      test: wget --tries=1 --spider http://localhost:8080/ops/healthcheck || exit 1
+      interval: 5s
+    networks:
+      - e2e_default
+
+networks:
+  e2e_default:
+    external: true
+    driver: bridge
