@@ -36,7 +36,7 @@ services:
       - ./docker/uid2-core/conf/local-e2e-docker-config.json:/app/conf/local-config.json
     depends_on:
       localstack:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: wget --tries=1 --spider http://localhost:8088/ops/healthcheck || exit 1
       interval: 10s
@@ -55,7 +55,7 @@ services:
       - ./docker/uid2-optout/mount/:/opt/uid2/optout/
     depends_on:
       core:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: wget --tries=1 --spider http://localhost:8081/ops/healthcheck || exit 1
       interval: 5s
@@ -76,9 +76,9 @@ services:
       - ./docker/uid2-operator/conf/local-e2e-docker-config.json:/app/conf/local-config.json
     depends_on:
       core:
-        condition: service_healthy
+        condition: service_started
       optout:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: wget --tries=1 --spider http://localhost:8080/ops/healthcheck || exit 1
       interval: 5s
