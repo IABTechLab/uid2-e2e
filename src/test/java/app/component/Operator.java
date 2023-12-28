@@ -4,13 +4,22 @@ import app.common.EnvUtil;
 import app.common.HttpClient;
 import app.common.Mapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.uid2.client.*;
+import com.uid2.client.IdentityScope;
 
+import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
+import java.security.*;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Base64;
 
@@ -56,8 +65,13 @@ public class Operator extends App {
     private static final String CLIENT_API_SECRET = EnvUtil.getEnv("UID2_E2E_API_SECRET");
     private static final String CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv("UID2_E2E_API_KEY_OLD");
     private static final String CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv("UID2_E2E_API_SECRET_OLD");
+    private static final String CLIENT_SIDE_TOKEN_GENERATE_SUBSCRIPTION_ID = EnvUtil.getEnv("UID2_E2E_SUBSCRIPTION_ID");
+    private static final String CLIENT_SIDE_TOKEN_GENERATE_SERVER_PUBLIC_KEY = EnvUtil.getEnv("UID2_E2E_SERVER_PUBLIC_KEY");
     private static final IdentityScope IDENTITY_SCOPE = IdentityScope.valueOf(EnvUtil.getEnv("UID2_E2E_IDENTITY_SCOPE"));
     private static final int TIMESTAMP_LENGTH = 8;
+    private static final int PUBLIC_KEY_PREFIX_LENGTH = 9;
+    private static final int AUTHENTICATION_TAG_LENGTH_BITS = 128;
+    private static final int IV_BYTES = 12;
     private static final String TC_STRING = "CPhJRpMPhJRpMABAMBFRACBoALAAAEJAAIYgAKwAQAKgArABAAqAAA";
 
     private final Type type;
@@ -182,6 +196,126 @@ public class Operator extends App {
         return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), getClientApiSecret(asOldParticipant));
     }
 
+    public JsonNode v2ClientSideTokenGenerate(String request) throws Exception {
+        final var serverPublicKeyBytes = base64ToByteArray(CLIENT_SIDE_TOKEN_GENERATE_SERVER_PUBLIC_KEY.substring(PUBLIC_KEY_PREFIX_LENGTH));
+
+        final var serverPublicKey = KeyFactory.getInstance("EC")
+                .generatePublic(new X509EncodedKeySpec(serverPublicKeyBytes));
+
+        final var keyPair = generateKeypair();
+        final var sharedSecret = generateSharedSecret(serverPublicKey, keyPair);
+
+        final JsonObject requestBody = generateRequestBody(request, CLIENT_SIDE_TOKEN_GENERATE_SUBSCRIPTION_ID, keyPair.getPublic(), sharedSecret);
+
+        final var encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/token/client-generate", requestBody.toString(), null);
+        final var responseBytes = base64ToByteArray(encryptedResponse);
+        final var decryptedResponse = decrypt(responseBytes, sharedSecret);
+
+        return Mapper.OBJECT_MAPPER.readTree(decryptedResponse);
+    }
+
+    private static KeyPair generateKeypair() {
+        final KeyPairGenerator keyPairGenerator;
+        try {
+            keyPairGenerator = KeyPairGenerator.getInstance("EC");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        final var ecParameterSpec = new ECGenParameterSpec("secp256r1");
+        try {
+            keyPairGenerator.initialize(ecParameterSpec);
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new RuntimeException(e);
+        }
+        return keyPairGenerator.genKeyPair();
+    }
+
+    private static SecretKey generateSharedSecret(PublicKey serverPublicKey, KeyPair clientKeypair) {
+        try {
+            final var ka = KeyAgreement.getInstance("ECDH");
+            ka.init(clientKeypair.getPrivate());
+            ka.doPhase(serverPublicKey, true);
+            return new SecretKeySpec(ka.generateSecret(), "AES");
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static JsonObject generateRequestBody(String request, String subscriptionId, PublicKey clientPublicKey, SecretKey sharedSecret) {
+        final var now = Clock.systemUTC().millis();
+
+        final var iv = new byte[IV_BYTES];
+        new SecureRandom().nextBytes(iv);
+
+        final var aad = new JsonArray();
+        aad.add(now);
+
+        final var plaintext = request.getBytes(StandardCharsets.UTF_8);
+        final var payload = encrypt(plaintext,
+                iv,
+                aad.toString().getBytes(StandardCharsets.UTF_8),
+                sharedSecret);
+
+        final var body = new JsonObject();
+
+        final var encoder = Base64.getEncoder();
+
+        body.addProperty("payload", encoder.encodeToString(payload));
+        body.addProperty("iv", encoder.encodeToString(iv));
+        body.addProperty("public_key", encoder.encodeToString(clientPublicKey.getEncoded()));
+        body.addProperty("timestamp", now);
+        body.addProperty("subscription_id", subscriptionId);
+
+        return body;
+    }
+
+    private static byte[] encrypt(byte[] plaintext, byte[] iv, byte[] aad, SecretKey key) {
+        final Cipher cipher;
+        try {
+            cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        }
+        final var gcmParameterSpec = new GCMParameterSpec(AUTHENTICATION_TAG_LENGTH_BITS, iv);
+        try {
+            cipher.init(Cipher.ENCRYPT_MODE, key, gcmParameterSpec);
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+            throw new RuntimeException(e);
+        }
+
+        cipher.updateAAD(aad);
+
+        try {
+            return cipher.doFinal(plaintext);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public byte[] decrypt(byte[] ciphertext, SecretKey key) {
+        final Cipher cipher;
+        try {
+            cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        }
+
+        final var gcmParameterSpec = new GCMParameterSpec(AUTHENTICATION_TAG_LENGTH_BITS, ciphertext, 0, IV_BYTES);
+        try {
+            cipher.init(Cipher.DECRYPT_MODE,
+                    key,
+                    gcmParameterSpec);
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            return cipher.doFinal(ciphertext, IV_BYTES, ciphertext.length - IV_BYTES);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public TokenRefreshResponse v2TokenRefresh(IdentityTokens identity) {
         return publisherClient.refreshToken(identity);
     }
@@ -283,11 +417,11 @@ public class Operator extends App {
         return (byte[]) encryptGDMMethod.invoke(clazz, b, null, secretBytes);
     }
 
-    private byte[] base64ToByteArray(String str) {
+    private static byte[] base64ToByteArray(String str) {
         return Base64.getDecoder().decode(str);
     }
 
-    private String byteArrayToBase64(byte[] b) {
+    private static String byteArrayToBase64(byte[] b) {
         return Base64.getEncoder().encodeToString(b);
     }
 }

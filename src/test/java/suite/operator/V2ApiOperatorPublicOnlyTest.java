@@ -199,6 +199,20 @@ public class V2ApiOperatorPublicOnlyTest {
         assertThat(response.at("/status").asText()).isEqualTo("success");
     }
 
+    @ParameterizedTest(name = "/v2/token/client-generate - {0} - {2}")
+    @MethodSource({
+            "suite.operator.TestData#clientSideTokenGenerateArgs",
+    })
+    public void testV2ClientSideTokenGenerate(String label, Operator operator, String operatorName, String payload) throws Exception {
+        if (isPrivateOperator(operator)) {
+            return;
+        }
+
+        final JsonNode response = operator.v2ClientSideTokenGenerate(payload);
+
+        assertEquals("success", response.get("status").asText());
+    }
+
     private boolean isPrivateOperator(Operator operator) {
         return operator.getType() == Operator.Type.PRIVATE;
     }

@@ -346,6 +346,24 @@ public final class TestData {
         return args;
     }
 
+    public static Set<Arguments> clientSideTokenGenerateArgs() {
+        Set<List<String>> inputs = new HashSet<>();
+
+        inputs.add(List.of("email hash", "{\"email_hash\":\"eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=\"}"));
+
+        if (PHONE_SUPPORT) {
+            inputs.add(List.of("phone hash", "{\"phone_hash\":\"eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=\"}"));
+        }
+
+        final Set<Arguments> args = new HashSet<>();
+        for (var operator : getPublicOperators()) {
+            for (var input : inputs) {
+                args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1)));
+            }
+        }
+        return args;
+    }
+
     public static Set<Arguments> tokenGenerateEmailArgsBadPolicy() {
         Set<Operator> operators = getPublicOperators();
         Set<List<String>> inputs = Set.of(
