@@ -199,6 +199,40 @@ public class V2ApiOperatorPublicOnlyTest {
         assertThat(response.at("/status").asText()).isEqualTo("success");
     }
 
+    @ParameterizedTest(name = "/v2/token/client-generate - {0} - {2}")
+    @MethodSource({
+            "suite.operator.TestData#clientSideTokenGenerateArgs",
+    })
+    public void testV2ClientSideTokenGenerate(String label, Operator operator, String operatorName, String payload) throws Exception {
+        if (isPrivateOperator(operator)) {
+            return;
+        }
+
+        final JsonNode response = operator.v2ClientSideTokenGenerate(payload, true);
+
+        assertThat(response.get("status").asText()).isEqualTo("success");
+    }
+
+    @ParameterizedTest(name = "/v2/token/client-generate - INVALID ORIGIN - {0} - {2}")
+    @MethodSource({
+            "suite.operator.TestData#clientSideTokenGenerateArgs",
+    })
+    public void testV2ClientSideTokenGenerateInvalidOrigin(String label, Operator operator, String operatorName, String payload) {
+        if (isPrivateOperator(operator)) {
+            return;
+        }
+
+        HttpClient.HttpException e = assertThrows(HttpClient.HttpException.class, () -> {
+            JsonNode response = operator.v2ClientSideTokenGenerate(payload, false);
+        });
+
+        assertAll(
+                () -> assertThat(e.getCode()).isEqualTo(403),
+                () -> assertThat(e.getResponseJson().get("status").asText()).isEqualTo("invalid_http_origin"),
+                () -> assertThat(e.getResponseJson().get("message").asText()).isEqualTo("unexpected http origin")
+        );
+    }
+
     private boolean isPrivateOperator(Operator operator) {
         return operator.getType() == Operator.Type.PRIVATE;
     }

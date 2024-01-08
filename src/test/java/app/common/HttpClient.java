@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public final class HttpClient {
     public static final OkHttpClient RAW_CLIENT = new OkHttpClient();
-    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     public enum HttpMethod {
         GET,
@@ -67,12 +67,7 @@ public final class HttpClient {
 
     public static String get(String url, String bearerToken) throws Exception {
         Request request = buildRequest(HttpMethod.GET, url, null, bearerToken);
-        try (Response response = RAW_CLIENT.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new HttpException(HttpMethod.GET, request.url().toString(), response.code(), response.message(), Objects.requireNonNull(response.body()).string());
-            }
-            return Objects.requireNonNull(response.body()).string();
-        }
+        return execute(request, HttpMethod.GET);
     }
 
     public static String get(String url) throws Exception {
@@ -81,9 +76,13 @@ public final class HttpClient {
 
     public static String post(String url, String body, String bearerToken) throws Exception {
         Request request = buildRequest(HttpMethod.POST, url, body, bearerToken);
+        return execute(request, HttpMethod.POST);
+    }
+
+    public static String execute(Request request, HttpMethod method) throws Exception {
         try (Response response = RAW_CLIENT.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                throw new HttpException(HttpMethod.POST, request.url().toString(), response.code(), response.message(), Objects.requireNonNull(response.body()).string());
+                throw new HttpException(method, request.url().toString(), response.code(), response.message(), Objects.requireNonNull(response.body()).string());
             }
             return Objects.requireNonNull(response.body()).string();
         }
