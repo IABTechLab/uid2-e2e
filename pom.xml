@@ -7,7 +7,7 @@
 
     <groupId>com.uid2</groupId>
     <artifactId>uid2-e2e</artifactId>
-    <version>3.0.4-293fb84be3</version>
+    <version>3.0.11-095e17c65e</version>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
