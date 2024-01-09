@@ -29,7 +29,8 @@ ENV UID2_E2E_PIPELINE_OPERATOR_CLOUD_PROVIDER ""
 CMD \
   if [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" != "PUBLIC" ] && [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" != "PRIVATE" ] ; \
   then \
-    echo "ERROR: Incorrect operator type: $UID2_E2E_PIPELINE_OPERATOR_TYPE" ; \
+    echo "ERROR: Incorrect operator type: $UID2_E2E_PIPELINE_OPERATOR_TYPE. Exiting." ; \
+    exit 1 ; \ 
   elif [ "$UID2_E2E_PIPELINE_OPERATOR_TYPE" = "PUBLIC" ] ; \
   then \
     mvn test -Dtest="E2EPublicOperatorTestSuite" ; \
