@@ -257,7 +257,7 @@ public class Operator extends App {
         final JsonArray aad = new JsonArray();
         aad.add(now);
 
-        final byte[] payload = encrypt(request.getBytes(StandardCharsets.UTF_8),
+        final byte[] payload = encryptCSTG(request.getBytes(StandardCharsets.UTF_8),
                 iv,
                 aad.toString().getBytes(StandardCharsets.UTF_8),
                 sharedSecret);
@@ -273,7 +273,7 @@ public class Operator extends App {
         return body;
     }
 
-    private static byte[] encrypt(byte[] plaintext, byte[] iv, byte[] aad, SecretKey key) {
+    private static byte[] encryptCSTG(byte[] plaintext, byte[] iv, byte[] aad, SecretKey key) {
         final Cipher cipher;
         try {
             cipher = Cipher.getInstance("AES/GCM/NoPadding");
