@@ -218,9 +218,7 @@ public class Operator extends App {
                 .post(RequestBody.create(cstgEnvelope.toString(), HttpClient.JSON));
 
         final String encryptedResponse = HttpClient.execute(requestBuilder.build(), HttpClient.HttpMethod.POST);
-        final byte[] decryptedResponse = decrypt(base64ToByteArray(encryptedResponse), sharedSecret);
-
-        return Mapper.OBJECT_MAPPER.readTree(decryptedResponse);
+        return v2DecryptResponseWithoutNonce(encryptedResponse, sharedSecret.getEncoded());
     }
 
     private static KeyPair generateKeyPair() {
@@ -298,35 +296,13 @@ public class Operator extends App {
         }
     }
 
-    public byte[] decrypt(byte[] ciphertext, SecretKey key) {
-        final Cipher cipher;
-        try {
-            cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException(e);
-        }
-
-        final GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(AUTHENTICATION_TAG_LENGTH_BITS, ciphertext, 0, IV_BYTES);
-        try {
-            cipher.init(Cipher.DECRYPT_MODE, key, gcmParameterSpec);
-        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            return cipher.doFinal(ciphertext, IV_BYTES, ciphertext.length - IV_BYTES);
-        } catch (IllegalBlockSizeException | BadPaddingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public TokenRefreshResponse v2TokenRefresh(IdentityTokens identity) {
         return publisherClient.refreshToken(identity);
     }
 
     public JsonNode v2TokenRefresh(String refreshToken, String refreshResponseKey) throws Exception {
         String response = HttpClient.post(getBaseUrl() + "/v2/token/refresh", refreshToken, CLIENT_API_KEY);
-        return v2DecryptRefreshResponse(response, refreshResponseKey);
+        return v2DecryptResponseWithoutNonce(response, base64ToByteArray(refreshResponseKey));
     }
 
     public JsonNode v2TokenValidate(String type, String identity, String advertisingToken) throws Exception {
@@ -407,10 +383,10 @@ public class Operator extends App {
         return Mapper.OBJECT_MAPPER.readTree(decryptedResponse);
     }
 
-    private JsonNode v2DecryptRefreshResponse(String refreshToken, String refreshResponseKey) throws Exception {
+    private JsonNode v2DecryptResponseWithoutNonce(String response, byte[] key) throws Exception {
         Method decryptMethod = PublisherUid2Helper.class.getDeclaredMethod("decrypt", String.class, byte[].class, boolean.class, byte[].class);
         decryptMethod.setAccessible(true);
-        String decryptedResponse = (String) decryptMethod.invoke(PublisherUid2Helper.class, refreshToken, base64ToByteArray(refreshResponseKey), true, null);
+        String decryptedResponse = (String) decryptMethod.invoke(PublisherUid2Helper.class, response, key, true, null);
         return Mapper.OBJECT_MAPPER.readTree(decryptedResponse);
     }
 
