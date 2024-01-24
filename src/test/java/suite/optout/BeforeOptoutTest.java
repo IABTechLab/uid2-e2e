@@ -28,7 +28,7 @@ public class BeforeOptoutTest {
 
     @AfterAll
     public static void teardownAll() {
-        System.out.println("OUTPUTS - Copy and paste this into AfterLogoutTest");
+        System.out.println("OUTPUTS - Copy and paste this into AfterOptOutTest");
         System.out.println("==================================================");
         outputs.forEach(System.out::print);
     }

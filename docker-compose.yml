@@ -64,7 +64,7 @@ services:
 
   publicoperator:
     container_name: public_operator
-    image: ghcr.io/iabtechlab/uid2-operator:latest
+    image: ghcr.io/iabtechlab/uid2-operator:5.25.47-snapshot-default
     profiles:
       - public
     ports:
