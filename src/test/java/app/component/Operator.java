@@ -64,15 +64,19 @@ public class Operator extends App {
     }
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final String CLIENT_API_KEY = EnvUtil.getEnv("UID2_E2E_API_KEY");
-    private static final String CLIENT_API_SECRET = EnvUtil.getEnv("UID2_E2E_API_SECRET");
+    public static final String CLIENT_API_KEY = EnvUtil.getEnv("UID2_E2E_API_KEY");
+    public static final String CLIENT_API_SECRET = EnvUtil.getEnv("UID2_E2E_API_SECRET");
     private static final String CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv("UID2_E2E_API_KEY_OLD");
     private static final String CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv("UID2_E2E_API_SECRET_OLD");
+    public static final String CLIENT_API_KEY_SHARING_RECIPIENT = EnvUtil.getEnv("UID2_E2E_API_KEY_SHARING_RECIPIENT");
+    public static final String CLIENT_API_SECRET_SHARING_RECIPIENT = EnvUtil.getEnv("UID2_E2E_API_SECRET_SHARING_RECIPIENT");
+    public static final String CLIENT_API_KEY_NON_SHARING_RECIPIENT = EnvUtil.getEnv("UID2_E2E_API_KEY_NON_SHARING_RECIPIENT");
+    public static final String CLIENT_API_SECRET_NON_SHARING_RECIPIENT = EnvUtil.getEnv("UID2_E2E_API_SECRET_NON_SHARING_RECIPIENT");
     private static final String CLIENT_SIDE_TOKEN_GENERATE_SUBSCRIPTION_ID = EnvUtil.getEnv("UID2_E2E_SUBSCRIPTION_ID");
     private static final String CLIENT_SIDE_TOKEN_GENERATE_SERVER_PUBLIC_KEY = EnvUtil.getEnv("UID2_E2E_SERVER_PUBLIC_KEY");
     private static final String CLIENT_SIDE_TOKEN_GENERATE_ORIGIN = EnvUtil.getEnv("UID2_E2E_ORIGIN");
     private static final String CLIENT_SIDE_TOKEN_GENERATE_INVALID_ORIGIN = EnvUtil.getEnv("UID2_E2E_INVALID_ORIGIN");
-    private static final IdentityScope IDENTITY_SCOPE = IdentityScope.valueOf(EnvUtil.getEnv("UID2_E2E_IDENTITY_SCOPE"));
+    public static final IdentityScope IDENTITY_SCOPE = IdentityScope.valueOf(EnvUtil.getEnv("UID2_E2E_IDENTITY_SCOPE"));
     private static final int TIMESTAMP_LENGTH = 8;
     private static final int PUBLIC_KEY_PREFIX_LENGTH = 9;
     private static final int AUTHENTICATION_TAG_LENGTH_BITS = 128;
