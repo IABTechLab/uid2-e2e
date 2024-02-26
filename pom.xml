@@ -11,6 +11,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <uid2-shared.version>7.2.4-SNAPSHOT</uid2-shared.version>
     </properties>
     <packaging>jar</packaging>
 
@@ -29,7 +30,21 @@
         </developer>
     </developers>
 
+    <repositories>
+        <repository>
+            <id>snapshots-repo</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>com.uid2</groupId>
+            <artifactId>uid2-shared</artifactId>
+            <version>${uid2-shared.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -67,7 +82,7 @@
         <dependency>
             <groupId>com.uid2</groupId>
             <artifactId>uid2-client</artifactId>
-            <version>4.2.4-dcf7ac1ce6</version>
+            <version>4.2.27-af48744214</version>
         </dependency>
     </dependencies>
 

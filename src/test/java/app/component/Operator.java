@@ -73,6 +73,7 @@ public class Operator extends App {
     private static final String CLIENT_SIDE_TOKEN_GENERATE_ORIGIN = EnvUtil.getEnv("UID2_E2E_ORIGIN");
     private static final String CLIENT_SIDE_TOKEN_GENERATE_INVALID_ORIGIN = EnvUtil.getEnv("UID2_E2E_INVALID_ORIGIN");
     private static final IdentityScope IDENTITY_SCOPE = IdentityScope.valueOf(EnvUtil.getEnv("UID2_E2E_IDENTITY_SCOPE"));
+
     private static final int TIMESTAMP_LENGTH = 8;
     private static final int PUBLIC_KEY_PREFIX_LENGTH = 9;
     private static final int AUTHENTICATION_TAG_LENGTH_BITS = 128;
