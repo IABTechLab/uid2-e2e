@@ -64,6 +64,12 @@ public class Operator extends App {
     }
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    // When running via the pipeline, environment variables are defined in the uid2-shared-actions repo.
+    // When running via IntelliJ, environment variables are defined in the uid2-dev-workspace repo under .idea/runConfigurations.
+    //
+    // Test data is defined in the uid2-admin repo.
+
     public static final String CLIENT_API_KEY = EnvUtil.getEnv("UID2_E2E_API_KEY");
     public static final String CLIENT_API_SECRET = EnvUtil.getEnv("UID2_E2E_API_SECRET");
     private static final String CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv("UID2_E2E_API_KEY_OLD");
