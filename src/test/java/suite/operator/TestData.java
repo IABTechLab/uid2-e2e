@@ -55,18 +55,22 @@ public final class TestData {
                 Arguments.of(client, publicOperator, client, publicOperator, DecryptionStatus.SUCCESS),
 
                 // CLIENT shares with SHARING RECIPIENT.
+                // Private operator only has site data for CLIENT, so SHARING RECIPIENT must decrypt using public operator.
                 Arguments.of(client, privateOperator, sharingRecipient, publicOperator, DecryptionStatus.SUCCESS),
                 Arguments.of(client, publicOperator, sharingRecipient, publicOperator, DecryptionStatus.SUCCESS),
 
                 // CLIENT does not share with NON-SHARING RECIPIENT.
+                // Private operator only has site data for CLIENT, so NON-SHARING RECIPIENT must decrypt using public operator.
                 Arguments.of(client, privateOperator, nonSharingRecipient, publicOperator, DecryptionStatus.NOT_AUTHORIZED_FOR_KEY),
                 Arguments.of(client, publicOperator, nonSharingRecipient, publicOperator, DecryptionStatus.NOT_AUTHORIZED_FOR_KEY),
 
                 // SHARING RECIPIENT shares with CLIENT.
+                // Private operator only has site data for CLIENT, so SHARING RECIPIENT must encrypt using public operator.
                 Arguments.of(sharingRecipient, publicOperator, client, privateOperator, DecryptionStatus.SUCCESS),
                 Arguments.of(sharingRecipient, publicOperator, client, publicOperator, DecryptionStatus.SUCCESS),
 
                 // NON-SHARING RECIPIENT does not share with CLIENT.
+                // Private operator only has site data for CLIENT, so NON-SHARING RECIPIENT must encrypt using public operator.
                 Arguments.of(nonSharingRecipient, publicOperator, client, publicOperator, DecryptionStatus.NOT_AUTHORIZED_FOR_KEY),
                 Arguments.of(nonSharingRecipient, publicOperator, client, privateOperator, DecryptionStatus.NOT_AUTHORIZED_FOR_KEY)
         );
