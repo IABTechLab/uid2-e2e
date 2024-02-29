@@ -3,18 +3,30 @@ package suite.operator;
 import app.AppsMap;
 import app.common.EnvUtil;
 import app.component.Operator;
+import com.uid2.client.DecryptionStatus;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Named.named;
 
 public final class TestData {
     public static final int RAW_UID2_LENGTH = 44;
     private static final boolean PHONE_SUPPORT = Boolean.parseBoolean(EnvUtil.getEnv("UID2_E2E_PHONE_SUPPORT"));
 
+    private static final Client CLIENT = new Client(Operator.CLIENT_API_KEY, Operator.CLIENT_API_SECRET);
+    private static final Client SHARING_RECIPIENT = new Client(Operator.CLIENT_API_KEY_SHARING_RECIPIENT, Operator.CLIENT_API_SECRET_SHARING_RECIPIENT);
+    private static final Client NON_SHARING_RECIPIENT = new Client(Operator.CLIENT_API_KEY_NON_SHARING_RECIPIENT, Operator.CLIENT_API_SECRET_NON_SHARING_RECIPIENT);
+
     private TestData() {
+    }
+
+    public record Client(String apiKey, String apiSecret) {
     }
 
     public static Set<Arguments> baseArgs() {
@@ -25,6 +37,50 @@ public final class TestData {
             args.add(Arguments.of(operator, operator.getName()));
         }
         return args;
+    }
+
+    public static Stream<Arguments> sharingArgs() {
+        final var privateOperator = named("PRIVATE OPERATOR", getOperator(Operator.Type.PRIVATE).orElse(null));
+        final var publicOperator = named("PUBLIC OPERATOR", getOperator(Operator.Type.PUBLIC).orElse(null));
+
+        final var client = named("CLIENT", CLIENT);
+        final var sharingRecipient = named("SHARING RECIPIENT", SHARING_RECIPIENT);
+        final var nonSharingRecipient = named("NON-SHARING RECIPIENT", NON_SHARING_RECIPIENT);
+
+        return Stream.of(
+                // CLIENT shares with CLIENT.
+                Arguments.of(client, privateOperator, client, privateOperator, DecryptionStatus.SUCCESS),
+                Arguments.of(client, privateOperator, client, publicOperator, DecryptionStatus.SUCCESS),
+                Arguments.of(client, publicOperator, client, privateOperator, DecryptionStatus.SUCCESS),
+                Arguments.of(client, publicOperator, client, publicOperator, DecryptionStatus.SUCCESS),
+
+                // CLIENT shares with SHARING RECIPIENT.
+                // Private operator only has site data for CLIENT, so SHARING RECIPIENT must decrypt using public operator.
+                Arguments.of(client, privateOperator, sharingRecipient, publicOperator, DecryptionStatus.SUCCESS),
+                Arguments.of(client, publicOperator, sharingRecipient, publicOperator, DecryptionStatus.SUCCESS),
+
+                // CLIENT does not share with NON-SHARING RECIPIENT.
+                // Private operator only has site data for CLIENT, so NON-SHARING RECIPIENT must decrypt using public operator.
+                Arguments.of(client, privateOperator, nonSharingRecipient, publicOperator, DecryptionStatus.NOT_AUTHORIZED_FOR_KEY),
+                Arguments.of(client, publicOperator, nonSharingRecipient, publicOperator, DecryptionStatus.NOT_AUTHORIZED_FOR_KEY),
+
+                // SHARING RECIPIENT shares with CLIENT.
+                // Private operator only has site data for CLIENT, so SHARING RECIPIENT must encrypt using public operator.
+                Arguments.of(sharingRecipient, publicOperator, client, privateOperator, DecryptionStatus.SUCCESS),
+                Arguments.of(sharingRecipient, publicOperator, client, publicOperator, DecryptionStatus.SUCCESS),
+
+                // NON-SHARING RECIPIENT does not share with CLIENT.
+                // Private operator only has site data for CLIENT, so NON-SHARING RECIPIENT must encrypt using public operator.
+                Arguments.of(nonSharingRecipient, publicOperator, client, publicOperator, DecryptionStatus.NOT_AUTHORIZED_FOR_KEY),
+                Arguments.of(nonSharingRecipient, publicOperator, client, privateOperator, DecryptionStatus.NOT_AUTHORIZED_FOR_KEY)
+        );
+    }
+
+    private static Optional<Operator> getOperator(Operator.Type type) {
+        return AppsMap.getApps(Operator.class)
+                .stream()
+                .filter(operator -> operator.getType() == type)
+                .findFirst();
     }
 
     public static Set<Arguments> tokenEmailArgs() {
