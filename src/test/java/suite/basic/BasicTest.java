@@ -20,7 +20,7 @@ public class BasicTest {
     })
     public void testHealthcheck(App app, String name) {
         try {
-            assertThat(app.isHealthy()).isTrue();
+            assertThat(app.isHealthy()).isTrue().withFailMessage("App '" + app.getName() + "' on URL: '" + app.getBaseUrl() + "' is not healthy");
         } catch (Exception e) {
             Assertions.fail("Failed to get health check for " + app.getName(), e);
         }
