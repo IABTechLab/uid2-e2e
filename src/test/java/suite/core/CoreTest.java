@@ -45,7 +45,7 @@ public class CoreTest {
         JsonNode body = response.get("body");
         assertAll("testAttest_ValidAttestationRequest - not-null body",
                 () -> assertNotNull(body),
-                () ->assertNotNull(body.get("attestation_token")),
+                () -> assertNotNull(body.get("attestation_token")),
                 () -> assertNotNull(body.get("expiresAt")));
 
         JwtService jwtService = new JwtService(getConfig());
@@ -53,7 +53,7 @@ public class CoreTest {
         JwtValidationResponse validationResponseOptOut = jwtService.validateJwt(body.get("attestation_jwt_optout").asText(), Core.OPTOUT_URL, Core.CORE_URL);
         assertAll("testAttest_ValidAttestationRequest valid OptOut JWT",
                 () -> assertNotNull(validationResponseOptOut),
-                ()  -> assertTrue(validationResponseOptOut.getIsValid()));
+                () -> assertTrue(validationResponseOptOut.getIsValid()));
 
         assertNotNull(body.get("attestation_jwt_core"));
         JwtValidationResponse validationResponseCore = jwtService.validateJwt(body.get("attestation_jwt_core").asText(), Core.CORE_URL, Core.CORE_URL);
@@ -67,7 +67,7 @@ public class CoreTest {
                 () -> assertEquals(Core.OPTOUT_URL, optoutUrl));
     }
 
-    private static JsonObject getConfig(){
+    private static JsonObject getConfig() {
         return new JsonObject("{  \"aws_kms_jwt_signing_public_keys\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmvwB41qI5Fe41PDbXqcX5uOvSvfKh8l9QV0O3M+NsB4lKqQEP0t1hfoiXTpOgKz1ArYxHsQ2LeXifX4uwEbYJFlpVM+tyQkTWQjBOw6fsLYK2Xk4X2ylNXUUf7x3SDiOVxyvTh3OZW9kqrDBN9JxSoraNLyfw0hhW0SHpfs699SehgbQ7QWep/gVlKRLIz0XAXaZNw24s79ORcQlrCE6YD0PgQmpI/dK5xMML82n6y3qcTlywlGaU7OGIMdD+CTXA3BcOkgXeqZTXNaX1u6jCTa1lvAczun6avp5VZ4TFiuPo+y4rJ3GU+14cyT5NckEcaTKSvd86UdwK5Id9tl3bQIDAQAB\"}");
     }
 }
