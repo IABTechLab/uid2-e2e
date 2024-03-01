@@ -14,6 +14,7 @@ import okhttp3.RequestBody;
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
@@ -387,16 +388,17 @@ public class Operator extends App {
     }
 
     private JsonNode v2DecryptEncryptedResponse(String encryptedResponse, byte[] nonceInRequest, String secret) throws Exception {
-        Method decryptMethod = PublisherUid2Helper.class.getDeclaredMethod("decrypt", String.class, byte[].class, boolean.class, byte[].class);
-        decryptMethod.setAccessible(true);
-        String decryptedResponse = (String) decryptMethod.invoke(PublisherUid2Helper.class, encryptedResponse, base64ToByteArray(secret), false, nonceInRequest);
+        Constructor<Uid2Helper> cons = Uid2Helper.class.getDeclaredConstructor(String.class);
+        cons.setAccessible(true);
+        Uid2Helper uid2Helper = cons.newInstance(secret);
+        String decryptedResponse = uid2Helper.decrypt(encryptedResponse, nonceInRequest);
         return Mapper.OBJECT_MAPPER.readTree(decryptedResponse);
     }
 
     private JsonNode v2DecryptResponseWithoutNonce(String response, byte[] key) throws Exception {
-        Method decryptMethod = PublisherUid2Helper.class.getDeclaredMethod("decrypt", String.class, byte[].class, boolean.class, byte[].class);
-        decryptMethod.setAccessible(true);
-        String decryptedResponse = (String) decryptMethod.invoke(PublisherUid2Helper.class, response, key, true, null);
+        Method decryptTokenRefreshResponseMethod = Uid2Helper.class.getDeclaredMethod("decryptTokenRefreshResponse", String.class, byte[].class);
+        decryptTokenRefreshResponseMethod.setAccessible(true);
+        String decryptedResponse = (String) decryptTokenRefreshResponseMethod.invoke(Uid2Helper.class, response, key);
         return Mapper.OBJECT_MAPPER.readTree(decryptedResponse);
     }
 
