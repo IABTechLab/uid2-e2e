@@ -12,6 +12,10 @@ public class Core extends App {
         super(host, port, name);
     }
 
+    public Core(String host, String name) {
+        super(host, null, name);
+    }
+
     public String attest(String attestationRequest) throws Exception {
         String response = HttpClient.post(getBaseUrl() + "/attest", attestationRequest, CORE_API_TOKEN);
         return response;
