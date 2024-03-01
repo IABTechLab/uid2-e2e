@@ -9,7 +9,6 @@ import java.util.Set;
 
 public final class TestData {
     private TestData() {
-
     }
 
     public static Set<Arguments> baseArgs() {
@@ -20,9 +19,5 @@ public final class TestData {
         }
 
         return args;
-    }
-
-    public static Set<Arguments> attestArgs() {
-        return baseArgs();
     }
 }

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CoreTest {
     @ParameterizedTest(name = "/attest - {0}")
     @MethodSource({
-            "suite.core.TestData#attestArgs"
+            "suite.core.TestData#baseArgs"
     })
     public void testAttest_EmptyAttestationRequest(Core core) {
         HttpClient.HttpException exception = assertThrows(
@@ -30,7 +30,7 @@ public class CoreTest {
 
     @ParameterizedTest(name = "/attest - {0}")
     @MethodSource({
-            "suite.core.TestData#attestArgs"
+            "suite.core.TestData#baseArgs"
     })
     public void testAttest_ValidAttestationRequest(Core core) throws Exception {
         final String validTrustedAttestationRequest = "{\"attestation_request\":\"AA==\",\"public_key\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl7kXK1wf15V9HgkQhbMK2nfJGbudmdXNrX7MZjFm07z6eEjaQsuqMteQumLRwn+RxEcXKVaxBAE3RQTFL9XsZc2OtRKOU+oMIQep8tmPFMgh83BzjLs5O5HZf510geFJO6qRqc3UHJT3ACxE7IkmRx1JIKFKPzTrthHdb2+D7bdJBPsVbwk7y+a36f5jvELGGzMC89LAvd7JpOmGsCAj6jwiEAKmmLId9bfe0YeLuebl95VfSzrQVdz82oGGQKXuJgKZtc/Xp1omZ9spm+zzVFJzsimxDdGdnaWMnas43VoTE04JDt+pucJTTbftIvu05frwkbZh3sQ2yBu5gBP7YwIDAQAB\",\"application_name\":\"uid2-operator\",\"application_version\":\"5.27.10-3f25586306\",\"components\":{\"uid2-attestation-api\":\"2.0.0-f968aec0e3\",\"uid2-shared\":\"7.2.4-SNAPSHOT\"}}";
@@ -43,24 +43,28 @@ public class CoreTest {
         assertEquals("success", response.get("status").asText());
 
         JsonNode body = response.get("body");
-        assertNotNull(body);
-        assertNotNull(body.get("attestation_token"));
-        assertNotNull(body.get("expiresAt"));
+        assertAll("testAttest_ValidAttestationRequest - not-null body",
+                () -> assertNotNull(body),
+                () ->assertNotNull(body.get("attestation_token")),
+                () -> assertNotNull(body.get("expiresAt")));
 
         JwtService jwtService = new JwtService(getConfig());
         assertNotNull(body.get("attestation_jwt_optout"));
         JwtValidationResponse validationResponseOptOut = jwtService.validateJwt(body.get("attestation_jwt_optout").asText(), Core.OPTOUT_URL, Core.CORE_URL);
-        assertNotNull(validationResponseOptOut);
-        assertTrue(validationResponseOptOut.getIsValid());
+        assertAll("testAttest_ValidAttestationRequest valid OptOut JWT",
+                () -> assertNotNull(validationResponseOptOut),
+                ()  -> assertTrue(validationResponseOptOut.getIsValid()));
 
         assertNotNull(body.get("attestation_jwt_core"));
         JwtValidationResponse validationResponseCore = jwtService.validateJwt(body.get("attestation_jwt_core").asText(), Core.CORE_URL, Core.CORE_URL);
-        assertNotNull(validationResponseCore);
-        assertTrue(validationResponseCore.getIsValid());
+        assertAll("testAttest_ValidAttestationRequest valid Core JWT",
+                () -> assertNotNull(validationResponseCore),
+                () -> assertTrue(validationResponseCore.getIsValid()));
 
         String optoutUrl = body.get("optout_url").asText();
-        assertNotNull(optoutUrl);
-        assertEquals(Core.OPTOUT_URL, optoutUrl);
+        assertAll("testAttest_ValidAttestationRequest OptOut URL not null",
+                () -> assertNotNull(optoutUrl),
+                () -> assertEquals(Core.OPTOUT_URL, optoutUrl));
     }
 
     private static JsonObject getConfig(){
