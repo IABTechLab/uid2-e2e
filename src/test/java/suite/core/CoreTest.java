@@ -4,6 +4,8 @@ import app.common.HttpClient;
 import app.common.Mapper;
 import app.component.Core;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.uid2.shared.attest.JwtService;
 import com.uid2.shared.attest.JwtValidationResponse;
 import io.vertx.core.json.JsonObject;
@@ -51,14 +53,18 @@ public class CoreTest {
         JwtService jwtService = new JwtService(getConfig());
         assertNotNull(body.get("attestation_jwt_optout"));
         JwtValidationResponse validationResponseOptOut = jwtService.validateJwt(body.get("attestation_jwt_optout").asText(), Core.OPTOUT_URL, Core.CORE_URL);
+        JsonWebSignature signatureOptOut = JsonWebSignature.parse(GsonFactory.getDefaultInstance(), body.get("attestation_jwt_optout").asText());
         assertAll("testAttest_ValidAttestationRequest valid OptOut JWT",
                 () -> assertNotNull(validationResponseOptOut),
+                () -> assertEquals(Core.OPTOUT_URL, signatureOptOut.getPayload().getAudience()),
                 () -> assertTrue(validationResponseOptOut.getIsValid()));
 
         assertNotNull(body.get("attestation_jwt_core"));
         JwtValidationResponse validationResponseCore = jwtService.validateJwt(body.get("attestation_jwt_core").asText(), Core.CORE_URL, Core.CORE_URL);
+        JsonWebSignature signatureCore = JsonWebSignature.parse(GsonFactory.getDefaultInstance(), body.get("attestation_jwt_core").asText());
         assertAll("testAttest_ValidAttestationRequest valid Core JWT",
                 () -> assertNotNull(validationResponseCore),
+                () -> assertEquals(Core.CORE_URL, signatureCore.getPayload().getAudience()),
                 () -> assertTrue(validationResponseCore.getIsValid()));
 
         String optoutUrl = body.get("optout_url").asText();
