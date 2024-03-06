@@ -124,3 +124,6 @@ networks:
   e2e_default:
     external: true
     driver: bridge
+
+volumes:
+  alertmanager-data: {}
