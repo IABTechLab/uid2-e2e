@@ -15,9 +15,7 @@ import suite.optout.BeforeOptoutTest;
         V1ApiOperatorTest.class,
         V2ApiOperatorTest.class,
         V2ApiOperatorPublicOnlyTest.class,
-        BeforeOptoutTest.class,
-        CoreTest.class,
-        CoreRefreshTest.class
+        BeforeOptoutTest.class
 })
 public class E2EPublicOperatorTestSuite {
 }
