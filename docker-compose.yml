@@ -87,6 +87,39 @@ services:
     networks:
       - e2e_default
 
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    command:
+      - "--config.file=/etc/alertmanager/config.yml"
+      - "--storage.path=/alertmanager"
+    volumes:
+      - ./tmp/monitorstack/alertmanager/alertmanager.yml:/etc/alertmanager/config.yml
+      - alertmanager-data:/data
+    ports:
+      - "9093:9093"
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:9093/-/ready" ]
+      interval: 5s
+
+  loki:
+    image: grafana/loki:main
+    container_name: loki
+    volumes:
+      - ./tmp/monitorstack/loki/loki.yml:/etc/config/loki.yml
+      - ./tmp/monitorstack/loki/rules.yml:/etc/loki/rules/fake/rules.yml
+    entrypoint:
+      - /usr/bin/loki
+      - -config.file=/etc/config/loki.yml
+    ports:
+      - "3100:3100"
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:3100/ready" ]
+      interval: 15s
+    depends_on:
+      alertmanager:
+        condition: service_healthy
+
 networks:
   e2e_default:
     external: true
