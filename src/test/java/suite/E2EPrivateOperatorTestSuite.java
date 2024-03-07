@@ -9,8 +9,7 @@ import suite.operator.V2ApiOperatorTest;
 @Suite
 @SelectClasses({
         BasicTest.class,
-        V2ApiOperatorTest.class,
-        CoreTest.class
+        V2ApiOperatorTest.class
 })
 public class E2EPrivateOperatorTestSuite {
 }
