@@ -1,6 +1,6 @@
 package app;
 
-import app.component.*;
+import app.component.Operator;
 
 import java.util.Set;
 

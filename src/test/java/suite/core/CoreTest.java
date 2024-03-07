@@ -3,8 +3,6 @@ package suite.core;
 import app.common.HttpClient;
 import app.component.Core;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.uid2.shared.attest.JwtService;
 import com.uid2.shared.attest.JwtValidationResponse;
 import io.vertx.core.json.JsonObject;

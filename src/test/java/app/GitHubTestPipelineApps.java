@@ -1,8 +1,8 @@
 package app;
 
 import app.common.EnvUtil;
-import app.component.Operator;
 import app.component.Core;
+import app.component.Operator;
 
 import java.util.Set;
 
