@@ -24,15 +24,11 @@ public class Core extends App {
         return Mapper.OBJECT_MAPPER.readTree(response);
     }
 
-    public JsonNode clientSideKeyPairRefresh() throws Exception {
-        String response = HttpClient.get(getBaseUrl() + "/client_side_keypairs/refresh", CORE_API_TOKEN);
-        return Mapper.OBJECT_MAPPER.readTree(response);
-    }
-    public JsonNode getPath(String path) throws Exception {
+    public JsonNode getWithCoreApiToken(String path) throws Exception {
         String response = HttpClient.get(getBaseUrl() + path, CORE_API_TOKEN);
         return Mapper.OBJECT_MAPPER.readTree(response);
     }
-    public JsonNode getPathForOptOut(String path) throws Exception {
+    public JsonNode getWithOptOutApiToken(String path) throws Exception {
         String response = HttpClient.get(getBaseUrl() + path, OPTOUT_TO_CALL_CORE_API_TOKEN);
         return Mapper.OBJECT_MAPPER.readTree(response);
     }

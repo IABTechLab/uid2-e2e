@@ -36,8 +36,9 @@ public class CoreTest {
 
         JsonNode response = core.attest(validTrustedAttestationRequest);
 
-        assertNotNull(response.get("status"));
-        assertEquals("success", response.get("status").asText());
+        assertAll("",
+                () -> assertNotNull(response.get("status")),
+                () -> assertEquals("success", response.get("status").asText()));
 
         JsonNode body = response.get("body");
         assertAll("testAttest_ValidAttestationRequest - not-null body",

@@ -15,7 +15,7 @@ public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
     @MethodSource({"suite.core.TestData#refreshArgs"})
     public void testLocationRefresh_Public_Success(Core core, String urlPath, String jsonPath) throws Exception {
-        JsonNode response = core.getPath(urlPath);
+        JsonNode response = core.getWithCoreApiToken(urlPath);
 
         assertAll("testLocationRefresh_Public_Success has version and location",
                 () -> assertNotNull(response),
@@ -26,7 +26,7 @@ public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - CollectionName: {2}")
     @MethodSource({"suite.core.TestData#collectionEndpointArgs"})
     public void testCollectionRefresh_Public_Success(Core core, String urlPath, String collectionName) throws Exception {
-        JsonNode response = core.getPath(urlPath);
+        JsonNode response = core.getWithCoreApiToken(urlPath);
 
         assertAll("testCollectionRefresh_Public_Success has version and collection",
                 () -> assertNotNull(response, "Response should not be null"),
@@ -34,7 +34,7 @@ public class CoreRefreshTest {
                 () -> assertNotNull(response.at("/" + collectionName), "Collection should not be null")
         );
 
-        ArrayNode nodes = (ArrayNode)response.at("/" + collectionName);
+        ArrayNode nodes = (ArrayNode) response.at("/" + collectionName);
         for (JsonNode node : nodes) {
             assertTrue(JsonAssert.hasContentInFields(
                     node, List.of("/effective", "/expires", "/location", "/size")
@@ -45,7 +45,7 @@ public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
     @MethodSource({"suite.core.TestData#optOutRefreshArgs"})
     public void testOptOut_LocationRefresh_Public_Success(Core core, String urlPath, String jsonPath) throws Exception {
-        JsonNode response = core.getPathForOptOut(urlPath);
+        JsonNode response = core.getWithOptOutApiToken(urlPath);
 
         assertAll("testOptOut_LocationRefresh_Public_Success has version and location",
                 () -> assertNotNull(response),

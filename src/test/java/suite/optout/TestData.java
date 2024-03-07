@@ -2,7 +2,6 @@ package suite.optout;
 
 import app.AppsMap;
 import app.common.EnvUtil;
-import app.component.Core;
 import app.component.Operator;
 import org.junit.jupiter.params.provider.Arguments;
 
