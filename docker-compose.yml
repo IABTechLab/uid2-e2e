@@ -55,6 +55,8 @@ services:
       - ./docker/uid2-optout/conf/default-config.json:/app/conf/default-config.json
       - ./docker/uid2-optout/conf/local-e2e-docker-config.json:/app/conf/local-config.json
       - ./docker/uid2-optout/mount/:/opt/uid2/optout/
+    environment:
+      LOGBACK_CONF: ./conf/logback.loki.xml
     depends_on:
       core:
         condition: service_healthy
