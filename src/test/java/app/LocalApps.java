@@ -7,7 +7,7 @@ import java.util.Set;
 public final class LocalApps extends Apps {
     public LocalApps() {
         super(Set.of(
-                // TODO: Add optout, snowflake-admin, monitorstack
+                // TODO: Add optout, monitorstack
                 new Localstack("http://localhost", 5001, "Localstack"),
                 new Admin("http://localhost", 8089, "Admin"),
                 new Core("http://localhost", 8088, "Core"),

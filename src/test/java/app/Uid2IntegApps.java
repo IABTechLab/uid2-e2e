@@ -8,8 +8,7 @@ import java.util.Set;
 public final class Uid2IntegApps extends Apps {
     public Uid2IntegApps() {
         super(Set.of(
-                new Operator("https://operator-integ.uidapi.com", "UID2 Integ - Public Operator", Operator.Type.PUBLIC),
-                new Core("http://core-integ.uidapi.com", "UID2 Integ - Core")
+                new Operator("https://operator-integ.uidapi.com", "UID2 Integ - Public Operator", Operator.Type.PUBLIC)
         ));
     }
 }
