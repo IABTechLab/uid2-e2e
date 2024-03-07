@@ -28,6 +28,7 @@ public class Core extends App {
         String response = HttpClient.get(getBaseUrl() + path, CORE_API_TOKEN);
         return Mapper.OBJECT_MAPPER.readTree(response);
     }
+
     public JsonNode getWithOptOutApiToken(String path) throws Exception {
         String response = HttpClient.get(getBaseUrl() + path, OPTOUT_TO_CALL_CORE_API_TOKEN);
         return Mapper.OBJECT_MAPPER.readTree(response);
