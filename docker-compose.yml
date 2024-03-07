@@ -34,8 +34,6 @@ services:
     volumes:
       - ./docker/uid2-core/conf/default-config.json:/app/conf/default-config.json
       - ./docker/uid2-core/conf/local-e2e-docker-config.json:/app/conf/local-config.json
-    environment:
-      LOGBACK_CONF: ./conf/logback.loki-e2e.xml
     depends_on:
       localstack:
         condition: service_healthy
@@ -55,8 +53,6 @@ services:
       - ./docker/uid2-optout/conf/default-config.json:/app/conf/default-config.json
       - ./docker/uid2-optout/conf/local-e2e-docker-config.json:/app/conf/local-config.json
       - ./docker/uid2-optout/mount/:/opt/uid2/optout/
-    environment:
-      LOGBACK_CONF: ./conf/logback.loki.xml
     depends_on:
       core:
         condition: service_healthy
@@ -88,82 +84,6 @@ services:
       interval: 5s
     networks:
       - e2e_default
-
-  alertmanager:
-    image: prom/alertmanager
-    container_name: alertmanager
-    command:
-      - "--config.file=/etc/alertmanager/config.yml"
-      - "--storage.path=/alertmanager"
-    volumes:
-      - ./docker/alertmanager/conf/alertmanager.yml:/etc/alertmanager/config.yml
-      - alertmanager-data:/data
-    ports:
-      - "9093:9093"
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "http://localhost:9093/-/ready" ]
-      interval: 5s
-    networks:
-      - e2e_default
-
-  loki:
-    image: grafana/loki:main
-    container_name: loki
-    volumes:
-      - ./docker/loki/conf/loki.yml:/etc/config/loki.yml
-      - ./docker/loki/conf/rules.yml:/etc/loki/rules/fake/rules.yml
-    entrypoint:
-      - /usr/bin/loki
-      - -config.file=/etc/config/loki.yml
-    ports:
-      - "3100:3100"
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "http://localhost:3100/ready" ]
-      interval: 15s
-    depends_on:
-      alertmanager:
-        condition: service_healthy
-    networks:
-      - e2e_default
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml
-    volumes:
-      - ./docker/prometheus/conf:/etc/prometheus
-      - prometheus-data:/prometheus
-    ports:
-      - "9090:9090"
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "http://localhost:9090/-/ready" ]
-      interval: 5s
-    networks:
-      - e2e_default
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    volumes:
-      - ./docker/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - grafana-data:/var/lib/grafana
-    ports:
-      - "3000:3000"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
-      interval: 5s
-    depends_on:
-      loki:
-        condition: service_healthy
-      prometheus:
-        condition: service_healthy
-    networks:
-      - e2e_default
-
-volumes:
-  alertmanager-data: {}
-  grafana-data: {}
-  prometheus-data: {}
 
 networks:
   e2e_default:
