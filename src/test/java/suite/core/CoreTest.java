@@ -1,7 +1,6 @@
 package suite.core;
 
 import app.common.HttpClient;
-import app.common.Mapper;
 import app.component.Core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.shared.attest.JwtService;
@@ -35,12 +34,11 @@ public class CoreTest {
     public void testAttest_ValidAttestationRequest(Core core) throws Exception {
         final String validTrustedAttestationRequest = "{\"attestation_request\":\"AA==\",\"public_key\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl7kXK1wf15V9HgkQhbMK2nfJGbudmdXNrX7MZjFm07z6eEjaQsuqMteQumLRwn+RxEcXKVaxBAE3RQTFL9XsZc2OtRKOU+oMIQep8tmPFMgh83BzjLs5O5HZf510geFJO6qRqc3UHJT3ACxE7IkmRx1JIKFKPzTrthHdb2+D7bdJBPsVbwk7y+a36f5jvELGGzMC89LAvd7JpOmGsCAj6jwiEAKmmLId9bfe0YeLuebl95VfSzrQVdz82oGGQKXuJgKZtc/Xp1omZ9spm+zzVFJzsimxDdGdnaWMnas43VoTE04JDt+pucJTTbftIvu05frwkbZh3sQ2yBu5gBP7YwIDAQAB\",\"application_name\":\"uid2-operator\",\"application_version\":\"5.27.10-3f25586306\",\"components\":{\"uid2-attestation-api\":\"2.0.0-f968aec0e3\",\"uid2-shared\":\"7.2.4-SNAPSHOT\"}}";
 
-        String attestationResponse = core.attest(validTrustedAttestationRequest);
+        JsonNode response = core.attest(validTrustedAttestationRequest);
 
-        assertNotNull(attestationResponse);
-        JsonNode response = Mapper.OBJECT_MAPPER.readTree(attestationResponse);
-        assertNotNull(response.get("status"));
-        assertEquals("success", response.get("status").asText());
+        assertAll("",
+                () -> assertNotNull(response.get("status")),
+                () -> assertEquals("success", response.get("status").asText()));
 
         JsonNode body = response.get("body");
         assertAll("testAttest_ValidAttestationRequest - not-null body",
@@ -51,13 +49,13 @@ public class CoreTest {
         JwtService jwtService = new JwtService(getConfig());
         assertNotNull(body.get("attestation_jwt_optout"));
         JwtValidationResponse validationResponseOptOut = jwtService.validateJwt(body.get("attestation_jwt_optout").asText(), Core.OPTOUT_URL, Core.CORE_URL);
-        assertAll("testAttest_ValidAttestationRequest valid OptOut JWT",
+        assertAll("testAttest_ValidAttestationRequest valid OptOut JWT. Local OptOut URL: '" + Core.OPTOUT_URL + "', Core URL: '" + Core.CORE_URL + "'",
                 () -> assertNotNull(validationResponseOptOut),
                 () -> assertTrue(validationResponseOptOut.getIsValid()));
 
         assertNotNull(body.get("attestation_jwt_core"));
         JwtValidationResponse validationResponseCore = jwtService.validateJwt(body.get("attestation_jwt_core").asText(), Core.CORE_URL, Core.CORE_URL);
-        assertAll("testAttest_ValidAttestationRequest valid Core JWT",
+        assertAll("testAttest_ValidAttestationRequest valid Core JWT. Local Core URL: '" + Core.CORE_URL + "'",
                 () -> assertNotNull(validationResponseCore),
                 () -> assertTrue(validationResponseCore.getIsValid()));
 
