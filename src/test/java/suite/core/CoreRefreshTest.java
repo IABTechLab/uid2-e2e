@@ -41,4 +41,15 @@ public class CoreRefreshTest {
             ), "Collection node was missing expected content");
         }
     }
+
+    @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
+    @MethodSource({"suite.core.TestData#optOutRefreshArgs"})
+    public void testOptOut_LocationRefresh_Public_Success(Core core, String urlPath, String jsonPath) throws Exception {
+        JsonNode response = core.getPathForOptOut(urlPath);
+
+        assertAll("testOptOut_LocationRefresh_Public_Success has version and location",
+                () -> assertNotNull(response),
+                () -> assertNotEquals("", response.at("/version").asText(), "Version was empty"),
+                () -> assertNotEquals("", response.at("/" + jsonPath + "/location").asText(), "/" + jsonPath + "/location was empty"));
+    }
 }

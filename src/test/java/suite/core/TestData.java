@@ -29,8 +29,6 @@ public final class TestData {
             args.add(Arguments.of(core, "/key/refresh", "keys"));
             args.add(Arguments.of(core, "/clients/refresh", "client_keys"));
             args.add(Arguments.of(core, "/client_side_keypairs/refresh", "client_side_keypairs"));
-            args.add(Arguments.of(core, "/operators/refresh", "operators"));
-            args.add(Arguments.of(core, "/partners/refresh", "partners"));
         }
 
         return args;
@@ -45,4 +43,16 @@ public final class TestData {
 
         return args;
     }
+
+    public static Set<Arguments> optOutRefreshArgs() {
+        Set<Core> cores = AppsMap.getApps(Core.class);
+        Set<Arguments> args = new HashSet<>();
+        for (Core core : cores) {
+            args.add(Arguments.of(core, "/operators/refresh", "operators"));
+            args.add(Arguments.of(core, "/partners/refresh", "partners"));
+        }
+
+        return args;
+    }
+
 }
