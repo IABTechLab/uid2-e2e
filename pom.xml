@@ -11,7 +11,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <uid2-shared.version>7.4.7-1876cb3a4a</uid2-shared.version>
+        <uid2-shared.version>7.4.0-5dea4369e6</uid2-shared.version>
     </properties>
     <packaging>jar</packaging>
 
@@ -69,7 +69,7 @@
         <dependency>
             <groupId>com.uid2</groupId>
             <artifactId>uid2-client</artifactId>
-            <version>4.3.2-479d2cb58f</version>
+            <version>4.3.0-3f9bbbefc8</version>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
