@@ -6,7 +6,7 @@ import suite.basic.BasicTest;
 import suite.core.CoreRefreshTest;
 import suite.core.CoreTest;
 import suite.operator.*;
-import suite.optout.BeforeOptoutTest;
+import suite.optout.OptOutTest;
 
 @Suite
 @SelectClasses({
@@ -17,7 +17,7 @@ import suite.optout.BeforeOptoutTest;
         V1ApiOperatorTest.class,
         V2ApiOperatorTest.class,
         V2ApiOperatorPublicOnlyTest.class,
-        BeforeOptoutTest.class
+        OptOutTest.class
 })
 public class E2EPublicOperatorTestSuite {
 }
