@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 
 @SuppressWarnings("unused")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class OptOutNewTest {
+public class OptOutTest {
     // TODO: Test failure case
 
     private static final int OPTOUT_DELAY_MS = 1000;
