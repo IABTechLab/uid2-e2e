@@ -6,7 +6,7 @@ import suite.basic.BasicTest;
 import suite.core.CoreRefreshTest;
 import suite.core.CoreTest;
 import suite.operator.*;
-import suite.optout.BeforeOptoutTest;
+import suite.optout.OptoutTest;
 import suite.validator.V0ApiValidatorTest;
 import suite.validator.V2ApiValidatorTest;
 
@@ -19,7 +19,7 @@ import suite.validator.V2ApiValidatorTest;
         V1ApiOperatorTest.class,
         V2ApiOperatorTest.class,
         V2ApiOperatorPublicOnlyTest.class,
-        BeforeOptoutTest.class,
+        OptoutTest.class,
         V0ApiValidatorTest.class,
         V1ApiOperatorTest.class,
         V2ApiValidatorTest.class
