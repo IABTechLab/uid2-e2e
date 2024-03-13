@@ -9,7 +9,7 @@ import suite.operator.V0ApiOperatorTest;
 import suite.operator.V1ApiOperatorTest;
 import suite.operator.V2ApiOperatorPublicOnlyTest;
 import suite.operator.V2ApiOperatorTest;
-import suite.optout.BeforeOptoutTest;
+import suite.optout.OptoutTest;
 import suite.validator.V0ApiValidatorTest;
 import suite.validator.V2ApiValidatorTest;
 
@@ -22,7 +22,7 @@ import suite.validator.V2ApiValidatorTest;
         V1ApiOperatorTest.class,
         V2ApiOperatorTest.class,
         V2ApiOperatorPublicOnlyTest.class,
-        BeforeOptoutTest.class,
+        OptoutTest.class,
         V0ApiValidatorTest.class,
         V1ApiOperatorTest.class,
         V2ApiValidatorTest.class

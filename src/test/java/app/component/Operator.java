@@ -136,6 +136,14 @@ public class Operator extends App {
         return Mapper.OBJECT_MAPPER.readTree(response);
     }
 
+    public JsonNode v0CheckedTokenRefresh(String token) {
+        try {
+            return v0TokenRefresh(token);
+        } catch (Exception e) {
+            return Mapper.OBJECT_MAPPER.createObjectNode();
+        }
+    }
+
     public JsonNode v0TokenValidate(String type, String identity, String advertisingToken) throws Exception {
         String response = HttpClient.get(getBaseUrl() + "/token/validate?" + type + "=" + URLEncoder.encode(identity, StandardCharsets.UTF_8) + "&token=" + URLEncoder.encode(advertisingToken, StandardCharsets.UTF_8), CLIENT_API_KEY);
         return Mapper.OBJECT_MAPPER.readTree(response);
@@ -161,6 +169,14 @@ public class Operator extends App {
     public JsonNode v1TokenRefresh(String token) throws Exception {
         String response = HttpClient.get(getBaseUrl() + "/v1/token/refresh?refresh_token=" + URLEncoder.encode(token, StandardCharsets.UTF_8), CLIENT_API_KEY);
         return Mapper.OBJECT_MAPPER.readTree(response);
+    }
+
+    public JsonNode v1CheckedTokenRefresh(String token) {
+        try {
+            return v1TokenRefresh(token);
+        } catch (Exception e) {
+            return Mapper.OBJECT_MAPPER.createObjectNode();
+        }
     }
 
     public JsonNode v1TokenValidate(String type, String identity, String advertisingToken) throws Exception {
