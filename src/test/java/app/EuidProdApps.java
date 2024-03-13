@@ -1,5 +1,6 @@
 package app;
 
+import app.component.Core;
 import app.component.Operator;
 
 import java.util.Set;
@@ -7,7 +8,7 @@ import java.util.Set;
 public final class EuidProdApps extends Apps {
     public EuidProdApps() {
         super(Set.of(
-                new Operator("https://prod.euid.eu", "EUID Prod Public Operator", Operator.Type.PUBLIC)
+                new Operator("https://prod.euid.eu", "EUID Prod - Public Operator", Operator.Type.PUBLIC)
         ));
     }
 }

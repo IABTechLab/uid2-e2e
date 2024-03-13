@@ -6,8 +6,8 @@ import app.common.Mapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.uid2.client.*;
 import com.uid2.client.IdentityScope;
+import com.uid2.client.*;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
