@@ -2,5 +2,3 @@
 .idea/*
 *.iml
 target
-
-.pre-commit-trivy-cache/
