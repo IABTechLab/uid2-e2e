@@ -8,8 +8,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.awaitility.Awaitility.*;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +17,6 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
-import static org.awaitility.Awaitility.await;
 import static org.awaitility.Awaitility.with;
 
 @SuppressWarnings("unused")
@@ -29,10 +28,12 @@ public class OptoutTest {
     private static final int OPTOUT_WAIT_SECONDS = 300;
 
     private static Set<Arguments> outputArgs;
+    private static Set<Arguments> outputAdvertisingIdArgs;
 
     @BeforeAll
     public static void setupAll() {
         outputArgs = new HashSet<>();
+        outputAdvertisingIdArgs = new HashSet<>();
     }
 
     @ParameterizedTest(name = "/v2/token/logout with /v0/token/generate - {0} - {2}")
@@ -120,7 +121,24 @@ public class OptoutTest {
         );
     }
 
+    @ParameterizedTest(name = "/v2/token/logout with /v2/identity/map - {0} - {2}")
+    @MethodSource({
+            "suite.optout.TestData#identityMapEmailArgs"
+    })
     @Order(5)
+    public void testV2LogoutWithV2IdentityMap(String label, Operator operator, String operatorName, String type, String emailOrPhone, boolean toOptOut) throws Exception {
+        JsonNode identityMapResponseNode = operator.v2IdentityMap("{\""+ type + "\":[\"" + emailOrPhone + "\"]}", false);
+        assertThat(identityMapResponseNode.at("/status").asText()).isEqualTo("success");
+        String rawUID = identityMapResponseNode.get("body").get("mapped").get(0).get(TestData.ADVERTISING_ID).asText();
+        if (toOptOut) {
+            Thread.sleep(OPTOUT_DELAY_MS);
+            JsonNode logoutResponse = operator.v2TokenLogout(type, emailOrPhone);
+            assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
+        }
+        outputAdvertisingIdArgs.add(Arguments.of(label, operator, operatorName, rawUID, toOptOut, Instant.now().toEpochMilli()));
+    }
+
+    @Order(6)
     @ParameterizedTest(name = "/v0/token/refresh after {2} generate and {3} logout - {0} - {1}")
     @MethodSource({
             "afterOptoutTokenArgs"
@@ -130,7 +148,7 @@ public class OptoutTest {
         this.waitForOptOutResponse(operator::v0CheckedTokenRefresh, refreshToken, "{\"advertisement_token\":\"\",\"advertising_token\":\"\",\"refresh_token\":\"\"}");
     }
 
-    @Order(6)
+    @Order(7)
     @ParameterizedTest(name = "/v1/token/refresh after {2} generate and {3} logout - {0} - {1}")
     @MethodSource({
             "afterOptoutTokenArgs"
@@ -140,7 +158,7 @@ public class OptoutTest {
         this.waitForOptOutResponse(operator::v1CheckedTokenRefresh, refreshToken, "{\"status\":\"optout\"}");
     }
 
-    @Order(7)
+    @Order(8)
     @ParameterizedTest(name = "/v2/token/refresh after {2} generate and {3} logout - {0} - {1}")
     @MethodSource({
             "afterOptoutTokenArgs"
@@ -151,8 +169,54 @@ public class OptoutTest {
         with().pollInterval(5, TimeUnit.SECONDS).await("Get V2 Token Response").atMost(OPTOUT_WAIT_SECONDS, TimeUnit.SECONDS).until(() -> operator.v2TokenRefresh(refreshToken, refreshResponseKey).equals(Mapper.OBJECT_MAPPER.readTree("{\"status\":\"optout\"}")));
     }
 
+    @Order(9)
+    @ParameterizedTest(name = "/v2/optout/status after v2/identity/map and v2/token/logout - DII {0} - expecting {4} - {2}")
+    @MethodSource({"afterOptoutAdvertisingIdArgs"})
+    public void testV2OptOutStatus(String label, Operator operator, String operatorName, String rawUID,
+                                   boolean isOptedOut, long optedOutTimestamp) throws Exception {
+        String payload = "{\"advertising_ids\":[\"" + rawUID + "\"]}";
+        with().pollInterval(5, TimeUnit.SECONDS)
+                .await("Get Opt out status response")
+                .atMost(OPTOUT_WAIT_SECONDS, TimeUnit.SECONDS)
+                .until(() -> {
+                    JsonNode response = operator.v2OptOutStatus(payload);
+                    JsonNode body = response.get("body");
+                    JsonNode optedOutJsonNode = body.get("opted_out");
+                    if (isOptedOut) {
+                        return optedOutJsonNode.size() == 1;
+
+                    } else {
+                        return optedOutJsonNode.isEmpty();
+                    }
+                });
+        JsonNode response = operator.v2OptOutStatus(payload);
+        assertThat(response.at("/status").asText()).isEqualTo("success");
+        JsonNode body = response.get("body");
+        assertThat(body).isNotNull();
+        JsonNode optedOutJsonNode = body.get("opted_out");
+        assertThat(optedOutJsonNode).isNotNull();
+        if (isOptedOut) {
+            assertThat(optedOutJsonNode.size()).isEqualTo(1);
+            JsonNode optedOutRecord = optedOutJsonNode.get(0);
+            assertThat(optedOutRecord).isNotNull();
+            assertThat(optedOutRecord.has(TestData.ADVERTISING_ID)).isTrue();
+            String advertisingId = optedOutRecord.get(TestData.ADVERTISING_ID).asText();
+            assertThat(advertisingId).isEqualTo(rawUID);
+            assertThat(optedOutRecord.has(TestData.OPTED_OUT_SINCE)).isTrue();
+            long optedOutSince = optedOutRecord.get(TestData.OPTED_OUT_SINCE).asLong();
+            // TODO uncomment after Opt Out Status API returns timestamp in milliseconds
+//             assertThat(optedOutSince).isGreaterThanOrEqualTo(optedOutTimestamp);
+        } else {
+            assertThat(optedOutJsonNode.size()).isEqualTo(0);
+        }
+    }
+
     private static Set<Arguments> afterOptoutTokenArgs() {
         return outputArgs;
+    }
+
+    private static Set<Arguments> afterOptoutAdvertisingIdArgs() {
+        return outputAdvertisingIdArgs;
     }
 
     private void addToken(String label, Operator operator, String tokenGenerateVersion, String tokenLogoutVersion, String refreshToken, String refreshResponseKey) {
