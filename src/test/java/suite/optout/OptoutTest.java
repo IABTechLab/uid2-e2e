@@ -123,7 +123,8 @@ public class OptoutTest {
 
     @ParameterizedTest(name = "/v2/token/logout with /v2/identity/map - {0} - {2}")
     @MethodSource({
-            "suite.optout.TestData#identityMapEmailArgs"
+            "suite.optout.TestData#identityMapEmailArgs",
+            "suite.optout.TestData#identityMapPhoneArgs"
     })
     @Order(5)
     public void testV2LogoutWithV2IdentityMap(String label, Operator operator, String operatorName, String type, String emailOrPhone, boolean toOptOut) throws Exception {
