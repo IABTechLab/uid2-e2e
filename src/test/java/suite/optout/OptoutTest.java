@@ -131,12 +131,13 @@ public class OptoutTest {
         JsonNode identityMapResponseNode = operator.v2IdentityMap("{\""+ type + "\":[\"" + emailOrPhone + "\"]}", false);
         assertThat(identityMapResponseNode.at("/status").asText()).isEqualTo("success");
         String rawUID = identityMapResponseNode.get("body").get("mapped").get(0).get(TestData.ADVERTISING_ID).asText();
+        long beforeOptOutTimestamp = Instant.now().toEpochMilli();
         if (toOptOut) {
             Thread.sleep(OPTOUT_DELAY_MS);
             JsonNode logoutResponse = operator.v2TokenLogout(type, emailOrPhone);
             assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
         }
-        outputAdvertisingIdArgs.add(Arguments.of(label, operator, operatorName, rawUID, toOptOut, Instant.now().toEpochMilli()));
+        outputAdvertisingIdArgs.add(Arguments.of(label, operator, operatorName, rawUID, toOptOut, beforeOptOutTimestamp));
     }
 
     @Order(6)
@@ -204,9 +205,8 @@ public class OptoutTest {
             String advertisingId = optedOutRecord.get(TestData.ADVERTISING_ID).asText();
             assertThat(advertisingId).isEqualTo(rawUID);
             assertThat(optedOutRecord.has(TestData.OPTED_OUT_SINCE)).isTrue();
-            long optedOutSince = optedOutRecord.get(TestData.OPTED_OUT_SINCE).asLong();
-            // TODO uncomment after Opt Out Status API returns timestamp in milliseconds
-//             assertThat(optedOutSince).isGreaterThanOrEqualTo(optedOutTimestamp);
+            long optedOutSinceMilliseconds = optedOutRecord.get(TestData.OPTED_OUT_SINCE).asLong();
+            assertThat(optedOutSinceMilliseconds).isGreaterThanOrEqualTo(optedOutTimestamp);
         } else {
             assertThat(optedOutJsonNode.size()).isEqualTo(0);
         }
