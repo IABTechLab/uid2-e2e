@@ -121,7 +121,7 @@ public class OptoutTest {
         );
     }
 
-    @ParameterizedTest(name = "/v2/token/logout with /v2/identity/map - {0} - {2}")
+    @ParameterizedTest(name = "/v2/token/logout with /v2/identity/map - DII {0} - toOptOut {5} - {2}")
     @MethodSource({
             "suite.optout.TestData#identityMapEmailArgs",
             "suite.optout.TestData#identityMapPhoneArgs"
