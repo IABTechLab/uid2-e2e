@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class TestData {
+    public static final String ADVERTISING_ID = "advertising_id";
+    public static final String OPTED_OUT_SINCE = "opted_out_since";
     private static final boolean PHONE_SUPPORT = Boolean.parseBoolean(EnvUtil.getEnv("UID2_E2E_PHONE_SUPPORT"));
 
     private TestData() {
@@ -34,12 +36,8 @@ public final class TestData {
 
     public static Set<Arguments> optoutTokenEmailArgs() {
         Set<Operator> operators = getPublicOperators();
-        Random random = new Random();
-        int number = random.nextInt(100000000);
-        String email = "test.email" + number + "@" + getRandomString(2, 10) + "." + getRandomString(2, 10);
-        Set<List<String>> inputs = Set.of(
-                List.of("good email", "email", email)
-        );
+
+        Set<List<String>> inputs = generateEmailSet(1);
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
@@ -69,15 +67,7 @@ public final class TestData {
 
     public static Set<Arguments> optoutTokenPhoneArgs() {
         Set<Operator> operators = getPublicOperators();
-        Random random = new Random();
-        StringBuilder phone = new StringBuilder(String.valueOf(random.nextLong((10000000000L - 1000000000L) +1) + 1000000000L));
-        while (phone.length() < 10) {
-            phone.insert(0, "0");
-        }
-        phone.insert(0, "+0");
-        Set<List<String>> inputs = Set.of(
-                List.of("good phone", "phone", phone.toString())
-        );
+        Set<List<String>> inputs = generatePhoneSet(1);
 
         Set<Arguments> args = new HashSet<>();
         if (PHONE_SUPPORT) {
@@ -88,6 +78,59 @@ public final class TestData {
             }
         }
         return args;
+    }
+
+    public static Set<Arguments> identityMapEmailArgs() {
+        Set<Operator> operators = getPublicOperators();
+        Set<List<String>> inputs = generateEmailSet(4);
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            for (List<String> input : inputs) {
+                args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1), input.get(2), Boolean.parseBoolean(input.get(3))));
+            }
+        }
+        return args;
+    }
+
+    public static Set<Arguments> identityMapPhoneArgs() {
+        Set<Operator> operators = getPublicOperators();
+        Set<List<String>> inputs = generatePhoneSet(4);
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            for (List<String> input : inputs) {
+                args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1), input.get(2), Boolean.parseBoolean(input.get(3))));
+            }
+        }
+        return args;
+    }
+
+    private static Set<List<String>> generateEmailSet(int count) {
+        Random random = new Random();
+        Set<List<String>> inputs = new HashSet<>(count);
+        for (int i = 0; i < count; ++i) {
+            int number = random.nextInt(100000000);
+            String email = "test.email" + number + "@" + getRandomString(2, 10) + "." + getRandomString(2, 10);
+            inputs.add(List.of("good email " + (i + 1), "email", email, i % 2 == 0 ? "true" : "false"));
+        }
+
+        return inputs;
+    }
+
+    private static Set<List<String>> generatePhoneSet(int count) {
+        Random random = new Random();
+        Set<List<String>> inputs = new HashSet<>();
+        final long bound = (10000000000L - 1000000000L) + 1;
+        for (int i = 0; i < count; ++i) {
+            StringBuilder phone = new StringBuilder(String.valueOf(random.nextLong(bound) + 1000000000L));
+            while (phone.length() < 10) {
+                phone.insert(0, "0");
+            }
+            phone.insert(0, "+0");
+            inputs.add(List.of("good phone " + (i + 1), "phone", phone.toString(),  i % 2 == 0 ? "true" : "false"));
+        }
+        return inputs;
     }
 
     private static String getRandomString(int minLength, int maxLength) {

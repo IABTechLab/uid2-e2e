@@ -363,6 +363,12 @@ public class Operator extends App {
         return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
     }
 
+    public JsonNode v2OptOutStatus(String payload) throws Exception {
+        V2Envelope envelope = v2CreateEnvelope(payload, CLIENT_API_SECRET);
+        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/optout/status", envelope.envelope(), CLIENT_API_KEY);
+        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
+    }
+
     public JsonNode v2KeySharing() throws Exception {
         V2Envelope envelope = v2CreateEnvelope("", CLIENT_API_SECRET);
         String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/key/sharing", envelope.envelope(), CLIENT_API_KEY);
