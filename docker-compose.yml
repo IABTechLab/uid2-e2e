@@ -71,6 +71,7 @@ services:
       - "127.0.0.1:8080:8080"
       - "127.0.0.1:9080:9080"
       - "127.0.0.1:5080:5005"
+      - "127.0.0.1:27015:27015"
     volumes:
       - ./docker/uid2-operator/conf/default-config.json:/app/conf/default-config.json
       - ./docker/uid2-operator/conf/local-e2e-docker-config.json:/app/conf/local-config.json
