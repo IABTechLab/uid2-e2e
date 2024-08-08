@@ -137,7 +137,7 @@ export async function setup() {
     }
     let response = await send(requestData, clientKey);
     let decrypt = await decryptEnvelope(response.body, clientSecret)
-    return decrypt.refresh_token;
+    return decrypt.body.refresh_token;
   };
 
 
