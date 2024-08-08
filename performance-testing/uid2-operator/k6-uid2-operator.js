@@ -3,7 +3,7 @@ import encoding from 'k6/encoding';
 import {check} from 'k6';
 import http from 'k6/http';
 
-const testDurationInSeconds = 2000;
+const testDurationInSeconds = 2500;
 const tokenGenerateTests = true;
 const tokenRefreshTests = true;
 const identityMapTests = true;
@@ -435,7 +435,7 @@ async function generateFutureMapRequest(count, emailCount) {
 }
 
 async function generateFutureGenerateRequests(count) {
-  let obj = {'optout_check': 1, 'email': 'test@example.com'};
+  let obj = {'optout_check': 1, 'email': 'test500@example.com'};
   return await generateFutureRequests(count, obj)
 }
 
