@@ -1,11 +1,14 @@
-import { crypto } from "k6/experimental/webcrypto";
+import {crypto} from "k6/experimental/webcrypto";
 import encoding from 'k6/encoding';
-import { check } from 'k6';
+import {check} from 'k6';
 import http from 'k6/http';
-import exec from 'k6/execution';
 
-const testDurationInSeconds = 4300;
-const targetVUCount = 100;
+const testDurationInSeconds = 2500;
+const tokenGenerateTests = true;
+const tokenRefreshTests = true;
+const identityMapTests = true;
+const identityBucketTests = true;
+
 
 //30 warm up on each
 // 5 min each
@@ -16,238 +19,82 @@ export const options = {
   noConnectionReuse: false,
   scenarios: {
     // Warmup scenarios
-    identityMapWarmup12: {
-      executor: 'ramping-vus',
-      startVUs: 0,
-      stages: [
-        { duration: '30s', target: 12 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-    },
-    identityMapLargeBatch12: {
+    tokenGenerateWarmup: {
       executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 12,
-      duration: '300s',
+      exec: 'tokenGenerate',
+      vus: 300,
+      duration: '30s',
       gracefulStop: '0s',
-      startTime: '30s',
     },
-    identityMapWarmup50: {
-      executor: 'ramping-vus',
-      startVUs: 12,
-      stages: [
-        { duration: '30s', target: 50 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '330s'
-    },
-    identityMapLargeBatch50: {
+    tokenRefreshWarmup: {
       executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 50,
-      duration: '300s',
+      exec: 'tokenRefresh',
+      vus: 300,
+      duration: '30s',
       gracefulStop: '0s',
-      startTime: '360s',
     },
-    identityMapWarmup100: {
-      executor: 'ramping-vus',
-      startVUs: 50,
-      stages: [
-        { duration: '30s', target: 100 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '660s',
-    },
-    identityMapLargeBatch100: {
+    identityMapWarmup: {
       executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 100,
-      duration: '300s',
+      exec: 'identityMap',
+      vus: 300,
+      duration: '30s',
       gracefulStop: '0s',
-      startTime: '690s',
     },
-    identityMapWarmup150: {
-      executor: 'ramping-vus',
-      startVUs: 100,
-      stages: [
-        { duration: '30s', target: 150 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '990s',
-    },
-    identityMapLargeBatch150: {
+    identityBucketsWarmup: {
       executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 150,
-      duration: '300s',
+      exec: 'identityBuckets',
+      vus: 2,
+      duration: '30s',
       gracefulStop: '0s',
-      startTime: '1020s',
     },
-    identityMapWarmup200: {
-      executor: 'ramping-vus',
-      startVUs: 150,
-      stages: [
-        { duration: '30s', target: 200 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '1320s',
-    },
-    identityMapLargeBatch200: {
+    // Actual testing scenarios
+    tokenGenerate: {
       executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 200,
-      duration: '300s',
-      gracefulStop: '0s',
-      startTime: '1350s',
-    },
-    identityMapWarmup250: {
-      executor: 'ramping-vus',
-      startVUs: 200,
-      stages: [
-        { duration: '30s', target: 250 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '1650s',
-    },
-    identityMapLargeBatch250: {
-      executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 250,
-      duration: '300s',
-      gracefulStop: '0s',
-      startTime: '1680s',
-    },
-    identityMapWarmup300: {
-      executor: 'ramping-vus',
-      startVUs: 250,
-      stages: [
-        { duration: '30s', target: 300 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '1980s',
-    },
-    identityMapLargeBatch300: {
-      executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
+      exec: 'tokenGenerate',
       vus: 300,
       duration: '300s',
       gracefulStop: '0s',
-      startTime: '2010s',
+      startTime: '40s',
     },
-    identityMapWarmup350: {
-      executor: 'ramping-vus',
-      startVUs: 300,
-      stages: [
-        { duration: '30s', target: 350 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '2310s',
-    },
-    identityMapLargeBatch350: {
+    tokenRefresh: {
       executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 350,
+      exec: 'tokenRefresh',
+      vus: 300,
       duration: '300s',
       gracefulStop: '0s',
-      startTime: '2340s',
+      startTime: '350s',
     },
-    identityMapWarmup400: {
-      executor: 'ramping-vus',
-      startVUs: 350,
-      stages: [
-        { duration: '30s', target: 400 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '2640s',
-    },
-    identityMapLargeBatch400: {
+    identityMap: {
       executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 400,
+      exec: 'identityMap',
+      vus: 300,
       duration: '300s',
       gracefulStop: '0s',
-      startTime: '2670s',
+      startTime: '660s',
     },
-    identityMapWarmup450: {
-      executor: 'ramping-vus',
-      startVUs: 400,
-      stages: [
-        { duration: '30s', target: 450 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '2970s',
-    },
-    identityMapLargeBatch450: {
+    identityMapLargeBatchSequential: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
-      vus: 450,
+      vus: 1,
       duration: '300s',
       gracefulStop: '0s',
-      startTime: '3000s',
+      startTime: '970s',
     },
-    identityMapWarmup500: {
-      executor: 'ramping-vus',
-      startVUs: 450,
-      stages: [
-        { duration: '30s', target: 500 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '3300s',
-    },
-    identityMapLargeBatch500: {
+    identityMapLargeBatch: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
-      vus: 500,
+      vus: 16,
       duration: '300s',
       gracefulStop: '0s',
-      startTime: '3330s',
+      startTime: '1280s',
     },
-    identityMapWarmup550: {
-      executor: 'ramping-vus',
-      startVUs: 500,
-      stages: [
-        { duration: '30s', target: 550 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '3630s',
-    },
-    identityMapLargeBatch550: {
+    identityBuckets: {
       executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 550,
+      exec: 'identityBuckets',
+      vus: 2,
       duration: '300s',
       gracefulStop: '0s',
-      startTime: '3660s',
-    },
-    identityMapWarmup600: {
-      executor: 'ramping-vus',
-      startVUs: 550,
-      stages: [
-        { duration: '30s', target: 600 }
-      ],
-      exec: 'identityMapLargeBatch',
-      gracefulStop: '0s',
-      startTime: '3960s',
-    },
-    identityMapLargeBatch600: {
-      executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 600,
-      duration: '300s',
-      gracefulStop: '0s',
-      startTime: '3990s',
+      startTime: '1590s',
     },
   },
   // So we get count in the summary, to demonstrate different metrics are different
@@ -279,57 +126,76 @@ const baseUrl = __ENV.BASE_URL;
 export async function setup() {
   // pregenerate the envelopes so they don't expire, but can be reused. Means the load test is not constrained by the client
   // Each is used fopr 45 sec. Add 2 to ensure we have enough
-  const numberOfRequestsToGenerate = Math.round(testDurationInSeconds / 45) + 2; 
+  const numberOfRequestsToGenerate = Math.round(testDurationInSeconds / 45) + 2;
 
 
-  const generateRefreshRequest = (data) => {
-    // TODO: call tokenGenerate to get the refresh token from response
-    const refreshToken = __ENV.REFRESH_TOKEN;
-    return refreshToken;
+  async function generateRefreshRequest(data) {
+    let request = await createReq( {'optout_check': 1, 'email': 'test5000@example.com'});
+    var requestData = {
+      endpoint: '/v2/token/generate',
+      requestBody: request,
+    }
+    let response = await send(requestData, clientKey);
+    let decrypt = await decryptEnvelope(response.body, clientSecret)
+    return decrypt.body.refresh_token;
   };
 
-  const generateSinceTimestampStr = () => {
-    var date = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 /* 2 days ago */);
-    var year = date.getFullYear();
-    var month = (date.getMonth() + 1).toString().padStart(2, '0');
-    var day = date.getDate().toString().padStart(2, '0');
 
-    return `${year}-${month}-${day}T00:00:00`;
-  };
 
-  const tokenGenerateData = {
-    endpoint: '/v2/token/generate',
-    requestBody: await createReq({
-      'optout_check': 1,
-      'email': 'test@example.com',
-    }),
-  };
+  let tokenGenerateData = {};
+  if (tokenGenerateTests) {
+    tokenGenerateData = {
+      endpoint: '/v2/token/generate',
+      requestData: await generateFutureGenerateRequests(numberOfRequestsToGenerate),
+    };
+  }
+  let tokenRefreshData = {};
+  if(tokenRefreshTests) {
+    tokenRefreshData = {
+      endpoint: '/v2/token/refresh',
+      requestBody: await generateRefreshRequest(tokenGenerateData),
+    };
+  }
+
+  let identityMapData = {};
+  let identityMapLargeBatchData = {};
+  if(identityMapTests) {
+    identityMapData = {
+      endpoint: '/v2/identity/map',
+      requestData: await generateFutureMapRequest(numberOfRequestsToGenerate, 2)
+    };
+    identityMapLargeBatchData = {
+      requestData: await generateFutureMapRequest(numberOfRequestsToGenerate, 5000)
+    };
+  }
+
+  let identityBucketData = {}
+  if(identityBucketTests) {
+    identityBucketData = {
+      endpoint: '/v2/identity/buckets',
+      requestData: await generateFutureBucketRequests(numberOfRequestsToGenerate)
+    };
+  }
 
   return {
     tokenGenerate: tokenGenerateData,
-    tokenRefresh: {
-      endpoint: '/v2/token/refresh',
-      requestBody: generateRefreshRequest(tokenGenerateData),
-    },
-    identityMap: {
-      endpoint: '/v2/identity/map',
-      requestBody: await createReq(generateIdentityMapRequest(2)),
-    },
-    identityMapLargeBatch: {
-      requestData: await generateFutureMapRequest(numberOfRequestsToGenerate)
-    },
-    identityBuckets: {
-      endpoint: '/v2/identity/buckets',
-      requestBody: await createReq({
-        "since_timestamp": generateSinceTimestampStr(),
-      }),
-    }
+    tokenRefresh: tokenRefreshData,
+    identityMap: identityMapData,
+    identityMapLargeBatch: identityMapLargeBatchData,
+    identityBuckets: identityBucketData
   };
 }
 
 // Scenarios
 export function tokenGenerate(data) {
-  execute(data.tokenGenerate, true);
+  var requestData = data.tokenGenerate.requestData;
+  var elementToUse = selectRequestData(requestData);
+
+  var tokenGenerateData = {
+    endpoint: data.tokenGenerate.endpoint,
+    requestBody: elementToUse.requestBody,
+  }
+  execute(tokenGenerateData, true);
 }
 
 export function tokenRefresh(data) {
@@ -337,20 +203,19 @@ export function tokenRefresh(data) {
 }
 
 export function identityMap(data) {
-  execute(data.identityMap, true);
+  var requestData = data.identityMap.requestData;
+  var elementToUse = selectRequestData(requestData);
+
+  var identityData = {
+    endpoint: '/v2/identity/map',
+    requestBody: elementToUse.requestBody,
+  }
+  execute(identityData, true);
 }
 
 export function identityMapLargeBatch(data) {
   var requestData = data.identityMapLargeBatch.requestData;
-  var elementToUse = requestData[0];
-  for (var i = 0; i < requestData.length; i++) {
-    var currentTime = Date.now() + 5000;
-    if (currentTime > requestData[i].time && currentTime < requestData[i + 1].time) {
-      elementToUse = requestData[i];
-      //console.log("VU: " + exec.vu.idInTest + ", item: " + i);
-      break;
-    }
-  }
+  var elementToUse = selectRequestData(requestData);
 
   var identityData = {
     endpoint: '/v2/identity/map',
@@ -361,10 +226,30 @@ export function identityMapLargeBatch(data) {
 }
 
 export function identityBuckets(data) {
-  execute(data.identityBuckets, true);
+  var requestData = data.identityBuckets.requestData;
+  var elementToUse = selectRequestData(requestData);
+
+  var bucketData = {
+    endpoint: data.identityBuckets.endpoint,
+    requestBody: elementToUse.requestBody,
+  }
+  execute(bucketData, true);
 }
 
 // Helpers
+function selectRequestData(requestData) {
+  var elementToUse = requestData[0];
+  for (var i = 0; i < requestData.length; i++) {
+    var currentTime = Date.now() + 5000;
+    if (currentTime > requestData[i].time && currentTime < requestData[i + 1].time) {
+      elementToUse = requestData[i];
+      //console.log("VU: " + exec.vu.idInTest + ", item: " + i);
+      break;
+    }
+  }
+  return elementToUse;
+}
+
 async function createReq(obj) {
   var envelope = getEnvelope(obj);
   return encoding.b64encode((await encryptEnvelope(envelope, clientSecret)).buffer);
@@ -438,6 +323,33 @@ async function encryptEnvelope(envelope, clientSecret) {
   return result;
 }
 
+async function decryptEnvelope(envelope, clientSecret) {
+  const rawKey = encoding.b64decode(clientSecret);
+  const rawData = encoding.b64decode(envelope);
+  const key = await crypto.subtle.importKey("raw", rawKey, "AES-GCM", true, [
+    "encrypt",
+    "decrypt",
+  ]);
+  const length = rawData.byteLength;
+  const iv = rawData.slice(0, 12);
+
+  const decrypted = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: iv,
+        tagLength: 128
+      },
+      key,
+      rawData.slice(12)
+  );
+
+
+  const decryptedResponse = String.fromCharCode.apply(String, new Uint8Array(decrypted.slice(16)));
+  const response = JSON.parse(decryptedResponse);
+
+  return response;
+}
+
 function getEnvelopeWithTimestamp(timestampArray, obj) {
   var randomBytes = new Uint8Array(8);
   crypto.getRandomValues(randomBytes);
@@ -502,13 +414,12 @@ function stringToUint8Array(str) {
   return view;
 }
 
-async function generateFutureMapRequest(count) {
+async function generateFutureRequests(count, obj) {
   const result = [];
   for (var i = 0; i < count; i++) {
     var time = Date.now() + (i * 45000)
     var timestampArr = new Uint8Array(getTimestampFromTime(time));
-    var emails = generateIdentityMapRequest(5000);
-    var requestBody = await createReqWithTimestamp(timestampArr, emails);
+    var requestBody = await createReqWithTimestamp(timestampArr, obj);
     var element = {
       time: time,
       requestBody: requestBody
@@ -516,4 +427,28 @@ async function generateFutureMapRequest(count) {
     result.push(element);
   }
   return result;
+}
+
+async function generateFutureMapRequest(count, emailCount) {
+  let emails = generateIdentityMapRequest(emailCount);
+  return await generateFutureRequests(count, emails);
+}
+
+async function generateFutureGenerateRequests(count) {
+  let obj = {'optout_check': 1, 'email': 'test500@example.com'};
+  return await generateFutureRequests(count, obj)
+}
+
+const generateSinceTimestampStr = () => {
+  var date = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 /* 2 days ago */);
+  var year = date.getFullYear();
+  var month = (date.getMonth() + 1).toString().padStart(2, '0');
+  var day = date.getDate().toString().padStart(2, '0');
+
+  return `${year}-${month}-${day}T00:00:00`;
+};
+
+async function generateFutureBucketRequests(count) {
+  let obj = {"since_timestamp": generateSinceTimestampStr()};
+  return await generateFutureRequests(count, obj)
 }
