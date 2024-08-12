@@ -20,6 +20,6 @@ jobs:
     with: 
       failure_severity: ${{ inputs.failure_severity || 'HIGH'}}
       fail_on_error: ${{ inputs.fail_on_error || true }}
-      java_version: '17'
+      java_version: '21'
       skip_tests: true
     secrets: inherit

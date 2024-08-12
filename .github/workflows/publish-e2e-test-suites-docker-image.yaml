@@ -22,7 +22,7 @@ jobs:
     with:
       release_type: ${{ inputs.release_type }}
       version_number_input: ${{ inputs.version_number_input }}
-      java_version: '17'
+      java_version: '21'
       force_release: 'yes'
       skip_tests: true
     secrets: inherit

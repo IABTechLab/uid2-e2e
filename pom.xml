@@ -9,9 +9,9 @@
     <artifactId>uid2-e2e</artifactId>
     <version>3.0.59-7310afd26d</version>
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <uid2-shared.version>7.9.0</uid2-shared.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <uid2-shared.version>7.17.1-alpha-145-SNAPSHOT</uid2-shared.version>
     </properties>
     <packaging>jar</packaging>
 
@@ -37,13 +37,18 @@
             <releases><enabled>false</enabled></releases>
             <snapshots><enabled>true</enabled></snapshots>
         </repository>
+        <repository>
+            <id>maven_central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
     </repositories>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.10.2</version>
+                <version>5.10.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -74,7 +79,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.25.2</version>
+            <version>3.26.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -97,13 +102,13 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.2.0</version>
+            <version>4.2.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.14.0</version>
+            <version>3.15.0</version>
         </dependency>
     </dependencies>
 
