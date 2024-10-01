@@ -16,7 +16,8 @@ const identityBucketTests = true;
 // 13 scenarios, each 5.5 min = 4290 se
 
 export const options = {
-  noConnectionReuse: false,
+  insecureSkipTLSVerify: true,  
+  noConnectionReuse: true,
   scenarios: {
     // Warmup scenarios
     tokenGenerateWarmup: {

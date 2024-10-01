@@ -1,0 +1,10 @@
+apiVersion: k6.io/v1alpha1
+kind: K6
+metadata:
+  name: k6-uid2-load-test
+spec:
+  parallelism: 4
+  script:
+    configMap:
+      name: operator-stress-test
+      file: k6-uid2-operator.js
