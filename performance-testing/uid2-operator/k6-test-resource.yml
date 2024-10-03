@@ -4,6 +4,7 @@ metadata:
   name: k6-uid2-load-test
 spec:
   parallelism: 4
+  arguments: --out cloud  
   script:
     configMap:
       name: operator-stress-test
