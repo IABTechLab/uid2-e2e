@@ -1,0 +1,3 @@
+kubectl create configmap operator-stress-test --from-file ./k6-uid2-operator.js
+
+kubectl apply -f ./k6-test-resource.yml

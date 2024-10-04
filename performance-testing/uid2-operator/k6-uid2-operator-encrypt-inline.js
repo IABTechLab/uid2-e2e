@@ -1,14 +1,12 @@
-import {crypto} from "k6/experimental/webcrypto";
+import { crypto } from "k6/experimental/webcrypto";
 import encoding from 'k6/encoding';
-import {check} from 'k6';
+import { check } from 'k6';
 import http from 'k6/http';
 
-const testDurationInSeconds = 2500;
-const tokenGenerateTests = true;
-const tokenRefreshTests = true;
-const identityMapTests = true;
-const identityBucketTests = true;
-
+const generateVUs = 500;
+const refreshVUs = 500;
+const identityMapVUs = 500;
+const testDuration = '10m'
 
 //30 warm up on each
 // 5 min each
@@ -16,63 +14,60 @@ const identityBucketTests = true;
 // 13 scenarios, each 5.5 min = 4290 se
 
 export const options = {
-  insecureSkipTLSVerify: true,  
-  noConnectionReuse: true,
+  insecureSkipTLSVerify: true,
+  noConnectionReuse: false,
   scenarios: {
     // Warmup scenarios
+
     tokenGenerateWarmup: {
-      executor: 'constant-vus',
+      executor: 'ramping-vus',
       exec: 'tokenGenerate',
-      vus: 300,
-      duration: '30s',
-      gracefulStop: '0s',
+      stages: [
+        { duration: '30s', target: generateVUs}
+      ],
+      gracefulRampDown: '0s',
     },
     tokenRefreshWarmup: {
-      executor: 'constant-vus',
+      executor: 'ramping-vus',
       exec: 'tokenRefresh',
-      vus: 300,
-      duration: '30s',
-      gracefulStop: '0s',
+      stages: [
+        { duration: '30s', target: refreshVUs}
+      ],
+      gracefulRampDown: '0s',
     },
     identityMapWarmup: {
-      executor: 'constant-vus',
+      executor: 'ramping-vus',
       exec: 'identityMap',
-      vus: 300,
-      duration: '30s',
-      gracefulStop: '0s',
-    },
-    identityBucketsWarmup: {
-      executor: 'constant-vus',
-      exec: 'identityBuckets',
-      vus: 2,
-      duration: '30s',
-      gracefulStop: '0s',
+      stages: [
+        { duration: '30s', target: identityMapVUs}
+      ],
+      gracefulRampDown: '0s',
     },
     // Actual testing scenarios
     tokenGenerate: {
       executor: 'constant-vus',
       exec: 'tokenGenerate',
-      vus: 300,
-      duration: '300s',
+      vus: generateVUs,
+      duration: testDuration,
       gracefulStop: '0s',
-      startTime: '40s',
+      startTime: '30s',
     },
     tokenRefresh: {
       executor: 'constant-vus',
       exec: 'tokenRefresh',
-      vus: 300,
-      duration: '300s',
+      vus: refreshVUs,
+      duration: testDuration,
       gracefulStop: '0s',
-      startTime: '350s',
+      startTime: '30s',
     },
     identityMap: {
       executor: 'constant-vus',
-      exec: 'identityMap',
-      vus: 300,
-      duration: '300s',
+      exec: 'identityMapLargeBatch',
+      vus: identityMapVUs,
+      duration: testDuration,
       gracefulStop: '0s',
-      startTime: '660s',
-    },
+      startTime: '30s',
+    },/*
     identityMapLargeBatchSequential: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
@@ -96,7 +91,7 @@ export const options = {
       duration: '300s',
       gracefulStop: '0s',
       startTime: '1590s',
-    },
+    },*/
   },
   // So we get count in the summary, to demonstrate different metrics are different
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)', 'count'],
@@ -125,12 +120,14 @@ const clientKey = __ENV.CLIENT_KEY;
 const baseUrl = __ENV.BASE_URL;
 
 export async function setup() {
-  // pregenerate the envelopes so they don't expire, but can be reused. Means the load test is not constrained by the client
-  // Each is used fopr 45 sec. Add 2 to ensure we have enough
-  const numberOfRequestsToGenerate = Math.round(testDurationInSeconds / 45) + 2;
+  var token = await generateRefreshRequest();
+  return {
+    tokenGenerate: null,
+    identityMap: null,
+    refreshToken: token
+  };
 
-
-  async function generateRefreshRequest(data) {
+  async function generateRefreshRequest() {
     let request = await createReq( {'optout_check': 1, 'email': 'test5000@example.com'});
     var requestData = {
       endpoint: '/v2/token/generate',
@@ -141,89 +138,63 @@ export async function setup() {
     return decrypt.body.refresh_token;
   };
 
-
-
-  let tokenGenerateData = {};
-  if (tokenGenerateTests) {
-    tokenGenerateData = {
-      endpoint: '/v2/token/generate',
-      requestData: await generateFutureGenerateRequests(numberOfRequestsToGenerate),
-    };
-  }
-  let tokenRefreshData = {};
-  if(tokenRefreshTests) {
-    tokenRefreshData = {
-      endpoint: '/v2/token/refresh',
-      requestBody: await generateRefreshRequest(tokenGenerateData),
-    };
-  }
-
-  let identityMapData = {};
-  let identityMapLargeBatchData = {};
-  if(identityMapTests) {
-    identityMapData = {
-      endpoint: '/v2/identity/map',
-      requestData: await generateFutureMapRequest(numberOfRequestsToGenerate, 2)
-    };
-    identityMapLargeBatchData = {
-      requestData: await generateFutureMapRequest(numberOfRequestsToGenerate, 5000)
-    };
-  }
-
-  let identityBucketData = {}
-  if(identityBucketTests) {
-    identityBucketData = {
-      endpoint: '/v2/identity/buckets',
-      requestData: await generateFutureBucketRequests(numberOfRequestsToGenerate)
-    };
-  }
-
-  return {
-    tokenGenerate: tokenGenerateData,
-    tokenRefresh: tokenRefreshData,
-    identityMap: identityMapData,
-    identityMapLargeBatch: identityMapLargeBatchData,
-    identityBuckets: identityBucketData
-  };
 }
 
 // Scenarios
-export function tokenGenerate(data) {
-  var requestData = data.tokenGenerate.requestData;
-  var elementToUse = selectRequestData(requestData);
-
-  var tokenGenerateData = {
-    endpoint: data.tokenGenerate.endpoint,
-    requestBody: elementToUse.requestBody,
+export async function tokenGenerate(data) {
+  const endpoint = '/v2/token/generate';
+  if (data.tokenGenerate == null) {
+    var newData = await generateTokenGenerateRequestWithTime();
+    data.tokenGenerate = newData;
+  } else if (data.tokenGenerate.time < (Date.now() - 45000)) {
+    data.tokenGenerate = await generateTokenGenerateRequestWithTime();
   }
+
+  var requestBody = data.tokenGenerate.requestBody;
+  var tokenGenerateData = {
+    endpoint: endpoint,
+    requestBody: requestBody,
+  }
+
   execute(tokenGenerateData, true);
 }
 
 export function tokenRefresh(data) {
-  execute(data.tokenRefresh, false);
+  var requestBody = data.refreshToken;
+  var refreshData = {
+    endpoint: '/v2/token/refresh',
+    requestBody: requestBody
+  }
+
+  execute(refreshData, false);
 }
 
-export function identityMap(data) {
-  var requestData = data.identityMap.requestData;
-  var elementToUse = selectRequestData(requestData);
+export async function identityMap(data) {
+  const endpoint = '/v2/identity/map';
+  if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
+    data.identityMap = await generateIdentityMapRequestWithTime(2);;
+  }
 
+  var requestBody = data.identityMap.requestBody;
   var identityData = {
-    endpoint: '/v2/identity/map',
-    requestBody: elementToUse.requestBody,
+    endpoint: endpoint,
+    requestBody: requestBody,
   }
   execute(identityData, true);
 }
 
-export function identityMapLargeBatch(data) {
-  var requestData = data.identityMapLargeBatch.requestData;
-  var elementToUse = selectRequestData(requestData);
-
-  var identityData = {
-    endpoint: '/v2/identity/map',
-    requestBody: elementToUse.requestBody,
+export async function identityMapLargeBatch(data) {
+  const endpoint = '/v2/identity/map';
+  if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
+    data.identityMap = await generateIdentityMapRequestWithTime(5000);;
   }
 
-   execute(identityData, true);
+  var requestBody = data.identityMap.requestBody;
+  var identityData = {
+    endpoint: endpoint,
+    requestBody: requestBody,
+  }
+  execute(identityData, true);
 }
 
 export function identityBuckets(data) {
@@ -238,24 +209,6 @@ export function identityBuckets(data) {
 }
 
 // Helpers
-function selectRequestData(requestData) {
-  var elementToUse = requestData[0];
-  for (var i = 0; i < requestData.length; i++) {
-    var currentTime = Date.now() + 5000;
-    if (currentTime > requestData[i].time && currentTime < requestData[i + 1].time) {
-      elementToUse = requestData[i];
-      //console.log("VU: " + exec.vu.idInTest + ", item: " + i);
-      break;
-    }
-  }
-  return elementToUse;
-}
-
-async function createReq(obj) {
-  var envelope = getEnvelope(obj);
-  return encoding.b64encode((await encryptEnvelope(envelope, clientSecret)).buffer);
-};
-
 async function createReqWithTimestamp(timestampArr, obj) {
   var envelope = getEnvelopeWithTimestamp(timestampArr, obj);
   return encoding.b64encode((await encryptEnvelope(envelope, clientSecret)).buffer);
@@ -335,13 +288,13 @@ async function decryptEnvelope(envelope, clientSecret) {
   const iv = rawData.slice(0, 12);
 
   const decrypted = await crypto.subtle.decrypt(
-      {
-        name: "AES-GCM",
-        iv: iv,
-        tagLength: 128
-      },
-      key,
-      rawData.slice(12)
+    {
+      name: "AES-GCM",
+      iv: iv,
+      tagLength: 128
+    },
+    key,
+    rawData.slice(12)
   );
 
 
@@ -415,29 +368,32 @@ function stringToUint8Array(str) {
   return view;
 }
 
-async function generateFutureRequests(count, obj) {
-  const result = [];
-  for (var i = 0; i < count; i++) {
-    var time = Date.now() + (i * 45000)
-    var timestampArr = new Uint8Array(getTimestampFromTime(time));
-    var requestBody = await createReqWithTimestamp(timestampArr, obj);
-    var element = {
-      time: time,
-      requestBody: requestBody
-    };
-    result.push(element);
-  }
-  return result;
+async function createReq(obj) {
+  var envelope = getEnvelope(obj);
+  return encoding.b64encode((await encryptEnvelope(envelope, clientSecret)).buffer);
+};
+
+async function generateRequestWithTime(obj) {
+  var time = Date.now();
+  var timestampArr = new Uint8Array(getTimestampFromTime(time));
+  var requestBody = await createReqWithTimestamp(timestampArr, obj);
+  var element = {
+    time: time,
+    requestBody: requestBody
+  };
+
+  return element;
 }
 
-async function generateFutureMapRequest(count, emailCount) {
+
+async function generateTokenGenerateRequestWithTime() {
+  let requestData = { 'optout_check': 1, 'email': 'test500@example.com' };
+  return await generateRequestWithTime(requestData);
+}
+
+async function generateIdentityMapRequestWithTime(emailCount) {
   let emails = generateIdentityMapRequest(emailCount);
-  return await generateFutureRequests(count, emails);
-}
-
-async function generateFutureGenerateRequests(count) {
-  let obj = {'optout_check': 1, 'email': 'test500@example.com'};
-  return await generateFutureRequests(count, obj)
+  return await generateRequestWithTime(emails);
 }
 
 const generateSinceTimestampStr = () => {
@@ -448,8 +404,3 @@ const generateSinceTimestampStr = () => {
 
   return `${year}-${month}-${day}T00:00:00`;
 };
-
-async function generateFutureBucketRequests(count) {
-  let obj = {"since_timestamp": generateSinceTimestampStr()};
-  return await generateFutureRequests(count, obj)
-}
