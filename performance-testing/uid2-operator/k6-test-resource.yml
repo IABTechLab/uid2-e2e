@@ -8,4 +8,4 @@ spec:
   script:
     configMap:
       name: operator-stress-test
-      file: k6-uid2-operator.js
+      file: k6-uid2-operator-encrypt-inline.js
