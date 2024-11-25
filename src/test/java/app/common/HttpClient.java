@@ -3,6 +3,7 @@ package app.common;
 import com.fasterxml.jackson.databind.JsonNode;
 import okhttp3.*;
 
+import java.util.Map;
 import java.util.Objects;
 
 public final class HttpClient {
@@ -65,9 +66,13 @@ public final class HttpClient {
     private HttpClient() {
     }
 
-    public static String get(String url, String bearerToken) throws Exception {
-        Request request = buildRequest(HttpMethod.GET, url, null, bearerToken);
+    public static String get(String url, String bearerToken, Map<String, String> additionalHeaders) throws Exception {
+        Request request = buildRequest(HttpMethod.GET, url, null, bearerToken, additionalHeaders);
         return execute(request, HttpMethod.GET);
+    }
+
+    public static String get(String url, String bearerToken) throws Exception {
+        return get(url, bearerToken, null);
     }
 
     public static String get(String url) throws Exception {
@@ -89,11 +94,21 @@ public final class HttpClient {
     }
 
     private static Request buildRequest(HttpMethod method, String url, String body, String bearerToken) {
+        return buildRequest(method, url, body, bearerToken, null);
+    }
+
+    private static Request buildRequest(HttpMethod method, String url, String body, String bearerToken, Map<String, String> additionalHeaders) {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url);
 
         if (bearerToken != null) {
             requestBuilder = requestBuilder.addHeader("Authorization", "Bearer " + bearerToken);
+        }
+
+        if (additionalHeaders != null) {
+            for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
+                requestBuilder = requestBuilder.addHeader(header.getKey(), header.getValue());
+            }
         }
 
         return (switch (method) {

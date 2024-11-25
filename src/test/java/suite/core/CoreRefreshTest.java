@@ -13,14 +13,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
-    @MethodSource({"suite.core.TestData#refreshArgs"})
+    @MethodSource({"suite.core.TestData#refreshArgs", "suite.core.TestData#refreshArgsEncrypted"})
     public void testLocationRefresh_Public_Success(Core core, String urlPath, String jsonPath) throws Exception {
-        JsonNode response = core.getWithCoreApiToken(urlPath);
+        JsonNode response = core.getWithCoreApiToken(urlPath, "5.0.1");
 
         assertAll("testLocationRefresh_Public_Success has version and location",
                 () -> assertNotNull(response),
                 () -> assertNotEquals("", response.at("/version").asText(), "Version was empty"),
-                () -> assertNotEquals("", response.at("/" + jsonPath + "/location").asText(), "/" + jsonPath + "/location was empty"));
+                () -> assertNotEquals("", response.at("/" + jsonPath + "/location").asText(), "/" + jsonPath + "/location was empty"),
+                () -> assertFalse(response.at("/" + jsonPath + "/location").asText().contains("encrypted")));
+    }
+
+    @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
+    @MethodSource({"suite.core.TestData#refreshArgsEncrypted"})
+    public void testLocationRefreshCloudEncryption_Public_Success(Core core, String urlPath, String jsonPath) throws Exception {
+        JsonNode response = core.getWithCoreApiToken(urlPath, "10000.0.1");
+
+        assertAll("testLocationRefresh_Public_Success has version and location",
+                () -> assertNotNull(response),
+                () -> assertNotEquals("", response.at("/version").asText(), "Version was empty"),
+                () -> assertNotEquals("", response.at("/" + jsonPath + "/location").asText(), "/" + jsonPath + "/location was empty"),
+                () -> assertTrue(response.at("/" + jsonPath + "/location").asText().contains("encrypted")));
     }
 
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - CollectionName: {2}")
