@@ -30,6 +30,9 @@ If you would like to test locally, follow these steps:
 #### Option 2b - Execute K6 Script in K8s
 In order to reduce network latency, we should deploy k6 and its script with the same zone of UID2 operator.
 
+Follow the installation instructions here: https://grafana.com/blog/2022/06/23/running-distributed-load-tests-on-kubernetes
+
+
 Set environment variables `CLIENT_KEY`, `CLIENT_SECRET`, `BASE_URL` and then use k6 to execute the testing by following command.
 ```
 k6 run k6-uid2-operator.js -e CLIENT_KEY=$CLIENT_KEY -e CLIENT_SECRET=$CLIENT_SECRET -e BASE_URL=$BASE_URL -e REFRESH_TOKEN=$REFRESH_TOKEN
