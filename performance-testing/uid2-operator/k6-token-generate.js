@@ -1,11 +1,17 @@
+
 import { crypto } from "k6/experimental/webcrypto";
 import encoding from 'k6/encoding';
 import { check } from 'k6';
 import http from 'k6/http';
 
-const generateVUs = 500;
-const refreshVUs = 500;
-const identityMapVUs = 500;
+const vus = 500;
+const baseUrl = "http://uid2-prod-opr-use2-alb-698161474.us-east-2.elb.amazonaws.com";
+const clientSecret = "";
+const clientKey = "";
+
+const generateVUs = vus;
+const refreshVUs = vus;
+const identityMapVUs = vus;
 const testDuration = '10m'
 
 //30 warm up on each
@@ -18,7 +24,6 @@ export const options = {
   noConnectionReuse: false,
   scenarios: {
     // Warmup scenarios
-
     tokenGenerateWarmup: {
       executor: 'ramping-vus',
       exec: 'tokenGenerate',
@@ -26,7 +31,7 @@ export const options = {
         { duration: '30s', target: generateVUs}
       ],
       gracefulRampDown: '0s',
-    },
+    },/*
     tokenRefreshWarmup: {
       executor: 'ramping-vus',
       exec: 'tokenRefresh',
@@ -42,7 +47,7 @@ export const options = {
         { duration: '30s', target: identityMapVUs}
       ],
       gracefulRampDown: '0s',
-    },
+    },*/
     // Actual testing scenarios
     tokenGenerate: {
       executor: 'constant-vus',
@@ -51,7 +56,7 @@ export const options = {
       duration: testDuration,
       gracefulStop: '0s',
       startTime: '30s',
-    },
+    }/*,
     tokenRefresh: {
       executor: 'constant-vus',
       exec: 'tokenRefresh',
@@ -67,7 +72,7 @@ export const options = {
       duration: testDuration,
       gracefulStop: '0s',
       startTime: '30s',
-    },/*
+    },
     identityMapLargeBatchSequential: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
@@ -114,11 +119,6 @@ for (let key in options.scenarios) {
   options.thresholds[thresholdName].push('max>=0');
 }
 
-// Configs
-const clientSecret = __ENV.CLIENT_SECRET;
-const clientKey = __ENV.CLIENT_KEY;
-const baseUrl = __ENV.BASE_URL;
-
 export async function setup() {
   var token = await generateRefreshRequest();
   return {
@@ -137,7 +137,12 @@ export async function setup() {
     let decrypt = await decryptEnvelope(response.body, clientSecret)
     return decrypt.body.refresh_token;
   };
+}
 
+export function handleSummary(data) {
+  return {
+    'summary.json': JSON.stringify(data),
+  }
 }
 
 // Scenarios
