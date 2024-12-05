@@ -4,7 +4,7 @@ metadata:
   name: k6-uid2-load-test
 spec:
   parallelism: 3
-  arguments: --out experimental-prometheus-rw --tag "replacecomment"
+  arguments: --out experimental-prometheus-rw --tag "testId=replacecomment"
   script:
     configMap:
       name: operator-stress-test
