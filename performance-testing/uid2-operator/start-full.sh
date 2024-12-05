@@ -2,7 +2,7 @@
 
 COMMENT=$1
 
-if [ "$S#" -ne 1 ]; then
+if [ "$#" -ne 1 ]; then
     COMMENT=$( date '+%F_%H:%M:%S' )
 fi
 
