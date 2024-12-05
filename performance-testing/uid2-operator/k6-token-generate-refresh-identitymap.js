@@ -5,15 +5,14 @@ import { check } from 'k6';
 import http from 'k6/http';
 
 const vus = 500;
-const baseUrl = "http://uid2-integ-opr-use2-alb-1278341514.us-east-2.elb.amazonaws.com";
+const baseUrl = "http://uid2-prod-opr-use2-alb-698161474.us-east-2.elb.amazonaws.com";
+const clientSecret = "";
+const clientKey = "";
 
 const generateVUs = vus;
 const refreshVUs = vus;
 const identityMapVUs = vus;
-const testDuration = '20m'
-
-const clientSecret = "";
-const clientKey = "";
+const testDuration = '5m'
 
 //30 warm up on each
 // 5 min each
