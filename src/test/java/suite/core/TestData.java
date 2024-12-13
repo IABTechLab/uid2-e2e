@@ -27,7 +27,6 @@ public final class TestData {
         for (Core core : cores) {
             args.add(Arguments.of(core, "/key/acl/refresh", "keys_acl"));
             args.add(Arguments.of(core, "/key/refresh", "keys"));
-            args.add(Arguments.of(core, "/client_side_keypairs/refresh", "client_side_keypairs"));
         }
 
         return args;
@@ -41,6 +40,7 @@ public final class TestData {
             args.add(Arguments.of(core, "/key/keyset-keys/refresh", "keyset_keys"));
             args.add(Arguments.of(core, "/clients/refresh", "client_keys"));
             args.add(Arguments.of(core, "/sites/refresh", "sites"));
+            args.add(Arguments.of(core, "/client_side_keypairs/refresh", "client_side_keypairs"));
         }
 
         return args;
