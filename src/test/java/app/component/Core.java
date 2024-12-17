@@ -5,6 +5,9 @@ import app.common.HttpClient;
 import app.common.Mapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Core extends App {
     private static final String CORE_API_TOKEN = EnvUtil.getEnv("UID2_E2E_CORE_API_TOKEN");
     private static final String OPTOUT_TO_CALL_CORE_API_TOKEN = EnvUtil.getEnv("UID2_E2E_OPTOUT_TO_CALL_CORE_API_TOKEN");
@@ -25,7 +28,13 @@ public class Core extends App {
     }
 
     public JsonNode getWithCoreApiToken(String path) throws Exception {
-        String response = HttpClient.get(getBaseUrl() + path, CORE_API_TOKEN);
+        return getWithCoreApiToken(path, "0.0.0");
+    }
+
+    public JsonNode getWithCoreApiToken(String path, String operatorVersion) throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("X-UID2-AppVersion", "uid2-operator=" + operatorVersion);
+        String response = HttpClient.get(getBaseUrl() + path, CORE_API_TOKEN, headers);
         return Mapper.OBJECT_MAPPER.readTree(response);
     }
 
