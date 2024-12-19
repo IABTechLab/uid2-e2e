@@ -3,9 +3,15 @@ kind: K6
 metadata:
   name: k6-uid2-load-test
 spec:
-  parallelism: 4
-  arguments: --out cloud  
+  parallelism: 3
+  arguments: --out experimental-prometheus-rw --tag "testid=replacecomment"
   script:
     configMap:
       name: operator-stress-test
-      file: k6-uid2-operator-encrypt-inline.js
+      file: replaced
+  runner:
+    env:
+      - name: K6_PROMETHEUS_RW_SERVER_URL
+        value: "http://prometheus-server.prometheus/api/v1/write"
+      - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+        value: "true"
