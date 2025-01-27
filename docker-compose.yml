@@ -57,7 +57,7 @@ services:
       core:
         condition: service_healthy
     healthcheck:
-      test: wget --tries=1 --spider http://localhost:8081/ops/healthcheck || exit 1
+      test: wget --spider http://localhost:8081/ops/healthcheck
       interval: 5s
     networks:
       - e2e_default
