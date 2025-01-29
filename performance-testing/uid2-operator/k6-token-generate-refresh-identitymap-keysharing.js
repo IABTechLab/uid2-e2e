@@ -235,7 +235,7 @@ export async function keySharing(data) {
   if (data.keySharing == null) {
     var newData = await generateKeySharingRequestWithTime();
     data.keySharing = newData;
-  } else if (data.tokenGenerate.time < (Date.now() - 45000)) {
+  } else if (data.keySharing.time < (Date.now() - 45000)) {
     data.keySharing = await generateKeySharingRequestWithTime();
   }
 
