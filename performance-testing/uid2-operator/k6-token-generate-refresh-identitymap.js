@@ -12,6 +12,7 @@ const clientKey = "";
 const generateVUs = vus;
 const refreshVUs = vus;
 const identityMapVUs = vus;
+const keySharingVUs = vus;
 const testDuration = '10m'
 
 //30 warm up on each

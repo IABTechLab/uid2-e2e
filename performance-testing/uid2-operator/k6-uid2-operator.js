@@ -8,6 +8,7 @@ const tokenGenerateTests = true;
 const tokenRefreshTests = true;
 const identityMapTests = true;
 const identityBucketTests = true;
+const keySharingTests = true;
 
 
 //30 warm up on each
@@ -84,8 +85,8 @@ export const options = {
     keySharing:{
       executor: 'constant-vus',
       exec: 'keySharing',
-      vus: keySharingVUs,
-      duration: testDuration,
+      vus: 300,
+      duration: '300s',
       gracefulStop: '0s',
       startTime: '30s',
     },
@@ -194,12 +195,21 @@ export async function setup() {
     };
   }
 
+  let keySharingData = {};
+  if(keySharingTests) {
+    keySharingData = {
+      endpoint: '/v2/key/sharing',
+      requestData: await generateFutureKeySharingRequests(numberOfRequestsToGenerate)
+    };
+  }
+
   return {
     tokenGenerate: tokenGenerateData,
     tokenRefresh: tokenRefreshData,
     identityMap: identityMapData,
     identityMapLargeBatch: identityMapLargeBatchData,
-    identityBuckets: identityBucketData
+    identityBuckets: identityBucketData,
+    keySharing: keySharingData
   };
 }
 
@@ -474,9 +484,9 @@ async function generateFutureGenerateRequests(count) {
   return await generateFutureRequests(count, obj)
 }
 
-async function generateKeySharingRequestWithTime() {
-  let requestData = { };
-  return await generateRequestWithTime(requestData);
+async function generateFutureKeySharingRequests(count) {
+  let obj = { };
+  return await generateFutureRequests(count, obj);
 }
 
 const generateSinceTimestampStr = () => {
