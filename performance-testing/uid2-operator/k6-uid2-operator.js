@@ -264,20 +264,13 @@ export function identityBuckets(data) {
 }
 
 export async function keySharing(data) {
-  const endpoint = '/v2/key/sharing';
-  if (data.keySharing == null) {
-    var newData = await generateKeySharingRequestWithTime();
-    data.keySharing = newData;
-  } else if (data.keySharing.time < (Date.now() - 45000)) {
-    data.keySharing = await generateKeySharingRequestWithTime();
-  }
+  var requestData = data.keySharing.requestData;
+  var elementToUse = selectRequestData(requestData);
 
-  var requestBody = data.keySharing.requestBody;
   var keySharingData = {
-    endpoint: endpoint,
-    requestBody: requestBody,
+    endpoint: data.keySharing.endpoint,
+    requestBody: elementToUse.requestBody,
   }
-
   execute(keySharingData, true);
 }
 
