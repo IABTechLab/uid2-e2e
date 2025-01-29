@@ -12,6 +12,7 @@ const clientKey = "";
 const generateVUs = vus;
 const refreshVUs = vus;
 const identityMapVUs = vus;
+const keySharingVUs = vus;
 const testDuration = '10m'
 
 //30 warm up on each
@@ -47,6 +48,14 @@ export const options = {
         { duration: '30s', target: identityMapVUs}
       ],
       gracefulRampDown: '0s',
+    },
+    keySharingWarmup: {
+      executor: 'ramping-vus',
+      exec: 'keySharing',
+      stages: [
+        { duration: '30s', target: keySharingVUs}
+      ],
+      gracefulRampDown: '0s',
     },*/
     // Actual testing scenarios
     tokenGenerate: {
@@ -73,6 +82,14 @@ export const options = {
       gracefulStop: '0s',
       startTime: '30s',
     },
+    keySharing:{
+      executor: 'constant-vus',
+      exec: 'keySharing',
+      vus: keySharingVUs,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: '30s',
+    }
     identityMapLargeBatchSequential: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
@@ -211,6 +228,24 @@ export function identityBuckets(data) {
     requestBody: elementToUse.requestBody,
   }
   execute(bucketData, true);
+}
+
+export async function keySharing(data) {
+  const endpoint = '/v2/key/sharing';
+  if (data.keySharing == null) {
+    var newData = await generateKeySharingRequestWithTime();
+    data.keySharing = newData;
+  } else if (data.keySharing.time < (Date.now() - 45000)) {
+    data.keySharing = await generateKeySharingRequestWithTime();
+  }
+
+  var requestBody = data.keySharing.requestBody;
+  var keySharingData = {
+    endpoint: endpoint,
+    requestBody: requestBody,
+  }
+
+  execute(keySharingData, true);
 }
 
 // Helpers
@@ -399,6 +434,11 @@ async function generateTokenGenerateRequestWithTime() {
 async function generateIdentityMapRequestWithTime(emailCount) {
   let emails = generateIdentityMapRequest(emailCount);
   return await generateRequestWithTime(emails);
+}
+
+async function generateKeySharingRequestWithTime() {
+  let requestData = { };
+  return await generateRequestWithTime(requestData);
 }
 
 const generateSinceTimestampStr = () => {

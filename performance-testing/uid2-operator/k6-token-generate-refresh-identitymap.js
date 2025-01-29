@@ -48,15 +48,15 @@ export const options = {
         { duration: '30s', target: identityMapVUs}
       ],
       gracefulRampDown: '0s',
-    },
-    // keySharingWarmup: {
-    //   executor: 'ramping-vus',
-    //   exec: 'keySharing',
-    //   stages: [
-    //     { duration: '30s', target: keySharingVUs}
-    //   ],
-    //   gracefulRampDown: '0s',
-    // },
+    },/*
+    keySharingWarmup: {
+      executor: 'ramping-vus',
+      exec: 'keySharing',
+      stages: [
+        { duration: '30s', target: keySharingVUs}
+      ],
+      gracefulRampDown: '0s',
+    },*/
     // Actual testing scenarios
     tokenGenerate: {
       executor: 'constant-vus',
