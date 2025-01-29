@@ -5,7 +5,7 @@ import { check } from 'k6';
 import http from 'k6/http';
 
 const vus = 500;
-const baseUrl = "http://uid2-prod-opr-use2-alb-698161474.us-east-2.elb.amazonaws.com";
+const baseUrl = "http://uid2-prod-opr-use2-alb-1657081774.us-east-2.elb.amazonaws.com";
 const clientSecret = "";
 const clientKey = "";
 

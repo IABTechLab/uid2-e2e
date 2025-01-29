@@ -48,6 +48,14 @@ export const options = {
       duration: '30s',
       gracefulStop: '0s',
     },
+    keySharingWarmup: {
+      executor: 'ramping-vus',
+      exec: 'keySharing',
+      stages: [
+        { duration: '30s', target: keySharingVUs}
+      ],
+      gracefulRampDown: '0s',
+    },
     // Actual testing scenarios
     tokenGenerate: {
       executor: 'constant-vus',
@@ -72,6 +80,14 @@ export const options = {
       duration: '300s',
       gracefulStop: '0s',
       startTime: '660s',
+    },
+    keySharing:{
+      executor: 'constant-vus',
+      exec: 'keySharing',
+      vus: keySharingVUs,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: '30s',
     },
     identityMapLargeBatchSequential: {
       executor: 'constant-vus',
@@ -235,6 +251,24 @@ export function identityBuckets(data) {
     requestBody: elementToUse.requestBody,
   }
   execute(bucketData, true);
+}
+
+export async function keySharing(data) {
+  const endpoint = '/v2/key/sharing';
+  if (data.keySharing == null) {
+    var newData = await generateKeySharingRequestWithTime();
+    data.keySharing = newData;
+  } else if (data.keySharing.time < (Date.now() - 45000)) {
+    data.keySharing = await generateKeySharingRequestWithTime();
+  }
+
+  var requestBody = data.keySharing.requestBody;
+  var keySharingData = {
+    endpoint: endpoint,
+    requestBody: requestBody,
+  }
+
+  execute(keySharingData, true);
 }
 
 // Helpers
@@ -438,6 +472,11 @@ async function generateFutureMapRequest(count, emailCount) {
 async function generateFutureGenerateRequests(count) {
   let obj = {'optout_check': 1, 'email': 'test500@example.com'};
   return await generateFutureRequests(count, obj)
+}
+
+async function generateKeySharingRequestWithTime() {
+  let requestData = { };
+  return await generateRequestWithTime(requestData);
 }
 
 const generateSinceTimestampStr = () => {
