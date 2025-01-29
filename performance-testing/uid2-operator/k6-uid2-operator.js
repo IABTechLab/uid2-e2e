@@ -50,12 +50,11 @@ export const options = {
       gracefulStop: '0s',
     },
     keySharingWarmup: {
-      executor: 'ramping-vus',
+      executor: 'constant-vus',
       exec: 'keySharing',
-      stages: [
-        { duration: '30s', target: keySharingVUs}
-      ],
-      gracefulRampDown: '0s',
+      vus: 300,
+      duration: '30s',
+      gracefulStop: '0s',
     },
     // Actual testing scenarios
     tokenGenerate: {
