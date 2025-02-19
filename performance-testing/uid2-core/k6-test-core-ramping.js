@@ -4,7 +4,7 @@ const CORE_API_TOKEN = "UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdE
 const CORE_BASE_URL = 'http://localhost:8088';
 
 const AUTH_HEADERS = { headers: { 'Authorization': `Bearer ${CORE_API_TOKEN}` }};
-const HEADERS = { headers: { ...AUTH_HEADERS.headers, 'X-UID2-AppVersion': 'uid2-operator=0.0.0' }};
+const HEADERS = { headers: { ...AUTH_HEADERS.headers, 'X-UID2-AppVersion': 'uid2-operator=0.0.0-local-load-test' }};
 
 const STAGE_DURATION = '120s';
 const STAGE_LOAD_MULTIPLIER = [
