@@ -6,121 +6,106 @@ const CORE_BASE_URL = 'http://localhost:8088';
 const AUTH_HEADERS = { headers: { 'Authorization': `Bearer ${CORE_API_TOKEN}` }};
 const HEADERS = { headers: { ...AUTH_HEADERS.headers, 'X-UID2-AppVersion': 'uid2-operator=0.0.0' }};
 
-const STAGE_DURATION = '30s';
-const STAGE_LOAD_MULTIPLIER = [
-    1,
-    2,
-    5,
-    10,
-    20,
-    50,
-    100,
-];
+const DURATION = '1m';
+const RATE_MULTIPLIER = 10;
 
 export const options = {
     scenarios: {
         ops_healthcheck: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'opsHealthcheck',
-            startRate: 4,
+            duration: DURATION,
+            rate: 4 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(4),
         },
 
         attest: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'attest',
-            startRate: 1,
+            duration: DURATION,
+            rate: 1 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(1),
         },
 
         clients_refresh: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'clientsRefresh',
-            startRate: 1,
+            duration: DURATION,
+            rate: 16 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(16),
         },
         keysets_refresh: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'keysetRefresh',
-            startRate: 1,
+            duration: DURATION,
+            rate: 16 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(16),
         },
         keyset_keys_refresh: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'keysetKeysRefresh',
-            startRate: 1,
+            duration: DURATION,
+            rate: 16 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(16),
         },
         salt_refresh: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'saltRefresh',
-            startRate: 1,
+            duration: DURATION,
+            rate: 16 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(16),
         },
 
         sites_refresh: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'sitesRefresh',
-            startRate: 1,
+            duration: DURATION,
+            rate: 9 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(9),
         },
         cstg_refresh: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'clientSideKeypairsRefresh',
-            startRate: 1,
+            duration: DURATION,
+            rate: 9 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(9),
         },
         services_refresh: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'servicesRefresh',
-            startRate: 1,
+            duration: DURATION,
+            rate: 9 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(9),
         },
         service_links_refresh: {
-            executor: 'ramping-arrival-rate',
+            executor: 'constant-arrival-rate',
             exec: 'serviceLinksRefresh',
-            startRate: 1,
+            duration: DURATION,
+            rate: 9 * RATE_MULTIPLIER,
             timeUnit: '1s',
             preAllocatedVUs: 1000,
             maxVUs: 1000,
-            stages: getStages(9),
         },
     },
 };
-
-function getStages(qps) {
-    return STAGE_LOAD_MULTIPLIER.map(loadMultiplier => ({
-        duration: STAGE_DURATION,
-        target: qps * loadMultiplier
-    }));
-}
 
 // Scenarios
 export async function opsHealthcheck(data) {
