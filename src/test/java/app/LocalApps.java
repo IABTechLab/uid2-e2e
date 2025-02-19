@@ -13,7 +13,6 @@ public final class LocalApps extends Apps {
                 new Core("http://localhost", 8088, "Local - Core"),
                 new Operator("http://localhost", 8888, "Local - Public Operator", Operator.Type.PUBLIC),
                 new Operator("http://localhost", 8180, "Local - Private Operator", Operator.Type.PRIVATE),
-                new Loki("http://localhost", 3100, "Local - Loki"),
                 new Prometheus("http://localhost", 9085, "Local - Validator Prometheus")
         ));
     }
