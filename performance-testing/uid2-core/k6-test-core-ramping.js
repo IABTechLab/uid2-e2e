@@ -1,6 +1,6 @@
 import http from 'k6/http';
 
-const CORE_API_TOKEN = "UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdEE=";
+const CORE_API_TOKEN = "UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdEE="; // Mock token for E2E tests
 const CORE_BASE_URL = 'http://localhost:8088';
 
 const AUTH_HEADERS = { headers: { 'Authorization': `Bearer ${CORE_API_TOKEN}` }};
