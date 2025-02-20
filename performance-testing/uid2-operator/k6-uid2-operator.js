@@ -8,6 +8,7 @@ const tokenGenerateTests = true;
 const tokenRefreshTests = true;
 const identityMapTests = true;
 const identityBucketTests = true;
+const keySharingTests = true;
 
 
 //30 warm up on each
@@ -48,6 +49,13 @@ export const options = {
       duration: '30s',
       gracefulStop: '0s',
     },
+    keySharingWarmup: {
+      executor: 'constant-vus',
+      exec: 'keySharing',
+      vus: 300,
+      duration: '30s',
+      gracefulStop: '0s',
+    },
     // Actual testing scenarios
     tokenGenerate: {
       executor: 'constant-vus',
@@ -72,6 +80,14 @@ export const options = {
       duration: '300s',
       gracefulStop: '0s',
       startTime: '660s',
+    },
+    keySharing:{
+      executor: 'constant-vus',
+      exec: 'keySharing',
+      vus: 300,
+      duration: '300s',
+      gracefulStop: '0s',
+      startTime: '30s',
     },
     identityMapLargeBatchSequential: {
       executor: 'constant-vus',
@@ -178,12 +194,21 @@ export async function setup() {
     };
   }
 
+  let keySharingData = {};
+  if(keySharingTests) {
+    keySharingData = {
+      endpoint: '/v2/key/sharing',
+      requestData: await generateFutureKeySharingRequests(numberOfRequestsToGenerate)
+    };
+  }
+
   return {
     tokenGenerate: tokenGenerateData,
     tokenRefresh: tokenRefreshData,
     identityMap: identityMapData,
     identityMapLargeBatch: identityMapLargeBatchData,
-    identityBuckets: identityBucketData
+    identityBuckets: identityBucketData,
+    keySharing: keySharingData
   };
 }
 
@@ -235,6 +260,17 @@ export function identityBuckets(data) {
     requestBody: elementToUse.requestBody,
   }
   execute(bucketData, true);
+}
+
+export async function keySharing(data) {
+  var requestData = data.keySharing.requestData;
+  var elementToUse = selectRequestData(requestData);
+
+  var keySharingData = {
+    endpoint: data.keySharing.endpoint,
+    requestBody: elementToUse.requestBody,
+  }
+  execute(keySharingData, true);
 }
 
 // Helpers
@@ -438,6 +474,11 @@ async function generateFutureMapRequest(count, emailCount) {
 async function generateFutureGenerateRequests(count) {
   let obj = {'optout_check': 1, 'email': 'test500@example.com'};
   return await generateFutureRequests(count, obj)
+}
+
+async function generateFutureKeySharingRequests(count) {
+  let obj = { };
+  return await generateFutureRequests(count, obj);
 }
 
 const generateSinceTimestampStr = () => {

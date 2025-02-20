@@ -32,7 +32,7 @@ export const options = {
         { duration: '30s', target: generateVUs}
       ],
       gracefulRampDown: '0s',
-    },/*
+    },
     tokenRefreshWarmup: {
       executor: 'ramping-vus',
       exec: 'tokenRefresh',
@@ -56,7 +56,7 @@ export const options = {
         { duration: '30s', target: keySharingVUs}
       ],
       gracefulRampDown: '0s',
-    },*/
+    },
     // Actual testing scenarios
     tokenGenerate: {
       executor: 'constant-vus',
@@ -65,7 +65,7 @@ export const options = {
       duration: testDuration,
       gracefulStop: '0s',
       startTime: '30s',
-    }/*,
+    },
     tokenRefresh: {
       executor: 'constant-vus',
       exec: 'tokenRefresh',
@@ -89,7 +89,7 @@ export const options = {
       duration: testDuration,
       gracefulStop: '0s',
       startTime: '30s',
-    }
+    }/*,
     identityMapLargeBatchSequential: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
