@@ -3,11 +3,13 @@ import encoding from 'k6/encoding';
 import {check} from 'k6';
 import http from 'k6/http';
 
-const testDurationInSeconds = 2500;
-const tokenGenerateTests = true;
-const tokenRefreshTests = true;
+const testDurationInSeconds = 5000;
+const tokenGenerateTests = false;
+const tokenRefreshTests = false;
 const identityMapTests = true;
-const identityBucketTests = true;
+const identityBucketTests = false;
+const identityMapVus = 10;
+const identityMapDuration = '30s';
 
 
 //30 warm up on each
@@ -20,20 +22,20 @@ export const options = {
   noConnectionReuse: true,
   scenarios: {
     // Warmup scenarios
-    tokenGenerateWarmup: {
-      executor: 'constant-vus',
-      exec: 'tokenGenerate',
-      vus: 300,
-      duration: '30s',
-      gracefulStop: '0s',
-    },
-    tokenRefreshWarmup: {
-      executor: 'constant-vus',
-      exec: 'tokenRefresh',
-      vus: 300,
-      duration: '30s',
-      gracefulStop: '0s',
-    },
+    // tokenGenerateWarmup: {
+    //   executor: 'constant-vus',
+    //   exec: 'tokenGenerate',
+    //   vus: 300,
+    //   duration: '30s',
+    //   gracefulStop: '0s',
+    // },
+    // tokenRefreshWarmup: {
+    //   executor: 'constant-vus',
+    //   exec: 'tokenRefresh',
+    //   vus: 300,
+    //   duration: '30s',
+    //   gracefulStop: '0s',
+    // },
     identityMapWarmup: {
       executor: 'constant-vus',
       exec: 'identityMap',
@@ -41,62 +43,62 @@ export const options = {
       duration: '30s',
       gracefulStop: '0s',
     },
-    identityBucketsWarmup: {
-      executor: 'constant-vus',
-      exec: 'identityBuckets',
-      vus: 2,
-      duration: '30s',
-      gracefulStop: '0s',
-    },
+    // identityBucketsWarmup: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityBuckets',
+    //   vus: 2,
+    //   duration: '30s',
+    //   gracefulStop: '0s',
+    // },
     // Actual testing scenarios
-    tokenGenerate: {
-      executor: 'constant-vus',
-      exec: 'tokenGenerate',
-      vus: 300,
-      duration: '300s',
-      gracefulStop: '0s',
-      startTime: '40s',
-    },
-    tokenRefresh: {
-      executor: 'constant-vus',
-      exec: 'tokenRefresh',
-      vus: 300,
-      duration: '300s',
-      gracefulStop: '0s',
-      startTime: '350s',
-    },
-    identityMap: {
-      executor: 'constant-vus',
-      exec: 'identityMap',
-      vus: 300,
-      duration: '300s',
-      gracefulStop: '0s',
-      startTime: '660s',
-    },
-    identityMapLargeBatchSequential: {
-      executor: 'constant-vus',
-      exec: 'identityMapLargeBatch',
-      vus: 1,
-      duration: '300s',
-      gracefulStop: '0s',
-      startTime: '970s',
-    },
+    // tokenGenerate: {
+    //   executor: 'constant-vus',
+    //   exec: 'tokenGenerate',
+    //   vus: 300,
+    //   duration: '300s',
+    //   gracefulStop: '0s',
+    //   startTime: '40s',
+    // },
+    // tokenRefresh: {
+    //   executor: 'constant-vus',
+    //   exec: 'tokenRefresh',
+    //   vus: 300,
+    //   duration: '300s',
+    //   gracefulStop: '0s',
+    //   startTime: '350s',
+    // },
+    // identityMap: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityMap',
+    //   vus: 300,
+    //   duration: '300s',
+    //   gracefulStop: '0s',
+    //   startTime: '660s',
+    // },
+    // identityMapLargeBatchSequential: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityMapLargeBatch',
+    //   vus: 1,
+    //   duration: '300s',
+    //   gracefulStop: '0s',
+    //   startTime: '970s',
+    // },
     identityMapLargeBatch: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
-      vus: 16,
-      duration: '300s',
+      vus: identityMapVus,
+      duration: identityMapDuration,
       gracefulStop: '0s',
-      startTime: '1280s',
+      startTime: '40s',
     },
-    identityBuckets: {
-      executor: 'constant-vus',
-      exec: 'identityBuckets',
-      vus: 2,
-      duration: '300s',
-      gracefulStop: '0s',
-      startTime: '1590s',
-    },
+    // identityBuckets: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityBuckets',
+    //   vus: 2,
+    //   duration: '300s',
+    //   gracefulStop: '0s',
+    //   startTime: '1590s',
+    // },
   },
   // So we get count in the summary, to demonstrate different metrics are different
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)', 'count'],
@@ -120,9 +122,13 @@ for (let key in options.scenarios) {
 }
 
 // Configs
-const clientSecret = __ENV.CLIENT_SECRET;
-const clientKey = __ENV.CLIENT_KEY;
-const baseUrl = __ENV.BASE_URL;
+// const clientSecret = __ENV.CLIENT_SECRET;
+// const clientKey = __ENV.CLIENT_KEY;
+// const baseUrl = __ENV.BASE_URL;
+
+const baseUrl = "http://74.179.232.150";
+const clientSecret = "s4BIdGNBAV/0FwhmErysepqsdmdQw1NH4g1XoX06uzM=";
+const clientKey = "UID2-C-I-32-N8gkyF.wWk2Ju78z+fLmC9mZ0xvgSrXjQkGHHgFgkUvk=";
 
 export async function setup() {
   // pregenerate the envelopes so they don't expire, but can be reused. Means the load test is not constrained by the client
