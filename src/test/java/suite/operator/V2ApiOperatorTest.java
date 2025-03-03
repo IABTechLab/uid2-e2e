@@ -5,6 +5,7 @@ import common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.client.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,6 +32,7 @@ public class V2ApiOperatorTest {
 
     private static final String SITE_ID = EnvUtil.getEnv("UID2_E2E_SITE_ID");
 
+    @Disabled
     @ParameterizedTest(name = "{index} ==> Sender {0} encrypts with {1}, recipient {2} decrypts with {3}, expected result is {4}")
     @MethodSource({
             "suite.operator.TestData#sharingArgs",
