@@ -28,12 +28,13 @@ public class Core extends App {
     }
 
     public JsonNode getWithCoreApiToken(String path) throws Exception {
-        return getWithCoreApiToken(path, "0.0.0");
+        return getWithCoreApiToken(path, false);
     }
 
-    public JsonNode getWithCoreApiToken(String path, String operatorVersion) throws Exception {
+    public JsonNode getWithCoreApiToken(String path, boolean encrypted) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("X-UID2-AppVersion", "uid2-operator=" + operatorVersion);
+        if (encrypted)
+            headers.put("Encrypted", "true");
         String response = HttpClient.get(getBaseUrl() + path, CORE_API_TOKEN, headers);
         return Mapper.OBJECT_MAPPER.readTree(response);
     }

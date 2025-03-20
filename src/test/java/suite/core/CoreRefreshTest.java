@@ -15,7 +15,7 @@ public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
     @MethodSource({"suite.core.TestData#refreshArgs", "suite.core.TestData#refreshArgsEncrypted"})
     public void testLocationRefresh_Public_Success(Core core, String urlPath, String jsonPath) throws Exception {
-        JsonNode response = core.getWithCoreApiToken(urlPath, "5.0.1");
+        JsonNode response = core.getWithCoreApiToken(urlPath);
 
         assertAll("testLocationRefresh_Public_Success has version and location",
                 () -> assertNotNull(response),
@@ -27,7 +27,7 @@ public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
     @MethodSource({"suite.core.TestData#refreshArgsEncrypted"})
     public void testLocationRefreshCloudEncryption_Public_Success(Core core, String urlPath, String jsonPath) throws Exception {
-        JsonNode response = core.getWithCoreApiToken(urlPath, "10000.0.1");
+        JsonNode response = core.getWithCoreApiToken(urlPath, true);
 
         assertAll("testLocationRefresh_Public_Success has version and location",
                 () -> assertNotNull(response),
@@ -58,7 +58,7 @@ public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - CollectionName: {2}")
     @MethodSource({"suite.core.TestData#collectionEndpointArgs"})
     public void testCollectionRefreshCloud_Encryption_Public_Success(Core core, String urlPath, String collectionName) throws Exception {
-        JsonNode response = core.getWithCoreApiToken(urlPath, "10000.0.1");
+        JsonNode response = core.getWithCoreApiToken(urlPath, true);
 
         assertAll("testCollectionRefresh_Public_Success has version and collection",
                 () -> assertNotNull(response, "Response should not be null"),
