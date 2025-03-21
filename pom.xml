@@ -47,6 +47,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.uid2</groupId>
+            <artifactId>uid2-shared</artifactId>
+            <version>${uid2-shared.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <version>${vertx.version}</version>
@@ -75,11 +80,6 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-templ-pebble</artifactId>
             <version>${vertx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.uid2</groupId>
-            <artifactId>uid2-shared</artifactId>
-            <version>${uid2-shared.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
