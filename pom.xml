@@ -2,41 +2,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.uid2</groupId>
     <artifactId>uid2-e2e</artifactId>
     <version>3.2.0</version>
+
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <vertx.version>4.5.13</vertx.version>
         <uid2-shared.version>8.1.25</uid2-shared.version>
     </properties>
-    <packaging>jar</packaging>
-
-    <licenses>
-        <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <name>UID2 team</name>
-            <email>unifiedid-admin@thetradedesk.com</email>
-            <organization>UID</organization>
-            <organizationUrl>https://github.com/IABTechLab</organizationUrl>
-        </developer>
-    </developers>
 
     <repositories>
         <repository>
             <id>snapshots-repo</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-            <releases><enabled>false</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>maven_central</id>
@@ -44,15 +32,9 @@
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
     </repositories>
+
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-stack-depchain</artifactId>
-                <version>${vertx.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
@@ -64,11 +46,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>com.uid2</groupId>
-            <artifactId>uid2-shared</artifactId>
-            <version>${uid2-shared.version}</version>
-        </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
@@ -98,6 +75,11 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-templ-pebble</artifactId>
             <version>${vertx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.uid2</groupId>
+            <artifactId>uid2-shared</artifactId>
+            <version>${uid2-shared.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
