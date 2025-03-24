@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 public final class AppsMap {
     private static final Map<String, String> APP_MAP;
-
     private static final Apps APPS;
 
     static {
@@ -22,6 +21,7 @@ public final class AppsMap {
                     "uid2-prod", "app.Uid2ProdApps",
                     "euid-integ", "app.EuidIntegApps",
                     "euid-prod", "app.EuidProdApps",
+                    "github-test-pipeline-local", "app.GitHubTestPipelineApps",
                     "github-test-pipeline", "app.GitHubTestPipelineApps"
             );
 
