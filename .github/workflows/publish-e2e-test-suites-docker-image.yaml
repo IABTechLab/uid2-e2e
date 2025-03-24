@@ -1,28 +1,30 @@
-name: Publish E2E Test Suites
-run-name: ${{ format('Publish E2E Test Suites{0} {1} Release', ':', inputs.release_type) }}
+name: Release UID2 E2E Image
+run-name: ${{ inputs.release_type == 'Snapshot' && 'Publish Pre-release' || format('Release {0}', inputs.release_type)}} Docker Image by @${{ github.actor }}
 on:
   workflow_dispatch:
     inputs:
       release_type:
         type: choice
-        description: 'The type of release'
+        description: The type of release
         options:
-          - Major
-          - Minor
-          - Patch
           - Snapshot
-      version_number_input:
-        description: If set, the version number will not be incremented and the given number will be used.
-        type: string
-        default: ''
+          - Patch
+          - Minor
+          - Major
+      vulnerability_severity:
+        description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised.
+        type: choice
+        options:
+          - CRITICAL,HIGH
+          - CRITICAL,HIGH,MEDIUM
+          - CRITICAL (DO NOT use if JIRA ticket not raised)
 
 jobs:
   Image:
-    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-publish-docker-versioned.yaml@v2.8
+    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-publish-java-to-docker-versioned.yaml@v3
     with:
       release_type: ${{ inputs.release_type }}
-      version_number_input: ${{ inputs.version_number_input }}
-      java_version: '21'
-      force_release: 'yes'
+      vulnerability_severity: ${{ inputs.vulnerability_severity }}
+      java_version: 21
       skip_tests: true
     secrets: inherit
