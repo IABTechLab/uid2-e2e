@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@EnabledIf("helper.EnabledCondition#isLocal")
+@EnabledIf("common.EnabledCondition#isLocal")
 public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
     @MethodSource({"suite.core.TestData#refreshArgs", "suite.core.TestData#refreshArgsEncrypted"})

@@ -50,7 +50,7 @@ There are different test suites that can be run depending on the environment and
 | `UID2_OPERATOR_E2E_CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF`  | **Optout cutoff tests** - The API secret before the optout policy cutoff for a client to communicate with Operator |
 | `UID2_OPERATOR_E2E_CLIENT_API_KEY_SHARING_RECIPIENT`        | **Sharing tests** - The API key with SHARER role for a client to communicate with Operator                         |
 | `UID2_OPERATOR_E2E_CLIENT_API_SECRET_SHARING_RECIPIENT`     | **Sharing tests** - The API with SHARER role secret for a client to communicate with Operator                      |
-| `UID2_OPERATOR_E2E_CLIENT_API_KEY_SHARING_NON_RECIPIENT`    | **Sharing tests** - The API key without SHARER role for a client to communicate with Operator                      |
+| `UID2_OPERATOR_E2E_CLIENT_API_KEY_NON_SHARING_RECIPIENT`    | **Sharing tests** - The API key without SHARER role for a client to communicate with Operator                      |
 | `UID2_OPERATOR_E2E_CLIENT_API_SECRET_NON_SHARING_RECIPIENT` | **Sharing tests** - The API without SHARER role secret for a client to communicate with Operator                   |
 | `UID2_OPERATOR_E2E_CSTG_SUBSCRIPTION_ID`                    | **CSTG tests** - The subscription ID                                                                               |
 | `UID2_OPERATOR_E2E_CSTG_SERVER_PUBLIC_KEY`                  | **CSTG tests** - The server public key                                                                             |

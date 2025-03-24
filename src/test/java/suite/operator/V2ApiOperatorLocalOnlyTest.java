@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@EnabledIf("helper.EnabledCondition#isLocal")
+@EnabledIf("common.EnabledCondition#isLocal")
 public class V2ApiOperatorLocalOnlyTest {
     @ParameterizedTest(name = "{index} ==> Sender {0} encrypts with {1}, recipient {2} decrypts with {3}, expected result is {4}")
     @MethodSource({
