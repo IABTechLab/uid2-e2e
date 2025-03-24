@@ -1,4 +1,4 @@
-package app.common;
+package common;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.platform.commons.logging.Logger;

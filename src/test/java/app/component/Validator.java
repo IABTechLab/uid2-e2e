@@ -1,6 +1,6 @@
 package app.component;
 
-import app.common.HttpClient;
+import common.HttpClient;
 import com.uid2.client.*;
 import okhttp3.*;
 

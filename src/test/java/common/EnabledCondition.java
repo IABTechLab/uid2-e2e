@@ -1,6 +1,4 @@
-package helper;
-
-import app.common.EnvUtil;
+package common;
 
 public final class EnabledCondition {
     private static final String ENV = EnvUtil.getEnv("UID2_E2E_ENV");

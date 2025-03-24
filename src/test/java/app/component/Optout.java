@@ -1,9 +1,9 @@
 package app.component;
 
 
-import app.common.EnvUtil;
-import app.common.HttpClient;
-import app.common.Mapper;
+import common.EnvUtil;
+import common.HttpClient;
+import common.Mapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class Optout extends App {

@@ -1,6 +1,6 @@
 package app.component;
 
-import app.common.HttpClient;
+import common.HttpClient;
 
 public class Localstack extends App {
     public Localstack(String host, Integer port, String name) {

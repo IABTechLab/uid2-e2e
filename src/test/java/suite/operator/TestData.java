@@ -1,7 +1,7 @@
 package suite.operator;
 
 import app.AppsMap;
-import app.common.EnvUtil;
+import common.EnvUtil;
 import app.component.Operator;
 import com.uid2.client.DecryptionStatus;
 import org.junit.jupiter.params.provider.Arguments;

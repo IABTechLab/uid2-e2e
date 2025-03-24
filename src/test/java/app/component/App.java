@@ -1,6 +1,6 @@
 package app.component;
 
-import app.common.HttpClient;
+import common.HttpClient;
 
 public abstract class App {
     private final String host;

@@ -1,7 +1,7 @@
 package suite.operator;
 
-import app.common.HttpClient;
-import app.common.Mapper;
+import common.HttpClient;
+import common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.params.ParameterizedTest;

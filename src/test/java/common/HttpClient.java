@@ -1,4 +1,4 @@
-package app.common;
+package common;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import okhttp3.*;

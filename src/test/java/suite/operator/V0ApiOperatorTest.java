@@ -1,11 +1,11 @@
 package suite.operator;
 
-import app.common.HttpClient;
-import app.common.Mapper;
+import common.HttpClient;
+import common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import helper.JsonAssert;
+import common.JsonAssert;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
