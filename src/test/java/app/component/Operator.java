@@ -45,7 +45,7 @@ public class Operator extends App {
 
     public enum CloudProvider {
         PUBLIC(""),
-        AWS("AWS"),
+        AWS("AWS-NITRO"),
         GCP("GCP-OIDC"),
         AZURE("Azure-CC");
 
