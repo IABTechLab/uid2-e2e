@@ -11,15 +11,20 @@ import java.util.Map;
 
 public final class EnvUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvUtil.class);
-    private static final Map<String, String> ARGS;
+    private static final Map<String, String> ARGS = new HashMap<>();
 
     static {
         try {
             String args = getEnv(Const.Config.ARGS_JSON);
-            TypeReference<HashMap<String,String>> typeRef = new TypeReference<>() {};
-            ARGS = Mapper.OBJECT_MAPPER.readValue(args, typeRef);
+
+            if (StringUtils.isNotBlank(args)) {
+                TypeReference<HashMap<String, String>> typeRef = new TypeReference<>() {
+                };
+                ARGS.putAll(Mapper.OBJECT_MAPPER.readValue(args, typeRef));
+            }
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(e::getMessage);
+            System.exit(1);
         }
     }
 
