@@ -22,7 +22,6 @@ public final class AppsMap {
                     "uid2-prod", "app.Uid2ProdApps",
                     "euid-integ", "app.EuidIntegApps",
                     "euid-prod", "app.EuidProdApps",
-                    "private", "app.PrivateApps",
                     "github-test-pipeline", "app.GitHubTestPipelineApps"
             );
 
