@@ -15,7 +15,7 @@ public final class EnvUtil {
 
     static {
         try {
-            String args = getEnv(Args.ARGS_JSON);
+            String args = getEnv(Const.Config.ARGS_JSON);
             TypeReference<HashMap<String,String>> typeRef = new TypeReference<>() {};
             ARGS = Mapper.OBJECT_MAPPER.readValue(args, typeRef);
         } catch (JsonProcessingException e) {
