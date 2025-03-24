@@ -39,5 +39,14 @@ public final class Const {
             public static final String CORE_URL = "UID2_CORE_E2E_CORE_URL";
             public static final String OPTOUT_URL = "UID2_CORE_E2E_OPTOUT_URL";
         }
+
+        // Args used for pipeline setup
+        public static final class Pipeline {
+            public static final String CORE_URL = "UID2_PIPELINE_E2E_CORE_URL";
+
+            public static final String OPERATOR_URL = "UID2_PIPELINE_E2E_OPERATOR_URL";
+            public static final String OPERATOR_TYPE = "UID2_PIPELINE_E2E_OPERATOR_TYPE";
+            public static final String OPERATOR_CLOUD_PROVIDER = "UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER";
+        }
     }
 }

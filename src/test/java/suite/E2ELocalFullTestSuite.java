@@ -11,6 +11,7 @@ import suite.operator.V2ApiOperatorPublicOnlyTest;
 import suite.operator.V2ApiOperatorTest;
 import suite.optout.OptoutTest;
 import suite.validator.V0ApiValidatorTest;
+import suite.validator.V1ApiValidatorTest;
 import suite.validator.V2ApiValidatorTest;
 
 @Suite
@@ -24,7 +25,7 @@ import suite.validator.V2ApiValidatorTest;
         V2ApiOperatorPublicOnlyTest.class,
         OptoutTest.class,
         V0ApiValidatorTest.class,
-        V1ApiOperatorTest.class,
+        V1ApiValidatorTest.class,
         V2ApiValidatorTest.class
 })
 public class E2ELocalFullTestSuite {
