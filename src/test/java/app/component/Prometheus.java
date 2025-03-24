@@ -1,6 +1,6 @@
 package app.component;
 
-import app.common.HttpClient;
+import common.HttpClient;
 
 public class Prometheus extends App {
     public Prometheus(String host, Integer port, String name) {

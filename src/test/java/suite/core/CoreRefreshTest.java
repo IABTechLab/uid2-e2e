@@ -3,7 +3,7 @@ package suite.core;
 import app.component.Core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import helper.JsonAssert;
+import common.JsonAssert;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 

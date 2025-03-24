@@ -1,6 +1,6 @@
 package app;
 
-import app.common.EnvUtil;
+import common.EnvUtil;
 import app.component.App;
 
 import java.lang.reflect.InvocationTargetException;

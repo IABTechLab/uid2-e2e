@@ -1,6 +1,6 @@
 package suite.validator;
 
-import app.common.HttpClient;
+import common.HttpClient;
 import app.component.Operator;
 import app.component.Prometheus;
 import com.uid2.client.IdentityTokens;

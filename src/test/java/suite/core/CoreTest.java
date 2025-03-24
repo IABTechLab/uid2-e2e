@@ -1,6 +1,6 @@
 package suite.core;
 
-import app.common.HttpClient;
+import common.HttpClient;
 import app.component.Core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.shared.attest.JwtService;

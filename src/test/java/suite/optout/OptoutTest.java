@@ -1,6 +1,6 @@
 package suite.optout;
 
-import app.common.Mapper;
+import common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.client.IdentityTokens;
