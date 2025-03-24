@@ -1,6 +1,7 @@
 package common;
 
 public final class Args {
+    public static final String ARGS_JSON = "E2E_ARGS_JSON";
     public static final String ENV = "E2E_ENV";
     public static final String IDENTITY_SCOPE = "E2E_IDENTITY_SCOPE";
     public static final String PHONE_SUPPORT = "E2E_PHONE_SUPPORT";
