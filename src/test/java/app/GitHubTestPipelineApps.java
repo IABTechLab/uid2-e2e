@@ -1,6 +1,5 @@
 package app;
 
-import app.component.App;
 import common.Const;
 import common.EnabledCondition;
 import common.EnvUtil;
@@ -10,7 +9,7 @@ import app.component.Operator;
 import java.util.Set;
 
 public class GitHubTestPipelineApps extends Apps {
-    private static final String CORE_URL = EnvUtil.getEnv(Const.Config.Pipeline.CORE_URL);
+    private static final String CORE_URL = EnvUtil.getEnv(Const.Config.Pipeline.CORE_URL, EnabledCondition.isLocal());
 
     private static final String OPERATOR_URL = EnvUtil.getEnv(Const.Config.Pipeline.OPERATOR_URL);
     private static final Operator.Type OPERATOR_TYPE = Operator.Type.valueOf(EnvUtil.getEnv(Const.Config.Pipeline.OPERATOR_TYPE));
@@ -20,9 +19,10 @@ public class GitHubTestPipelineApps extends Apps {
             : "GitHub Test Pipeline - Private %s Operator".formatted(OPERATOR_CLOUD_PROVIDER.toString());
 
     public GitHubTestPipelineApps() {
-        super(Set.of(
-                new Operator(OPERATOR_URL, OPERATOR_NAME, OPERATOR_TYPE),
-                new Core(CORE_URL, "GitHub Test Pipeline - Core")
-        ));
+        super(EnabledCondition.isLocal() ?
+                Set.of(
+                        new Operator(OPERATOR_URL, OPERATOR_NAME, OPERATOR_TYPE),
+                        new Core(CORE_URL, "GitHub Test Pipeline - Core")) :
+                Set.of(new Operator(OPERATOR_URL, OPERATOR_NAME, OPERATOR_TYPE)));
     }
 }

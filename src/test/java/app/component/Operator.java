@@ -5,10 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.uid2.client.IdentityScope;
 import com.uid2.client.*;
-import common.Const;
-import common.EnvUtil;
-import common.HttpClient;
-import common.Mapper;
+import common.*;
 import lombok.Getter;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -85,16 +82,16 @@ public class Operator extends App {
     public static final String CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF);
 
     // Local only - Sharing
-    public static final String CLIENT_API_KEY_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_SHARING_RECIPIENT);
-    public static final String CLIENT_API_SECRET_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_SHARING_RECIPIENT);
-    public static final String CLIENT_API_KEY_NON_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_NON_SHARING_RECIPIENT);
-    public static final String CLIENT_API_SECRET_NON_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_NON_SHARING_RECIPIENT);
+    public static final String CLIENT_API_KEY_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_SHARING_RECIPIENT, EnabledCondition.isLocal());
+    public static final String CLIENT_API_SECRET_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_SHARING_RECIPIENT, EnabledCondition.isLocal());
+    public static final String CLIENT_API_KEY_NON_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_NON_SHARING_RECIPIENT, EnabledCondition.isLocal());
+    public static final String CLIENT_API_SECRET_NON_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_NON_SHARING_RECIPIENT, EnabledCondition.isLocal());
 
     // Local only - CSTG
-    public static final String CSTG_SUBSCRIPTION_ID = EnvUtil.getEnv(Const.Config.Operator.CSTG_SUBSCRIPTION_ID);
-    public static final String CSTG_SERVER_PUBLIC_KEY = EnvUtil.getEnv(Const.Config.Operator.CSTG_SERVER_PUBLIC_KEY);
-    public static final String CSTG_ORIGIN = EnvUtil.getEnv(Const.Config.Operator.CSTG_ORIGIN);
-    public static final String CSTG_INVALID_ORIGIN = EnvUtil.getEnv(Const.Config.Operator.CSTG_INVALID_ORIGIN);
+    public static final String CSTG_SUBSCRIPTION_ID = EnvUtil.getEnv(Const.Config.Operator.CSTG_SUBSCRIPTION_ID, EnabledCondition.isLocal());
+    public static final String CSTG_SERVER_PUBLIC_KEY = EnvUtil.getEnv(Const.Config.Operator.CSTG_SERVER_PUBLIC_KEY, EnabledCondition.isLocal());
+    public static final String CSTG_ORIGIN = EnvUtil.getEnv(Const.Config.Operator.CSTG_ORIGIN, EnabledCondition.isLocal());
+    public static final String CSTG_INVALID_ORIGIN = EnvUtil.getEnv(Const.Config.Operator.CSTG_INVALID_ORIGIN, EnabledCondition.isLocal());
 
     @Getter
     private final Type type;
