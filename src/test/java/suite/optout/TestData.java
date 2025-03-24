@@ -1,7 +1,7 @@
 package suite.optout;
 
 import app.AppsMap;
-import common.EnvUtil;
+import app.component.App;
 import app.component.Operator;
 import org.junit.jupiter.params.provider.Arguments;
 
@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public final class TestData {
     public static final String ADVERTISING_ID = "advertising_id";
     public static final String OPTED_OUT_SINCE = "opted_out_since";
-    private static final boolean PHONE_SUPPORT = Boolean.parseBoolean(EnvUtil.getEnv("UID2_E2E_PHONE_SUPPORT"));
 
     private TestData() {
     }
@@ -55,7 +54,7 @@ public final class TestData {
         );
 
         Set<Arguments> args = new HashSet<>();
-        if (PHONE_SUPPORT) {
+        if (App.PHONE_SUPPORT) {
             for (Operator operator : operators) {
                 for (List<String> input : inputs) {
                     args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1), input.get(2)));
@@ -70,7 +69,7 @@ public final class TestData {
         Set<List<String>> inputs = generatePhoneSet(1);
 
         Set<Arguments> args = new HashSet<>();
-        if (PHONE_SUPPORT) {
+        if (App.PHONE_SUPPORT) {
             for (Operator operator : operators) {
                 for (List<String> input : inputs) {
                     args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1), input.get(2)));
