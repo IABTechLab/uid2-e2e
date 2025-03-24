@@ -1,5 +1,6 @@
 package app.component;
 
+import common.Const;
 import common.EnvUtil;
 import common.HttpClient;
 import common.Mapper;
@@ -9,10 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Core extends App {
-    private static final String CORE_API_TOKEN = EnvUtil.getEnv("UID2_E2E_CORE_API_TOKEN");
-    private static final String OPTOUT_TO_CALL_CORE_API_TOKEN = EnvUtil.getEnv("UID2_E2E_OPTOUT_TO_CALL_CORE_API_TOKEN");
-    public static final String CORE_URL = EnvUtil.getEnv("UID2_E2E_CORE_URL");
-    public static final String OPTOUT_URL = EnvUtil.getEnv("UID2_E2E_OPTOUT_URL");
+    private static final String OPERATOR_API_KEY = EnvUtil.getEnv(Const.Config.Core.OPERATOR_API_KEY);
+    private static final String OPTOUT_API_KEY = EnvUtil.getEnv(Const.Config.Core.OPTOUT_API_KEY);
+    public static final String CORE_URL = EnvUtil.getEnv(Const.Config.Core.CORE_URL);
+    public static final String OPTOUT_URL = EnvUtil.getEnv(Const.Config.Core.OPTOUT_URL);
 
     public Core(String host, Integer port, String name) {
         super(host, port, name);
@@ -23,7 +24,7 @@ public class Core extends App {
     }
 
     public JsonNode attest(String attestationRequest) throws Exception {
-        String response = HttpClient.post(getBaseUrl() + "/attest", attestationRequest, CORE_API_TOKEN);
+        String response = HttpClient.post(getBaseUrl() + "/attest", attestationRequest, OPERATOR_API_KEY);
         return Mapper.OBJECT_MAPPER.readTree(response);
     }
 
@@ -35,12 +36,12 @@ public class Core extends App {
         Map<String, String> headers = new HashMap<>();
         if (encrypted)
             headers.put("Encrypted", "true");
-        String response = HttpClient.get(getBaseUrl() + path, CORE_API_TOKEN, headers);
+        String response = HttpClient.get(getBaseUrl() + path, OPERATOR_API_KEY, headers);
         return Mapper.OBJECT_MAPPER.readTree(response);
     }
 
     public JsonNode getWithOptOutApiToken(String path) throws Exception {
-        String response = HttpClient.get(getBaseUrl() + path, OPTOUT_TO_CALL_CORE_API_TOKEN);
+        String response = HttpClient.get(getBaseUrl() + path, OPTOUT_API_KEY);
         return Mapper.OBJECT_MAPPER.readTree(response);
     }
 }
