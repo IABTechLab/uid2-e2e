@@ -4,7 +4,7 @@ import app.component.Core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import common.JsonAssert;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
+@EnabledIf("helper.EnabledCondition#isLocal")
 public class CoreRefreshTest {
     @ParameterizedTest(name = "Refresh test - UrlPath: {1} - JsonPath: {2}")
     @MethodSource({"suite.core.TestData#refreshArgs", "suite.core.TestData#refreshArgsEncrypted"})

@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.shared.attest.JwtService;
 import com.uid2.shared.attest.JwtValidationResponse;
 import io.vertx.core.json.JsonObject;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
+@EnabledIf("helper.EnabledCondition#isLocal")
 public class CoreTest {
     @ParameterizedTest(name = "/attest - {0}")
     @MethodSource({
