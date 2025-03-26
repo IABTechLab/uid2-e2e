@@ -122,7 +122,7 @@ public class V2ApiOperatorTest {
         assertTrue(refreshed.isOptout());
     }
 
-    @EnabledIf("helper.EnabledCondition#isLocal")
+    @EnabledIf("common.EnabledCondition#isLocal")
     @ParameterizedTest(name = "/v2/token/generate - LOCAL MOCK OPTOUT - {0} - {2}")
     @MethodSource({
             "suite.operator.TestData#tokenEmailArgsLocalMockOptout"
