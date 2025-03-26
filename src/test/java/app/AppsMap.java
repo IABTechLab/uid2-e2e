@@ -1,6 +1,5 @@
 package app;
 
-import common.EnvUtil;
 import app.component.App;
 
 import java.lang.reflect.InvocationTargetException;
@@ -10,8 +9,6 @@ import java.util.stream.Collectors;
 
 public final class AppsMap {
     private static final Map<String, String> APP_MAP;
-    private static final String ENV = EnvUtil.getEnv("UID2_E2E_ENV");
-
     private static final Apps APPS;
 
     static {
@@ -24,10 +21,11 @@ public final class AppsMap {
                     "uid2-prod", "app.Uid2ProdApps",
                     "euid-integ", "app.EuidIntegApps",
                     "euid-prod", "app.EuidProdApps",
+                    "github-test-pipeline-local", "app.GitHubTestPipelineApps",
                     "github-test-pipeline", "app.GitHubTestPipelineApps"
             );
 
-            APPS = (Apps) Class.forName(APP_MAP.get(ENV)).getDeclaredConstructor().newInstance();
+            APPS = (Apps) Class.forName(APP_MAP.get(App.ENV)).getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

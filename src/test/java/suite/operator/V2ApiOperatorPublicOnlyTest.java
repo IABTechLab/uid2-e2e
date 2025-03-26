@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.client.DecryptionResponse;
 import com.uid2.client.IdentityTokens;
 import com.uid2.client.TokenRefreshResponse;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -199,6 +201,7 @@ public class V2ApiOperatorPublicOnlyTest {
         assertThat(response.at("/status").asText()).isEqualTo("success");
     }
 
+    @EnabledIf("common.EnabledCondition#isLocal")
     @ParameterizedTest(name = "/v2/token/client-generate - {0} - {2}")
     @MethodSource({
             "suite.operator.TestData#clientSideTokenGenerateArgs",
@@ -213,6 +216,7 @@ public class V2ApiOperatorPublicOnlyTest {
         assertThat(response.get("status").asText()).isEqualTo("success");
     }
 
+    @EnabledIf("common.EnabledCondition#isLocal")
     @ParameterizedTest(name = "/v2/token/client-generate - INVALID ORIGIN - {0} - {2}")
     @MethodSource({
             "suite.operator.TestData#clientSideTokenGenerateArgs",

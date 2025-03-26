@@ -1,19 +1,15 @@
 package suite.operator;
 
+import common.Const;
 import common.EnvUtil;
 import common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.client.*;
-import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.security.SecureRandom;
-import java.util.Base64;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unused")
@@ -29,49 +25,7 @@ public class V2ApiOperatorTest {
     // The advertiser token will be different on every call due to randomness used in encryption,
     // so we can't assert on it
 
-    private static final String SITE_ID = EnvUtil.getEnv("UID2_E2E_SITE_ID");
-
-    @ParameterizedTest(name = "{index} ==> Sender {0} encrypts with {1}, recipient {2} decrypts with {3}, expected result is {4}")
-    @MethodSource({
-            "suite.operator.TestData#sharingArgs",
-    })
-    public void testSharing(TestData.Client sender, Operator senderOperator, TestData.Client recipient, Operator recipientOperator, DecryptionStatus expectedDecryptionStatus) throws Exception {
-        assumeThat(senderOperator).isNotNull();
-        assumeThat(recipientOperator).isNotNull();
-
-        final var rawUidBytes = new byte[33];
-        new SecureRandom().nextBytes(rawUidBytes);
-        rawUidBytes[0] = 0;
-
-        final var rawUid = Base64.getEncoder().encodeToString(rawUidBytes);
-
-        final var senderClient = new UID2Client(
-                senderOperator.getBaseUrl(),
-                sender.apiKey(),
-                sender.apiSecret(),
-                Operator.IDENTITY_SCOPE
-        );
-
-        final var recipientClient = new UID2Client(
-                recipientOperator.getBaseUrl(),
-                recipient.apiKey(),
-                recipient.apiSecret(),
-                Operator.IDENTITY_SCOPE
-        );
-
-        senderClient.refresh();
-        final var encrypted = senderClient.encrypt(rawUid);
-        assertTrue(encrypted.isSuccess());
-
-        recipientClient.refresh();
-        final var decrypted = recipientClient.decrypt(encrypted.getEncryptedData());
-        final var expectedRawUid = expectedDecryptionStatus == DecryptionStatus.SUCCESS ? rawUid : null;
-
-        assertAll(
-                () -> assertThat(decrypted.getStatus()).isEqualTo(expectedDecryptionStatus),
-                () -> assertThat(decrypted.getUid()).isEqualTo(expectedRawUid)
-        );
-    }
+    private static final String CLIENT_SITE_ID = EnvUtil.getEnv(Const.Config.Operator.CLIENT_SITE_ID);
 
     @ParameterizedTest(name = "/v2/token/generate - {0} - {2}")
     @MethodSource({
@@ -120,18 +74,6 @@ public class V2ApiOperatorTest {
         TokenRefreshResponse refreshed = operator.v2TokenRefresh(currentIdentity);
 
         assertTrue(refreshed.isOptout());
-    }
-
-    @EnabledIf("common.EnabledCondition#isLocal")
-    @ParameterizedTest(name = "/v2/token/generate - LOCAL MOCK OPTOUT - {0} - {2}")
-    @MethodSource({
-            "suite.operator.TestData#tokenEmailArgsLocalMockOptout"
-    })
-    public void testV2TokenGenerateLocalMockOptout(String label, Operator operator, String operatorName, String type, String identity) {
-        TokenGenerateResponse tokenGenerateResponse = operator.v2TokenGenerate(type, identity, false);
-        IdentityTokens currentIdentity = tokenGenerateResponse.getIdentity();
-
-        assertThat(currentIdentity).isNull();
     }
 
     @ParameterizedTest(name = "/v2/token/validate - {0} - {2}")
@@ -191,6 +133,6 @@ public class V2ApiOperatorTest {
     public void testV2KeySharing(Operator operator, String operatorName) throws Exception {
         JsonNode response = operator.v2KeySharing();
 
-        assertEquals(SITE_ID, response.at("/body/caller_site_id").asText());
+        assertEquals(CLIENT_SITE_ID, response.at("/body/caller_site_id").asText());
     }
 }

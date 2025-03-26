@@ -1,13 +1,12 @@
 package app.component;
 
-import common.EnvUtil;
-import common.HttpClient;
-import common.Mapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.uid2.client.IdentityScope;
 import com.uid2.client.*;
+import common.*;
+import lombok.Getter;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
@@ -16,7 +15,6 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -45,9 +43,9 @@ public class Operator extends App {
 
     public enum CloudProvider {
         PUBLIC(""),
-        AWS("AWS"),
-        GCP("GCP-OIDC"),
-        AZURE("Azure-CC");
+        AWS("aws-nitro"),
+        GCP("gcp-oidc"),
+        AZURE("azure-cc");
 
         private final String name;
 
@@ -64,32 +62,37 @@ public class Operator extends App {
     private record V2Envelope(String envelope, byte[] nonce) {
     }
 
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
     // When running via the pipeline, environment variables are defined in the uid2-shared-actions repo.
     // When running via IntelliJ, environment variables are defined in the uid2-dev-workspace repo under .idea/runConfigurations.
-    //
     // Test data is defined in the uid2-admin repo.
 
-    public static final String CLIENT_API_KEY = EnvUtil.getEnv("UID2_E2E_API_KEY");
-    public static final String CLIENT_API_SECRET = EnvUtil.getEnv("UID2_E2E_API_SECRET");
-    private static final String CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv("UID2_E2E_API_KEY_OLD");
-    private static final String CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv("UID2_E2E_API_SECRET_OLD");
-    public static final String CLIENT_API_KEY_SHARING_RECIPIENT = EnvUtil.getEnv("UID2_E2E_API_KEY_SHARING_RECIPIENT");
-    public static final String CLIENT_API_SECRET_SHARING_RECIPIENT = EnvUtil.getEnv("UID2_E2E_API_SECRET_SHARING_RECIPIENT");
-    public static final String CLIENT_API_KEY_NON_SHARING_RECIPIENT = EnvUtil.getEnv("UID2_E2E_API_KEY_NON_SHARING_RECIPIENT");
-    public static final String CLIENT_API_SECRET_NON_SHARING_RECIPIENT = EnvUtil.getEnv("UID2_E2E_API_SECRET_NON_SHARING_RECIPIENT");
-    private static final String CLIENT_SIDE_TOKEN_GENERATE_SUBSCRIPTION_ID = EnvUtil.getEnv("UID2_E2E_SUBSCRIPTION_ID");
-    private static final String CLIENT_SIDE_TOKEN_GENERATE_SERVER_PUBLIC_KEY = EnvUtil.getEnv("UID2_E2E_SERVER_PUBLIC_KEY");
-    private static final String CLIENT_SIDE_TOKEN_GENERATE_ORIGIN = EnvUtil.getEnv("UID2_E2E_ORIGIN");
-    private static final String CLIENT_SIDE_TOKEN_GENERATE_INVALID_ORIGIN = EnvUtil.getEnv("UID2_E2E_INVALID_ORIGIN");
-    public static final IdentityScope IDENTITY_SCOPE = IdentityScope.valueOf(EnvUtil.getEnv("UID2_E2E_IDENTITY_SCOPE"));
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final int TIMESTAMP_LENGTH = 8;
     private static final int PUBLIC_KEY_PREFIX_LENGTH = 9;
     private static final int AUTHENTICATION_TAG_LENGTH_BITS = 128;
     private static final int IV_BYTES = 12;
     private static final String TC_STRING = "CPhJRpMPhJRpMABAMBFRACBoALAAAEJAAIYgAKwAQAKgArABAAqAAA";
 
+    public static final String CLIENT_API_KEY = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY);
+    public static final String CLIENT_API_SECRET = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET);
+
+    // Optout cutoff
+    public static final String CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF);
+    public static final String CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF);
+
+    // Local only - Sharing
+    public static final String CLIENT_API_KEY_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_SHARING_RECIPIENT, EnabledCondition.isLocal());
+    public static final String CLIENT_API_SECRET_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_SHARING_RECIPIENT, EnabledCondition.isLocal());
+    public static final String CLIENT_API_KEY_NON_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_NON_SHARING_RECIPIENT, EnabledCondition.isLocal());
+    public static final String CLIENT_API_SECRET_NON_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_NON_SHARING_RECIPIENT, EnabledCondition.isLocal());
+
+    // Local only - CSTG
+    public static final String CSTG_SUBSCRIPTION_ID = EnvUtil.getEnv(Const.Config.Operator.CSTG_SUBSCRIPTION_ID, EnabledCondition.isLocal());
+    public static final String CSTG_SERVER_PUBLIC_KEY = EnvUtil.getEnv(Const.Config.Operator.CSTG_SERVER_PUBLIC_KEY, EnabledCondition.isLocal());
+    public static final String CSTG_ORIGIN = EnvUtil.getEnv(Const.Config.Operator.CSTG_ORIGIN, EnabledCondition.isLocal());
+    public static final String CSTG_INVALID_ORIGIN = EnvUtil.getEnv(Const.Config.Operator.CSTG_INVALID_ORIGIN, EnabledCondition.isLocal());
+
+    @Getter
     private final Type type;
     private final PublisherUid2Client publisherClient;
     private final PublisherUid2Client oldPublisherClient;
@@ -122,10 +125,6 @@ public class Operator extends App {
         this(host, null, name, type);
     }
 
-    public Type getType() {
-        return type;
-    }
-
     public TokenGenerateResponse v2TokenGenerate(String type, String identity, boolean asOldParticipant) {
         TokenGenerateInput token;
 
@@ -156,7 +155,7 @@ public class Operator extends App {
     }
 
     public JsonNode v2ClientSideTokenGenerate(String requestBody, boolean useValidOrigin) throws Exception {
-        final byte[] serverPublicKeyBytes = base64ToByteArray(CLIENT_SIDE_TOKEN_GENERATE_SERVER_PUBLIC_KEY.substring(PUBLIC_KEY_PREFIX_LENGTH));
+        final byte[] serverPublicKeyBytes = base64ToByteArray(CSTG_SERVER_PUBLIC_KEY.substring(PUBLIC_KEY_PREFIX_LENGTH));
 
         final PublicKey serverPublicKey = KeyFactory.getInstance("EC")
                 .generatePublic(new X509EncodedKeySpec(serverPublicKeyBytes));
@@ -164,11 +163,11 @@ public class Operator extends App {
         final KeyPair keyPair = generateKeyPair();
         final SecretKey sharedSecret = generateSharedSecret(serverPublicKey, keyPair);
 
-        final JsonObject cstgEnvelope = createCstgEnvelope(requestBody, CLIENT_SIDE_TOKEN_GENERATE_SUBSCRIPTION_ID, keyPair.getPublic(), sharedSecret);
+        final JsonObject cstgEnvelope = createCstgEnvelope(requestBody, keyPair.getPublic(), sharedSecret);
 
         final Request.Builder requestBuilder = new Request.Builder()
                 .url(getBaseUrl() + "/v2/token/client-generate")
-                .addHeader("Origin", useValidOrigin ? CLIENT_SIDE_TOKEN_GENERATE_ORIGIN : CLIENT_SIDE_TOKEN_GENERATE_INVALID_ORIGIN)
+                .addHeader("Origin", useValidOrigin ? CSTG_ORIGIN : CSTG_INVALID_ORIGIN)
                 .post(RequestBody.create(cstgEnvelope.toString(), HttpClient.JSON));
 
         final String encryptedResponse = HttpClient.execute(requestBuilder.build(), HttpClient.HttpMethod.POST);
@@ -202,7 +201,7 @@ public class Operator extends App {
         }
     }
 
-    private static JsonObject createCstgEnvelope(String request, String subscriptionId, PublicKey clientPublicKey, SecretKey sharedSecret) {
+    private static JsonObject createCstgEnvelope(String request, PublicKey clientPublicKey, SecretKey sharedSecret) {
         final long now = Clock.systemUTC().millis();
 
         final byte[] iv = new byte[IV_BYTES];
@@ -222,7 +221,7 @@ public class Operator extends App {
         body.addProperty("iv", byteArrayToBase64(iv));
         body.addProperty("public_key", byteArrayToBase64(clientPublicKey.getEncoded()));
         body.addProperty("timestamp", now);
-        body.addProperty("subscription_id", subscriptionId);
+        body.addProperty("subscription_id", CSTG_SUBSCRIPTION_ID);
 
         return body;
     }
