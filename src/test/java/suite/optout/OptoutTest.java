@@ -41,7 +41,7 @@ public class OptoutTest {
             "suite.optout.TestData#optoutTokenEmailArgs",
             "suite.optout.TestData#optoutTokenPhoneArgs"
     })
-    @Order(3)
+    @Order(1)
     public void testV2LogoutWithV2TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, false).getIdentity();
         Thread.sleep(OPTOUT_DELAY_MS);
@@ -62,7 +62,7 @@ public class OptoutTest {
             "suite.optout.TestData#optoutTokenEmailArgs",
             "suite.optout.TestData#optoutTokenPhoneArgs"
     })
-    @Order(4)
+    @Order(2)
     public void testV2LogoutWithV2TokenGenerateOldParticipant(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, true).getIdentity();
         Thread.sleep(OPTOUT_DELAY_MS);
@@ -83,7 +83,7 @@ public class OptoutTest {
             "suite.optout.TestData#identityMapEmailArgs",
             "suite.optout.TestData#identityMapPhoneArgs"
     })
-    @Order(5)
+    @Order(3)
     public void testV2LogoutWithV2IdentityMap(String label, Operator operator, String operatorName, String type, String emailOrPhone, boolean toOptOut) throws Exception {
         JsonNode identityMapResponseNode = operator.v2IdentityMap("{\""+ type + "\":[\"" + emailOrPhone + "\"]}", false);
         assertThat(identityMapResponseNode.at("/status").asText()).isEqualTo("success");
@@ -97,7 +97,7 @@ public class OptoutTest {
         outputAdvertisingIdArgs.add(Arguments.of(label, operator, operatorName, rawUID, toOptOut, beforeOptOutTimestamp));
     }
 
-    @Order(8)
+    @Order(4)
     @ParameterizedTest(name = "/v2/token/refresh after {2} generate and {3} logout - {0} - {1}")
     @MethodSource({
             "afterOptoutTokenArgs"
@@ -108,7 +108,7 @@ public class OptoutTest {
         with().pollInterval(5, TimeUnit.SECONDS).await("Get V2 Token Response").atMost(OPTOUT_WAIT_SECONDS, TimeUnit.SECONDS).until(() -> operator.v2TokenRefresh(refreshToken, refreshResponseKey).equals(Mapper.OBJECT_MAPPER.readTree("{\"status\":\"optout\"}")));
     }
 
-    @Order(9)
+    @Order(5)
     @ParameterizedTest(name = "/v2/optout/status after v2/identity/map and v2/token/logout - DII {0} - expecting {4} - {2}")
     @MethodSource({"afterOptoutAdvertisingIdArgs"})
     public void testV2OptOutStatus(String label, Operator operator, String operatorName, String rawUID,
