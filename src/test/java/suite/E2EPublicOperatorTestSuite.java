@@ -11,8 +11,8 @@ import suite.optout.OptoutTest;
 @Suite
 @SelectClasses({
         BasicTest.class,
-        V0ApiOperatorTest.class,
-        V1ApiOperatorTest.class,
+        CoreTest.class,
+        CoreRefreshTest.class,
         V2ApiOperatorTest.class,
         V2ApiOperatorPublicOnlyTest.class,
         V2ApiOperatorLocalOnlyTest.class,

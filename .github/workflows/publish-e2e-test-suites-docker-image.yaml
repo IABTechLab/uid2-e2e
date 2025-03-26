@@ -11,6 +11,10 @@ on:
           - Patch
           - Minor
           - Major
+      version_number_input:
+        description: If set, the version number will not be incremented and the given number will be used.
+        type: string
+        default: ''
       vulnerability_severity:
         description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised.
         type: choice
@@ -24,6 +28,7 @@ jobs:
     uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-publish-java-to-docker-versioned.yaml@v3
     with:
       release_type: ${{ inputs.release_type }}
+      version_number_input: ${{ inputs.version_number_input }}
       vulnerability_severity: ${{ inputs.vulnerability_severity }}
       java_version: 21
       skip_tests: true

@@ -36,55 +36,12 @@ public class OptoutTest {
         outputAdvertisingIdArgs = new HashSet<>();
     }
 
-    @ParameterizedTest(name = "/v2/token/logout with /v0/token/generate - {0} - {2}")
-    @MethodSource({
-            "suite.optout.TestData#tokenEmailArgs"
-    })
-    @Order(1)
-    public void testV2LogoutWithV0TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
-        JsonNode generateResponse = operator.v0TokenGenerate(type, identity);
-        Thread.sleep(OPTOUT_DELAY_MS);
-        JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
-
-        assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
-        addToken(
-                label,
-                operator,
-                "v0",
-                "v2",
-                generateResponse.at("/refresh_token").asText(),
-                ""
-        );
-    }
-
-    @ParameterizedTest(name = "/v2/token/logout with /v1/token/generate - {0} - {2}")
-    @MethodSource({
-            "suite.optout.TestData#tokenEmailArgs",
-            "suite.optout.TestData#tokenPhoneArgs"
-    })
-    @Order(2)
-    public void testV2LogoutWithV1TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
-        JsonNode generateResponse = operator.v1TokenGenerate(type, identity);
-        Thread.sleep(OPTOUT_DELAY_MS);
-        JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
-
-        assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
-        addToken(
-                label,
-                operator,
-                "v1",
-                "v2",
-                generateResponse.at("/body/refresh_token").asText(),
-                ""
-        );
-    }
-
     @ParameterizedTest(name = "/v2/token/logout with /v2/token/generate - {0} - {2}")
     @MethodSource({
             "suite.optout.TestData#optoutTokenEmailArgs",
             "suite.optout.TestData#optoutTokenPhoneArgs"
     })
-    @Order(3)
+    @Order(1)
     public void testV2LogoutWithV2TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, false).getIdentity();
         Thread.sleep(OPTOUT_DELAY_MS);
@@ -105,7 +62,7 @@ public class OptoutTest {
             "suite.optout.TestData#optoutTokenEmailArgs",
             "suite.optout.TestData#optoutTokenPhoneArgs"
     })
-    @Order(4)
+    @Order(2)
     public void testV2LogoutWithV2TokenGenerateOldParticipant(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, true).getIdentity();
         Thread.sleep(OPTOUT_DELAY_MS);
@@ -126,7 +83,7 @@ public class OptoutTest {
             "suite.optout.TestData#identityMapEmailArgs",
             "suite.optout.TestData#identityMapPhoneArgs"
     })
-    @Order(5)
+    @Order(3)
     public void testV2LogoutWithV2IdentityMap(String label, Operator operator, String operatorName, String type, String emailOrPhone, boolean toOptOut) throws Exception {
         JsonNode identityMapResponseNode = operator.v2IdentityMap("{\""+ type + "\":[\"" + emailOrPhone + "\"]}", false);
         assertThat(identityMapResponseNode.at("/status").asText()).isEqualTo("success");
@@ -140,27 +97,7 @@ public class OptoutTest {
         outputAdvertisingIdArgs.add(Arguments.of(label, operator, operatorName, rawUID, toOptOut, beforeOptOutTimestamp));
     }
 
-    @Order(6)
-    @ParameterizedTest(name = "/v0/token/refresh after {2} generate and {3} logout - {0} - {1}")
-    @MethodSource({
-            "afterOptoutTokenArgs"
-    })
-    public void testV0TokenRefreshAfterOptOut(String label, Operator operator, String tokenGenerateVersion, String tokenLogoutVersion, String refreshToken, String refreshResponseKey) throws Exception {
-        assumeThat(tokenGenerateVersion).isEqualTo("v0");
-        this.waitForOptOutResponse(operator::v0CheckedTokenRefresh, refreshToken, "{\"advertisement_token\":\"\",\"advertising_token\":\"\",\"refresh_token\":\"\"}");
-    }
-
-    @Order(7)
-    @ParameterizedTest(name = "/v1/token/refresh after {2} generate and {3} logout - {0} - {1}")
-    @MethodSource({
-            "afterOptoutTokenArgs"
-    })
-    public void testV1TokenRefreshAfterOptOut(String label, Operator operator, String tokenGenerateVersion, String tokenLogoutVersion, String refreshToken, String refreshResponseKey) throws Exception {
-        assumeThat(tokenGenerateVersion).isEqualTo("v1");
-        this.waitForOptOutResponse(operator::v1CheckedTokenRefresh, refreshToken, "{\"status\":\"optout\"}");
-    }
-
-    @Order(8)
+    @Order(4)
     @ParameterizedTest(name = "/v2/token/refresh after {2} generate and {3} logout - {0} - {1}")
     @MethodSource({
             "afterOptoutTokenArgs"
@@ -171,7 +108,7 @@ public class OptoutTest {
         with().pollInterval(5, TimeUnit.SECONDS).await("Get V2 Token Response").atMost(OPTOUT_WAIT_SECONDS, TimeUnit.SECONDS).until(() -> operator.v2TokenRefresh(refreshToken, refreshResponseKey).equals(Mapper.OBJECT_MAPPER.readTree("{\"status\":\"optout\"}")));
     }
 
-    @Order(9)
+    @Order(5)
     @ParameterizedTest(name = "/v2/optout/status after v2/identity/map and v2/token/logout - DII {0} - expecting {4} - {2}")
     @MethodSource({"afterOptoutAdvertisingIdArgs"})
     public void testV2OptOutStatus(String label, Operator operator, String operatorName, String rawUID,
