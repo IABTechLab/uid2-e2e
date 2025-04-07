@@ -5,9 +5,9 @@ import { check } from 'k6';
 import http from 'k6/http';
 
 const vus = 500;
-const baseUrl = "https://integ.euid.eu";
-const clientSecret = "";
-const clientKey = "";
+const baseUrl = $OPERATOR_URL;
+const clientSecret = $CLIENT_SECRET;
+const clientKey = $CLIENT_KEY;
 
 const generateVUs = vus;
 const refreshVUs = vus;
