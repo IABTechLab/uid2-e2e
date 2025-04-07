@@ -5,9 +5,9 @@ import { check } from 'k6';
 import http from 'k6/http';
 
 const vus = 300;
-const baseUrl = $OPERATOR_URL;
-const clientSecret = $CLIENT_SECRET;
-const clientKey = $CLIENT_KEY;
+const baseUrl = __ENV.OPERATOR_URL;
+const clientSecret = __ENV.CLIENT_SECRET;
+const clientKey = __ENV.CLIENT_KEY;
 
 const generateVUs = vus;
 const refreshVUs = vus;

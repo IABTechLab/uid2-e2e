@@ -15,3 +15,9 @@ spec:
         value: "http://prometheus-server.prometheus/api/v1/write"
       - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
         value: "true"
+      - name: OPERATOR_URL
+        value: "operator_url"
+      - name: CLIENT_KEY
+        value: "client_key"
+      - name: CLIENT_SECRET
+        value: "client_secret"
