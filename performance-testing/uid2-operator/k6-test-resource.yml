@@ -1,9 +1,9 @@
 apiVersion: k6.io/v1alpha1
-kind: K6
+kind: TestRun
 metadata:
   name: k6-uid2-load-test
 spec:
-  parallelism: 4
+  parallelism: 10  # original 4
   arguments: --out experimental-prometheus-rw --tag "testid=replacecomment"
   script:
     configMap:

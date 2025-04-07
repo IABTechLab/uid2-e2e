@@ -5,7 +5,7 @@ import { check } from 'k6';
 import http from 'k6/http';
 
 const vus = 500;
-const baseUrl = "http://uid2-prod-opr-use2-alb-1657081774.us-east-2.elb.amazonaws.com";
+const baseUrl = "https://integ.euid.eu";
 const clientSecret = "";
 const clientKey = "";
 
@@ -13,12 +13,7 @@ const generateVUs = vus;
 const refreshVUs = vus;
 const identityMapVUs = vus;
 const keySharingVUs = vus;
-const testDuration = '10m'
-
-//30 warm up on each
-// 5 min each
-// 12, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600
-// 13 scenarios, each 5.5 min = 4290 se
+const testDuration = '6h'
 
 export const options = {
   insecureSkipTLSVerify: true,
@@ -65,7 +60,7 @@ export const options = {
       duration: testDuration,
       gracefulStop: '0s',
       startTime: '30s',
-    }/*,
+    },/*
     tokenRefresh: {
       executor: 'constant-vus',
       exec: 'tokenRefresh',
@@ -89,7 +84,7 @@ export const options = {
       duration: testDuration,
       gracefulStop: '0s',
       startTime: '30s',
-    }
+    },
     identityMapLargeBatchSequential: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
