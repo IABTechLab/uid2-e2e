@@ -6,4 +6,4 @@ if [ "$#" -ne 1 ]; then
     COMMENT=$( date '+%F_%H:%M:%S' )
 fi
 
-./start-named-test.sh k6-token-generate-refresh-identitymap-keysharing.js $COMMENT
+./start-named-test.sh k6-token-generate-refresh-identitymap.js $COMMENT

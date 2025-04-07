@@ -4,7 +4,7 @@ import encoding from 'k6/encoding';
 import { check } from 'k6';
 import http from 'k6/http';
 
-const vus = 500;
+const vus = 300;
 const baseUrl = __ENV.OPERATOR_URL;
 const clientSecret = __ENV.CLIENT_SECRET;
 const clientKey = __ENV.CLIENT_KEY;
@@ -27,7 +27,7 @@ export const options = {
         { duration: '30s', target: generateVUs}
       ],
       gracefulRampDown: '0s',
-    },/*
+    },
     tokenRefreshWarmup: {
       executor: 'ramping-vus',
       exec: 'tokenRefresh',
@@ -51,7 +51,7 @@ export const options = {
         { duration: '30s', target: keySharingVUs}
       ],
       gracefulRampDown: '0s',
-    },*/
+    },
     // Actual testing scenarios
     tokenGenerate: {
       executor: 'constant-vus',
@@ -60,7 +60,7 @@ export const options = {
       duration: testDuration,
       gracefulStop: '0s',
       startTime: '30s',
-    },/*
+    },
     tokenRefresh: {
       executor: 'constant-vus',
       exec: 'tokenRefresh',
@@ -108,7 +108,7 @@ export const options = {
       duration: '300s',
       gracefulStop: '0s',
       startTime: '1590s',
-    },*/
+    },
   },
   // So we get count in the summary, to demonstrate different metrics are different
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)', 'count'],
