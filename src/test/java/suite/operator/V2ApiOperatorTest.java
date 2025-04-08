@@ -1,8 +1,9 @@
 package suite.operator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uid2.shared.util.Mapper;
 import common.Const;
 import common.EnvUtil;
-import common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.client.*;
@@ -25,6 +26,7 @@ public class V2ApiOperatorTest {
     // The advertiser token will be different on every call due to randomness used in encryption,
     // so we can't assert on it
 
+    private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
     private static final String CLIENT_SITE_ID = EnvUtil.getEnv(Const.Config.Operator.CLIENT_SITE_ID);
 
     @ParameterizedTest(name = "/v2/token/generate - {0} - {2}")
@@ -86,7 +88,7 @@ public class V2ApiOperatorTest {
         String advertisingToken = currentIdentity.getAdvertisingToken();
         JsonNode response = operator.v2TokenValidate(type, identity, advertisingToken);
 
-        assertThat(response).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":true,\"status\":\"success\"}"));
+        assertThat(response).isEqualTo(OBJECT_MAPPER.readTree("{\"body\":true,\"status\":\"success\"}"));
     }
 
     @ParameterizedTest(name = "/v2/identity/map - {0} - {2}")

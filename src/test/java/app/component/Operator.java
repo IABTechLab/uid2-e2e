@@ -1,10 +1,12 @@
 package app.component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.uid2.client.IdentityScope;
 import com.uid2.client.*;
+import com.uid2.shared.util.Mapper;
 import common.*;
 import lombok.Getter;
 import okhttp3.Request;
@@ -66,6 +68,7 @@ public class Operator extends App {
     // When running via IntelliJ, environment variables are defined in the uid2-dev-workspace repo under .idea/runConfigurations.
     // Test data is defined in the uid2-admin repo.
 
+    private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final int TIMESTAMP_LENGTH = 8;
     private static final int PUBLIC_KEY_PREFIX_LENGTH = 9;
@@ -340,14 +343,14 @@ public class Operator extends App {
         cons.setAccessible(true);
         Uid2Helper uid2Helper = cons.newInstance(secret);
         String decryptedResponse = uid2Helper.decrypt(encryptedResponse, nonceInRequest);
-        return Mapper.OBJECT_MAPPER.readTree(decryptedResponse);
+        return OBJECT_MAPPER.readTree(decryptedResponse);
     }
 
     private JsonNode v2DecryptResponseWithoutNonce(String response, byte[] key) throws Exception {
         Method decryptTokenRefreshResponseMethod = Uid2Helper.class.getDeclaredMethod("decryptTokenRefreshResponse", String.class, byte[].class);
         decryptTokenRefreshResponseMethod.setAccessible(true);
         String decryptedResponse = (String) decryptTokenRefreshResponseMethod.invoke(Uid2Helper.class, response, key);
-        return Mapper.OBJECT_MAPPER.readTree(decryptedResponse);
+        return OBJECT_MAPPER.readTree(decryptedResponse);
     }
 
     private byte[] encryptGDM(byte[] b, byte[] secretBytes) throws Exception {

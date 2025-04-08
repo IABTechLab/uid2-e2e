@@ -1,13 +1,10 @@
 package suite.operator;
 
 import common.HttpClient;
-import common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.uid2.client.DecryptionResponse;
 import com.uid2.client.IdentityTokens;
 import com.uid2.client.TokenRefreshResponse;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

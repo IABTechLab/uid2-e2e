@@ -1,12 +1,17 @@
 package common;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uid2.shared.util.Mapper;
+import lombok.Getter;
 import okhttp3.*;
 
 import java.util.Map;
 import java.util.Objects;
 
 public final class HttpClient {
+    private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
+
     public static final OkHttpClient RAW_CLIENT = new OkHttpClient();
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
@@ -15,6 +20,7 @@ public final class HttpClient {
         POST
     }
 
+    @Getter
     public static class HttpException extends Exception {
         private final HttpMethod method;
         private final String url;
@@ -32,28 +38,8 @@ public final class HttpClient {
             this.response = response;
         }
 
-        public HttpMethod getMethod() {
-            return method;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public int getCode() {
-            return code;
-        }
-
-        public String getCodeMessage() {
-            return codeMessage;
-        }
-
-        public String getResponse() {
-            return response;
-        }
-
         public JsonNode getResponseJson() throws Exception {
-            return Mapper.OBJECT_MAPPER.readTree(response);
+            return OBJECT_MAPPER.readTree(response);
         }
 
         private static String createErrorMessage(HttpMethod method, String url, int code, String message, String response) {

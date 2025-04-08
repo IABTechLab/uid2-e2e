@@ -1,9 +1,10 @@
 package suite.optout;
 
-import common.Mapper;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uid2.client.IdentityTokens;
+import com.uid2.shared.util.Mapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,6 +25,7 @@ import static org.awaitility.Awaitility.with;
 public class OptoutTest {
     // TODO: Test failure case
 
+    private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
     private static final int OPTOUT_DELAY_MS = 1000;
     private static final int OPTOUT_WAIT_SECONDS = 300;
 
@@ -46,14 +48,14 @@ public class OptoutTest {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, false).getIdentity();
         Thread.sleep(OPTOUT_DELAY_MS);
         JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
-        assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
+        assertThat(logoutResponse).isEqualTo(OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
         addToken(
                 label,
                 operator,
                 "v2",
                 "v2",
                 generateResponse.getRefreshToken(),
-                Mapper.OBJECT_MAPPER.readTree(generateResponse.getJsonString()).at("/refresh_response_key").asText()
+                OBJECT_MAPPER.readTree(generateResponse.getJsonString()).at("/refresh_response_key").asText()
         );
     }
 
@@ -67,14 +69,14 @@ public class OptoutTest {
         IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, true).getIdentity();
         Thread.sleep(OPTOUT_DELAY_MS);
         JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
-        assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
+        assertThat(logoutResponse).isEqualTo(OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
         addToken(
                 "old participant " + label,
                 operator,
                 "v2",
                 "v2",
                 generateResponse.getRefreshToken(),
-                Mapper.OBJECT_MAPPER.readTree(generateResponse.getJsonString()).at("/refresh_response_key").asText()
+                OBJECT_MAPPER.readTree(generateResponse.getJsonString()).at("/refresh_response_key").asText()
         );
     }
 
@@ -92,7 +94,7 @@ public class OptoutTest {
         if (toOptOut) {
             Thread.sleep(OPTOUT_DELAY_MS);
             JsonNode logoutResponse = operator.v2TokenLogout(type, emailOrPhone);
-            assertThat(logoutResponse).isEqualTo(Mapper.OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
+            assertThat(logoutResponse).isEqualTo(OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
         }
         outputAdvertisingIdArgs.add(Arguments.of(label, operator, operatorName, rawUID, toOptOut, beforeOptOutTimestamp));
     }
@@ -105,7 +107,7 @@ public class OptoutTest {
     public void testV2TokenRefreshAfterOptOut(String label, Operator operator, String tokenGenerateVersion, String tokenLogoutVersion, String refreshToken, String refreshResponseKey) throws Exception {
         assumeThat(tokenGenerateVersion).isEqualTo("v2");
 
-        with().pollInterval(5, TimeUnit.SECONDS).await("Get V2 Token Response").atMost(OPTOUT_WAIT_SECONDS, TimeUnit.SECONDS).until(() -> operator.v2TokenRefresh(refreshToken, refreshResponseKey).equals(Mapper.OBJECT_MAPPER.readTree("{\"status\":\"optout\"}")));
+        with().pollInterval(5, TimeUnit.SECONDS).await("Get V2 Token Response").atMost(OPTOUT_WAIT_SECONDS, TimeUnit.SECONDS).until(() -> operator.v2TokenRefresh(refreshToken, refreshResponseKey).equals(OBJECT_MAPPER.readTree("{\"status\":\"optout\"}")));
     }
 
     @Order(5)
@@ -164,7 +166,7 @@ public class OptoutTest {
     private void waitForOptOutResponse(Function<String, JsonNode> tokenRefreshFunction, String refreshToken, String expectedResponse) {
         with().pollInterval(5, TimeUnit.SECONDS).await("Get Token Response").atMost(OPTOUT_WAIT_SECONDS, TimeUnit.SECONDS).until(() -> {
             JsonNode response = tokenRefreshFunction.apply(refreshToken);
-            return response.equals(Mapper.OBJECT_MAPPER.readTree(expectedResponse));
+            return response.equals(OBJECT_MAPPER.readTree(expectedResponse));
         });
     }
 }

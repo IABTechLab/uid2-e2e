@@ -2,6 +2,8 @@ package common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uid2.shared.util.Mapper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -11,6 +13,7 @@ import java.util.Map;
 
 public final class EnvUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvUtil.class);
+    private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
     private static final Map<String, String> ARGS = new HashMap<>();
 
     static {
@@ -20,7 +23,7 @@ public final class EnvUtil {
             if (StringUtils.isNotBlank(args)) {
                 TypeReference<HashMap<String, String>> typeRef = new TypeReference<>() {
                 };
-                ARGS.putAll(Mapper.OBJECT_MAPPER.readValue(args, typeRef));
+                ARGS.putAll(OBJECT_MAPPER.readValue(args, typeRef));
             }
         } catch (JsonProcessingException e) {
             LOGGER.error(e::getMessage);
