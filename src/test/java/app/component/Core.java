@@ -1,15 +1,17 @@
 package app.component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uid2.shared.util.Mapper;
 import common.Const;
 import common.EnvUtil;
 import common.HttpClient;
-import common.Mapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Core extends App {
+    private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
     private static final String OPERATOR_API_KEY = EnvUtil.getEnv(Const.Config.Core.OPERATOR_API_KEY);
     private static final String OPTOUT_API_KEY = EnvUtil.getEnv(Const.Config.Core.OPTOUT_API_KEY);
     public static final String CORE_URL = EnvUtil.getEnv(Const.Config.Core.CORE_URL);
@@ -25,7 +27,7 @@ public class Core extends App {
 
     public JsonNode attest(String attestationRequest) throws Exception {
         String response = HttpClient.post(getBaseUrl() + "/attest", attestationRequest, OPERATOR_API_KEY);
-        return Mapper.OBJECT_MAPPER.readTree(response);
+        return OBJECT_MAPPER.readTree(response);
     }
 
     public JsonNode getWithCoreApiToken(String path) throws Exception {
@@ -37,11 +39,11 @@ public class Core extends App {
         if (encrypted)
             headers.put("Encrypted", "true");
         String response = HttpClient.get(getBaseUrl() + path, OPERATOR_API_KEY, headers);
-        return Mapper.OBJECT_MAPPER.readTree(response);
+        return OBJECT_MAPPER.readTree(response);
     }
 
     public JsonNode getWithOptOutApiToken(String path) throws Exception {
         String response = HttpClient.get(getBaseUrl() + path, OPTOUT_API_KEY);
-        return Mapper.OBJECT_MAPPER.readTree(response);
+        return OBJECT_MAPPER.readTree(response);
     }
 }
