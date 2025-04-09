@@ -66,7 +66,7 @@ public class V2ApiOperatorLocalOnlyTest {
             "suite.operator.TestData#tokenEmailArgsLocalMockOptout"
     })
     public void testV2TokenGenerateLocalMockOptout(String label, Operator operator, String operatorName, String type, String identity) {
-        TokenGenerateResponse tokenGenerateResponse = operator.v2TokenGenerate(type, identity, false);
+        TokenGenerateResponse tokenGenerateResponse = operator.v2TokenGenerate(type, identity);
         IdentityTokens currentIdentity = tokenGenerateResponse.getIdentity();
 
         assertThat(currentIdentity).isNull();

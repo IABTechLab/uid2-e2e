@@ -95,7 +95,6 @@ public class Operator extends App {
     @Getter
     private final Type type;
     private final PublisherUid2Client publisherClient;
-    private final PublisherUid2Client oldPublisherClient;
     private final UID2Client dspClient;
 
     public Operator(String host, Integer port, String name, Type type) {
@@ -107,11 +106,6 @@ public class Operator extends App {
                 getBaseUrl(),
                 CLIENT_API_KEY,
                 CLIENT_API_SECRET
-        );
-        this.oldPublisherClient = new PublisherUid2Client(
-                getBaseUrl(),
-                CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF,
-                CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF
         );
         this.dspClient = new UID2Client(
                 getBaseUrl(),
@@ -125,7 +119,7 @@ public class Operator extends App {
         this(host, null, name, type);
     }
 
-    public TokenGenerateResponse v2TokenGenerate(String type, String identity, boolean asOldParticipant) {
+    public TokenGenerateResponse v2TokenGenerate(String type, String identity) {
         TokenGenerateInput token;
 
         if ("email".equals(type)) {
@@ -140,18 +134,8 @@ public class Operator extends App {
             token = token.withTransparencyAndConsentString(TC_STRING);
         }
 
-        if (!asOldParticipant) {
-            token = token.doNotGenerateTokensForOptedOut();
-            return publisherClient.generateTokenResponse(token);
-        } else {
-            return oldPublisherClient.generateTokenResponse(token);
-        }
-    }
-
-    public JsonNode v2TokenGenerateUsingPayload(String payload, boolean asOldParticipant) throws Exception {
-        V2Envelope envelope = v2CreateEnvelope(payload, getClientApiSecret(asOldParticipant));
-        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/token/generate", envelope.envelope(), getClientApiKey(asOldParticipant));
-        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), getClientApiSecret(asOldParticipant));
+        token = token.doNotGenerateTokensForOptedOut();
+        return publisherClient.generateTokenResponse(token);
     }
 
     public JsonNode v2ClientSideTokenGenerate(String requestBody, boolean useValidOrigin) throws Exception {
@@ -277,10 +261,10 @@ public class Operator extends App {
         return dspClient.decrypt(token);
     }
 
-    public JsonNode v2IdentityMap(String payload, boolean asOldParticipant) throws Exception {
-        V2Envelope envelope = v2CreateEnvelope(payload, getClientApiSecret(asOldParticipant));
-        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/identity/map", envelope.envelope(), getClientApiKey(asOldParticipant));
-        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), getClientApiSecret(asOldParticipant));
+    public JsonNode v2IdentityMap(String payload) throws Exception {
+        V2Envelope envelope = v2CreateEnvelope(payload, getClientApiSecret());
+        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/identity/map", envelope.envelope(), getClientApiKey());
+        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), getClientApiSecret());
     }
 
     public JsonNode v2IdentityBuckets(String payload) throws Exception {
@@ -301,12 +285,12 @@ public class Operator extends App {
         return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
     }
 
-    private String getClientApiKey(boolean asOldParticipant) {
-        return asOldParticipant ? CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF : CLIENT_API_KEY;
+    private String getClientApiKey() {
+        return CLIENT_API_KEY;
     }
 
-    private String getClientApiSecret(boolean asOldParticipant) {
-        return asOldParticipant ? CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF : CLIENT_API_SECRET;
+    private String getClientApiSecret() {
+        return CLIENT_API_SECRET;
     }
 
     private V2Envelope v2CreateEnvelope(String payload, String secret) throws Exception {

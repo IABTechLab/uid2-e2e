@@ -18,7 +18,7 @@ public class V2ApiValidatorTest extends ValidatorTestBase {
     })
     public void testV2TokenGenerateViaMetrics(String label, Operator operator, String operatorName, Prometheus prometheus, String prometheusName, String type, String identity) throws Exception {
         assertThat(compareMetricValues(prometheus, Metric.MATCH_METRIC_NAME, "/v2/token/generate", HttpClient.HttpMethod.POST, () ->
-                operator.v2TokenGenerate(type, identity, false)
+                operator.v2TokenGenerate(type, identity)
         )).isTrue();
     }
 
@@ -29,7 +29,7 @@ public class V2ApiValidatorTest extends ValidatorTestBase {
     })
     public void testV2TokenRefreshViaMetrics(String label, Operator operator, String operatorName, Prometheus prometheus, String prometheusName, String type, String identity) throws Exception {
         assertThat(compareMetricValues(prometheus, Metric.MATCH_METRIC_NAME, "/v2/token/refresh", HttpClient.HttpMethod.POST, () -> {
-            IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity, false).getIdentity();
+            IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity).getIdentity();
             operator.v2TokenRefresh(currentIdentity);
         })).isTrue();
     }
@@ -43,7 +43,7 @@ public class V2ApiValidatorTest extends ValidatorTestBase {
     })
     public void testV2IdentityMapViaMetrics(String label, Operator operator, String operatorName, Prometheus prometheus, String prometheusName, String payload) throws Exception {
         assertThat(compareMetricValues(prometheus, Metric.MATCH_METRIC_NAME, "/v2/identity/map", HttpClient.HttpMethod.POST, () ->
-                operator.v2IdentityMap(payload, false)
+                operator.v2IdentityMap(payload)
         )).isTrue();
     }
 

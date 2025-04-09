@@ -30,7 +30,7 @@ public class V2ApiOperatorPublicOnlyTest {
             return;
         }
 
-        IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity, true).getIdentity();
+        IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity).getIdentity();
         TokenRefreshResponse refreshed = operator.v2TokenRefresh(currentIdentity);
 
         assertTrue(refreshed.isOptout());
@@ -41,13 +41,13 @@ public class V2ApiOperatorPublicOnlyTest {
             "suite.operator.TestData#tokenEmailArgsSpecialOptout",
             "suite.operator.TestData#tokenPhoneArgsSpecialOptout"
     })
-    public void testV2IdentityMapSpecialOptoutParamTrue(String label, Operator operator, String operatorName, String type, String identity, boolean asOldParticipant) throws Exception {
+    public void testV2IdentityMapSpecialOptoutParamTrue(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         if (isPrivateOperator(operator)) {
             return;
         }
 
         String payload = "{\"" + type + "\": [\"" + identity + "\"], \"optout_check\":1}";
-        JsonNode response = operator.v2IdentityMap(payload, asOldParticipant);
+        JsonNode response = operator.v2IdentityMap(payload);
 
         assertThat(response.get("body").get("unmapped").get(0).get("reason").asText()).isEqualTo("optout");
     }
@@ -57,13 +57,13 @@ public class V2ApiOperatorPublicOnlyTest {
             "suite.operator.TestData#tokenEmailArgsSpecialOptout",
             "suite.operator.TestData#tokenPhoneArgsSpecialOptout"
     })
-    public void testV2IdentityMapSpecialOptoutParamFalse(String label, Operator operator, String operatorName, String type, String identity, boolean asOldParticipant) throws Exception {
+    public void testV2IdentityMapSpecialOptoutParamFalse(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         if (isPrivateOperator(operator)) {
             return;
         }
 
         String payload = "{\"" + type + "\": [\"" + identity + "\"], \"optout_check\":0}";
-        JsonNode response = operator.v2IdentityMap(payload, asOldParticipant);
+        JsonNode response = operator.v2IdentityMap(payload);
 
         assertThat(response.get("body").get("unmapped").get(0).get("reason").asText()).isEqualTo("optout");
     }
@@ -73,13 +73,13 @@ public class V2ApiOperatorPublicOnlyTest {
             "suite.operator.TestData#tokenEmailArgsSpecialOptout",
             "suite.operator.TestData#tokenPhoneArgsSpecialOptout"
     })
-    public void testV2IdentityMapSpecialOptoutNoParam(String label, Operator operator, String operatorName, String type, String identity, boolean asOldParticipant) throws Exception {
+    public void testV2IdentityMapSpecialOptoutNoParam(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         if (isPrivateOperator(operator)) {
             return;
         }
 
         String payload = "{\"" + type + "\": [\"" + identity + "\"]}";
-        JsonNode response = operator.v2IdentityMap(payload, asOldParticipant);
+        JsonNode response = operator.v2IdentityMap(payload);
 
         assertThat(response.get("body").get("unmapped").get(0).get("reason").asText()).isEqualTo("optout");
     }

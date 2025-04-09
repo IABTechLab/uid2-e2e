@@ -33,7 +33,7 @@ public class V2ApiOperatorTest {
             "suite.operator.TestData#tokenPhoneArgs"
     })
     public void testV2TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
-        TokenGenerateResponse tokenGenerateResponse = operator.v2TokenGenerate(type, identity, false);
+        TokenGenerateResponse tokenGenerateResponse = operator.v2TokenGenerate(type, identity);
         IdentityTokens currentIdentity = tokenGenerateResponse.getIdentity();
         DecryptionResponse decrypted = operator.v2TokenDecrypt(currentIdentity.getAdvertisingToken());
 
@@ -45,8 +45,8 @@ public class V2ApiOperatorTest {
             "suite.operator.TestData#tokenEmailArgsSpecialOptout",
             "suite.operator.TestData#tokenPhoneArgsSpecialOptout"
     })
-    public void testV2TokenGenerateSpecialOptout(String label, Operator operator, String operatorName, String type, String identity, boolean asOldParticipant) {
-        TokenGenerateResponse tokenGenerateResponse = operator.v2TokenGenerate(type, identity, false);
+    public void testV2TokenGenerateSpecialOptout(String label, Operator operator, String operatorName, String type, String identity) {
+        TokenGenerateResponse tokenGenerateResponse = operator.v2TokenGenerate(type, identity);
 
         assertTrue(tokenGenerateResponse.isOptout());
     }
@@ -57,7 +57,7 @@ public class V2ApiOperatorTest {
             "suite.operator.TestData#tokenPhoneArgs"
     })
     public void testV2TokenRefresh(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
-        IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity, false).getIdentity();
+        IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity).getIdentity();
         TokenRefreshResponse refreshed = operator.v2TokenRefresh(currentIdentity);
         DecryptionResponse decrypted = operator.v2TokenDecrypt(refreshed.getIdentity().getAdvertisingToken());
 
@@ -70,7 +70,7 @@ public class V2ApiOperatorTest {
             "suite.operator.TestData#tokenPhoneArgsSpecialRefreshOptout"
     })
     public void testV2SpecialRefreshOptout(String label, Operator operator, String operatorName, String type, String identity) {
-        IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity, false).getIdentity();
+        IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity).getIdentity();
         TokenRefreshResponse refreshed = operator.v2TokenRefresh(currentIdentity);
 
         assertTrue(refreshed.isOptout());
@@ -82,7 +82,7 @@ public class V2ApiOperatorTest {
             "suite.operator.TestData#tokenValidatePhoneArgs"
     })
     public void testV2TokenValidate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
-        IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity, false).getIdentity();
+        IdentityTokens currentIdentity = operator.v2TokenGenerate(type, identity).getIdentity();
         String advertisingToken = currentIdentity.getAdvertisingToken();
         JsonNode response = operator.v2TokenValidate(type, identity, advertisingToken);
 
@@ -97,7 +97,7 @@ public class V2ApiOperatorTest {
             "suite.operator.TestData#identityMapBatchBadPhoneArgs"
     })
     public void testV2IdentityMap(String label, Operator operator, String operatorName, String payload) throws Exception {
-        JsonNode response = operator.v2IdentityMap(payload, false);
+        JsonNode response = operator.v2IdentityMap(payload);
 
         // TODO: Assert the value
         assertThat(response.at("/status").asText()).isEqualTo("success");
@@ -110,7 +110,7 @@ public class V2ApiOperatorTest {
     })
     public void testV2IdentityMapValidateArgs(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
         String payload = "{\"" + type + "\": [\"" + identity + "\"], \"optout_check\":1}";
-        JsonNode response = operator.v2IdentityMap(payload, false);
+        JsonNode response = operator.v2IdentityMap(payload);
 
         assertThat(response.get("body").get("mapped").get(0).get("advertising_id").asText()).isNotNull();
     }
