@@ -79,10 +79,6 @@ public class Operator extends App {
     public static final String CLIENT_API_KEY = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY);
     public static final String CLIENT_API_SECRET = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET);
 
-    // Optout cutoff
-    public static final String CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF);
-    public static final String CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF);
-
     // Local only - Sharing
     public static final String CLIENT_API_KEY_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_SHARING_RECIPIENT, EnabledCondition.isLocal());
     public static final String CLIENT_API_SECRET_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET_SHARING_RECIPIENT, EnabledCondition.isLocal());
