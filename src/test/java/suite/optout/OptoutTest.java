@@ -45,33 +45,12 @@ public class OptoutTest {
     })
     @Order(1)
     public void testV2LogoutWithV2TokenGenerate(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
-        IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, false).getIdentity();
+        IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity).getIdentity();
         Thread.sleep(OPTOUT_DELAY_MS);
         JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
         assertThat(logoutResponse).isEqualTo(OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
         addToken(
                 label,
-                operator,
-                "v2",
-                "v2",
-                generateResponse.getRefreshToken(),
-                OBJECT_MAPPER.readTree(generateResponse.getJsonString()).at("/refresh_response_key").asText()
-        );
-    }
-
-    @ParameterizedTest(name = "/v2/token/logout with /v2/token/generate - {0} - {2}")
-    @MethodSource({
-            "suite.optout.TestData#optoutTokenEmailArgs",
-            "suite.optout.TestData#optoutTokenPhoneArgs"
-    })
-    @Order(2)
-    public void testV2LogoutWithV2TokenGenerateOldParticipant(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
-        IdentityTokens generateResponse = operator.v2TokenGenerate(type, identity, true).getIdentity();
-        Thread.sleep(OPTOUT_DELAY_MS);
-        JsonNode logoutResponse = operator.v2TokenLogout(type, identity);
-        assertThat(logoutResponse).isEqualTo(OBJECT_MAPPER.readTree("{\"body\":{\"optout\":\"OK\"},\"status\":\"success\"}"));
-        addToken(
-                "old participant " + label,
                 operator,
                 "v2",
                 "v2",
@@ -87,7 +66,7 @@ public class OptoutTest {
     })
     @Order(3)
     public void testV2LogoutWithV2IdentityMap(String label, Operator operator, String operatorName, String type, String emailOrPhone, boolean toOptOut) throws Exception {
-        JsonNode identityMapResponseNode = operator.v2IdentityMap("{\""+ type + "\":[\"" + emailOrPhone + "\"]}", false);
+        JsonNode identityMapResponseNode = operator.v2IdentityMap("{\""+ type + "\":[\"" + emailOrPhone + "\"]}");
         assertThat(identityMapResponseNode.at("/status").asText()).isEqualTo("success");
         String rawUID = identityMapResponseNode.get("body").get("mapped").get(0).get(TestData.ADVERTISING_ID).asText();
         long beforeOptOutTimestamp = Instant.now().toEpochMilli();
