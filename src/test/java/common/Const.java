@@ -23,10 +23,6 @@ public final class Const {
             public static final String CLIENT_API_KEY = "UID2_OPERATOR_E2E_CLIENT_API_KEY";
             public static final String CLIENT_API_SECRET = "UID2_OPERATOR_E2E_CLIENT_API_SECRET";
 
-            // Optout cutoff
-            public static final String CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF = "UID2_OPERATOR_E2E_CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF";
-            public static final String CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF = "UID2_OPERATOR_E2E_CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF";
-
             // Local only - Sharing
             public static final String CLIENT_API_KEY_SHARING_RECIPIENT = "UID2_OPERATOR_E2E_CLIENT_API_KEY_SHARING_RECIPIENT";
             public static final String CLIENT_API_SECRET_SHARING_RECIPIENT = "UID2_OPERATOR_E2E_CLIENT_API_SECRET_SHARING_RECIPIENT";
