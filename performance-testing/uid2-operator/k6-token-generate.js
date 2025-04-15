@@ -6,9 +6,9 @@ import http from 'k6/http';
 
 const vus = 300;
 // Get Key and Secret from: https://start.1password.com/open/i?a=SWHBRR7FURBBXPZORJWBGP5UBM&v=cknem3yiubq6f2guyizd2ifsnm&i=ywhkqovi4p5wzoi7me4564hod4&h=thetradedesk.1password.com
-const baseUrl = "";
-const clientSecret = "";
-const clientKey = "";
+const baseUrl = __ENV.OPERATOR_URL;
+const clientSecret = __ENV.CLIENT_SECRET;
+const clientKey = __ENV.CLIENT_KEY;
 
 const generateVUs = vus;
 const testDuration = '5m'
