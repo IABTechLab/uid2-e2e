@@ -95,6 +95,13 @@ export async function setup() {
   };
 }
 
+// Remove this function if you are running manually inside a GCP/Azure/AWS instance using docker
+export function handleSummary(data) {
+  return {
+    'summary.json': JSON.stringify(data),
+  }
+}
+
 // Scenarios
 export async function tokenGenerate(data) {
   const endpoint = '/v2/token/generate';
