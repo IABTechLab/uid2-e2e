@@ -9,6 +9,8 @@ const vus = 300;
 const baseUrl = "";
 const clientSecret = "";
 const clientKey = "";
+const identityMapVUs = 300;
+const identityMapLargeBatchVUs = 10;
 
 const generateVUs = vus;
 const testDuration = '5m'
@@ -18,22 +20,38 @@ export const options = {
   noConnectionReuse: false,
   scenarios: {
     // Warmup scenarios
-    tokenGenerateWarmup: {
+    identityMapWarmup: {
       executor: 'ramping-vus',
-      exec: 'tokenGenerate',
+      exec: 'identityMap',
       stages: [
-        { duration: '30s', target: generateVUs}
+        { duration: '30s', target: identityMapVUs}
       ],
       gracefulRampDown: '0s',
     },
     // Actual testing scenarios
-    tokenGenerate: {
+    // identityMap: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityMap',
+    //   vus: identityMapVUs,
+    //   duration: testDuration,
+    //   gracefulStop: '0s',
+    //   startTime: '40s',
+    // },
+    // identityMapLargeBatchSequential: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityMapLargeBatch',
+    //   vus: 1,
+    //   duration: '300s',
+    //   gracefulStop: '0s',
+    //   startTime: '40s',
+    // },
+    identityMapLargeBatch: {
       executor: 'constant-vus',
-      exec: 'tokenGenerate',
-      vus: generateVUs,
-      duration: testDuration,
+      exec: 'identityMapLargeBatch',
+      vus: identityMapLargeBatchVUs,
+      duration: '300s',
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: '40s',
     },
   },
   // So we get count in the summary, to demonstrate different metrics are different
