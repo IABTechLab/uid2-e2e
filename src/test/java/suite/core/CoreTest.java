@@ -70,4 +70,21 @@ public class CoreTest {
     private static JsonObject getConfig() {
         return new JsonObject("{  \"aws_kms_jwt_signing_public_keys\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmvwB41qI5Fe41PDbXqcX5uOvSvfKh8l9QV0O3M+NsB4lKqQEP0t1hfoiXTpOgKz1ArYxHsQ2LeXifX4uwEbYJFlpVM+tyQkTWQjBOw6fsLYK2Xk4X2ylNXUUf7x3SDiOVxyvTh3OZW9kqrDBN9JxSoraNLyfw0hhW0SHpfs699SehgbQ7QWep/gVlKRLIz0XAXaZNw24s79ORcQlrCE6YD0PgQmpI/dK5xMML82n6y3qcTlywlGaU7OGIMdD+CTXA3BcOkgXeqZTXNaX1u6jCTa1lvAczun6avp5VZ4TFiuPo+y4rJ3GU+14cyT5NckEcaTKSvd86UdwK5Id9tl3bQIDAQAB\"}");
     }
+
+    @ParameterizedTest(name = "/operator/config - {0}")
+    @MethodSource({
+            "suite.core.TestData#baseArgs"
+    })
+    public void testOpertorConfig_ValidRequest(Core core) throws Exception {
+        JsonNode response = core.getOperatorConfig();
+
+        assertAll("testOpertorConfig_ValidRequest has valid response",
+                () -> assertNotNull(response),
+                () -> assertInstanceOf(Integer.class, response.get("version").asInt()),
+                () -> {
+                    JsonNode runtimeConfig = response.get("runtime_config");
+                    assertNotNull(runtimeConfig, "runtime_config should not be null");
+                }
+        );
+    }
 }

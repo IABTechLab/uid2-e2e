@@ -46,4 +46,10 @@ public class Core extends App {
         String response = HttpClient.get(getBaseUrl() + path, OPTOUT_API_KEY);
         return OBJECT_MAPPER.readTree(response);
     }
+
+    public JsonNode getOperatorConfig() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        String response = HttpClient.get(getBaseUrl() + "/operator/config", OPERATOR_API_KEY, headers);
+        return OBJECT_MAPPER.readTree(response);
+    }
 }
