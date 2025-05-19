@@ -6,7 +6,7 @@
 
     <groupId>com.uid2</groupId>
     <artifactId>uid2-e2e</artifactId>
-    <version>4.0.20</version>
+    <version>4.0.21-alpha-68-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
