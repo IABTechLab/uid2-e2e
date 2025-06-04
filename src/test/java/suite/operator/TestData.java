@@ -5,19 +5,18 @@ import app.component.App;
 import app.component.Operator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.uid2.client.DecryptionStatus;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Named.named;
 
 public final class TestData {
     public static final int RAW_UID2_LENGTH = 44;
+    private static final Random RANDOM = new Random();
 
     private TestData() {
     }
@@ -329,16 +328,20 @@ public final class TestData {
 
     public static Set<Arguments> identityMapBigBatchArgs() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        Random random = new Random();
         Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         List<String> emails = new ArrayList<>();
         List<String> phones = new ArrayList<>();
+        List<String> emailHashes = new ArrayList<>();
+        List<String> phoneHashes = new ArrayList<>();
         for (int i = 0; i < 10_000; i++) {
-            emails.add("email_" + Math.abs(random.nextLong()) + "@example.com");
+            emails.add("email_" + Math.abs(RANDOM.nextLong()) + "@example.com");
 
             // Phone numbers with 15 digits are technically valid but are not used in any country
-            phones.add("+" + String.format("%015d", Math.abs(random.nextLong() % 1_000_000_000_000_000L)));
+            phones.add("+" + String.format("%015d", Math.abs(RANDOM.nextLong() % 1_000_000_000_000_000L)));
+
+            emailHashes.add(fakeRandomHash());
+            phoneHashes.add(fakeRandomHash());
         }
 
         var emailsJson = mapper.createObjectNode().putPOJO("email", emails).put("policy", 1);
@@ -347,12 +350,26 @@ public final class TestData {
         var phonesJson = mapper.createObjectNode().putPOJO("phone", phones).put("policy", 1);
         String phonesPayload = mapper.writeValueAsString(phonesJson);
 
+        var emailHashesJson = mapper.createObjectNode().putPOJO("email_hash", emailHashes).put("policy", 1);
+        String emailHashesPayload = mapper.writeValueAsString(emailHashesJson);
+
+        var phoneHashesJson = mapper.createObjectNode().putPOJO("phone_hash", phoneHashes).put("policy", 1);
+        String phoneHashesPayload = mapper.writeValueAsString(phoneHashesJson);
+
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
             args.add(Arguments.of("10k emails", operator, operator.getName(), emailsPayload, emails));
             args.add(Arguments.of("10k phones", operator, operator.getName(), phonesPayload, phones));
+            args.add(Arguments.of("10k email hashes", operator, operator.getName(), emailHashesPayload, emailHashes));
+            args.add(Arguments.of("10k phone hashes", operator, operator.getName(), phoneHashesPayload, phoneHashes));
         }
         return args;
+    }
+
+    private static String fakeRandomHash() {
+        byte[] randomBytes = new byte[32];
+        RANDOM.nextBytes(randomBytes);
+        return Base64.getEncoder().encodeToString(randomBytes);
     }
 
     public static Set<Arguments> identityMapBatchEmailArgsBadPolicy() {
