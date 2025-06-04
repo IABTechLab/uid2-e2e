@@ -7,7 +7,6 @@ import common.EnvUtil;
 import app.component.Operator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.uid2.client.*;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 

@@ -335,26 +335,16 @@ public final class TestData {
         List<String> emailHashes = new ArrayList<>();
         List<String> phoneHashes = new ArrayList<>();
         for (int i = 0; i < 10_000; i++) {
-            emails.add("email_" + Math.abs(RANDOM.nextLong()) + "@example.com");
-
-            // Phone numbers with 15 digits are technically valid but are not used in any country
-            phones.add("+" + String.format("%015d", Math.abs(RANDOM.nextLong() % 1_000_000_000_000_000L)));
-
-            emailHashes.add(fakeRandomHash());
-            phoneHashes.add(fakeRandomHash());
+            emails.add(random_email());
+            phones.add(randomPhoneNumber());
+            emailHashes.add(randomHash());
+            phoneHashes.add(randomHash());
         }
 
-        var emailsJson = mapper.createObjectNode().putPOJO("email", emails).put("policy", 1);
-        String emailsPayload = mapper.writeValueAsString(emailsJson);
-
-        var phonesJson = mapper.createObjectNode().putPOJO("phone", phones).put("policy", 1);
-        String phonesPayload = mapper.writeValueAsString(phonesJson);
-
-        var emailHashesJson = mapper.createObjectNode().putPOJO("email_hash", emailHashes).put("policy", 1);
-        String emailHashesPayload = mapper.writeValueAsString(emailHashesJson);
-
-        var phoneHashesJson = mapper.createObjectNode().putPOJO("phone_hash", phoneHashes).put("policy", 1);
-        String phoneHashesPayload = mapper.writeValueAsString(phoneHashesJson);
+        var emailsPayload = identityMapPayload(mapper, "email", emails);
+        var phonesPayload = identityMapPayload(mapper, "phone", phones);
+        var emailHashesPayload = identityMapPayload(mapper, "email_hash", emailHashes);
+        var phoneHashesPayload = identityMapPayload(mapper, "phone_hash", phoneHashes);
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
@@ -366,7 +356,22 @@ public final class TestData {
         return args;
     }
 
-    private static String fakeRandomHash() {
+    private static String identityMapPayload(ObjectMapper mapper, String field, List<String> diis) throws JsonProcessingException {
+        var json = mapper.createObjectNode().putPOJO(field, diis).put("policy", 1);
+        return mapper.writeValueAsString(json);
+    }
+
+    private static String random_email() {
+        return "email_" + Math.abs(RANDOM.nextLong()) + "@example.com";
+    }
+
+    private static String randomPhoneNumber() {
+        // Phone numbers with 15 digits are technically valid but are not used in any country
+        return "+" + String.format("%015d", Math.abs(RANDOM.nextLong() % 1_000_000_000_000_000L));
+    }
+
+    private static String randomHash() {
+        // This isn't really a hashed DII but looks like one ot UID2
         byte[] randomBytes = new byte[32];
         RANDOM.nextBytes(randomBytes);
         return Base64.getEncoder().encodeToString(randomBytes);
