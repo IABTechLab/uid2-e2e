@@ -328,22 +328,29 @@ public final class TestData {
     }
 
     public static Set<Arguments> identityMapBigBatchArgs() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Random random = new Random();
         Set<Operator> operators = AppsMap.getApps(Operator.class);
 
-        List<String> emails = IntStream.range(0, 10_000)
-                .mapToObj(i -> "email_" + i + "_" + UUID.randomUUID() + "@example.com")
-                .collect(Collectors.toList());
+        List<String> emails = new ArrayList<>();
+        List<String> phones = new ArrayList<>();
+        for (int i = 0; i < 10_000; i++) {
+            emails.add("email_" + Math.abs(random.nextLong()) + "@example.com");
 
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode root = mapper.createObjectNode();
-        root.putPOJO("email", emails);
-        root.put("policy", 1);
+            // Phone numbers with 15 digits are technically valid but are not used in any country
+            phones.add("+" + String.format("%015d", Math.abs(random.nextLong() % 1_000_000_000_000_000L)));
+        }
 
-        String emailsPayload = mapper.writeValueAsString(root);
+        var emailsJson = mapper.createObjectNode().putPOJO("email", emails).put("policy", 1);
+        String emailsPayload = mapper.writeValueAsString(emailsJson);
+
+        var phonesJson = mapper.createObjectNode().putPOJO("phone", phones).put("policy", 1);
+        String phonesPayload = mapper.writeValueAsString(phonesJson);
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
             args.add(Arguments.of("10k emails", operator, operator.getName(), emailsPayload, emails));
+            args.add(Arguments.of("10k phones", operator, operator.getName(), phonesPayload, phones));
         }
         return args;
     }
