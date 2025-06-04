@@ -3,14 +3,15 @@ package suite.operator;
 import app.AppsMap;
 import app.component.App;
 import app.component.Operator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.uid2.client.DecryptionStatus;
 import org.junit.jupiter.params.provider.Arguments;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Named.named;
@@ -322,6 +323,27 @@ public final class TestData {
             for (List<String> input : inputs) {
                 args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1)));
             }
+        }
+        return args;
+    }
+
+    public static Set<Arguments> identityMapBigBatchArgs() throws JsonProcessingException {
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
+
+        List<String> emails = IntStream.range(0, 10_000)
+                .mapToObj(i -> "email_" + i + "_" + UUID.randomUUID() + "@example.com")
+                .collect(Collectors.toList());
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode root = mapper.createObjectNode();
+        root.putPOJO("email", emails);
+        root.put("policy", 1);
+
+        String emailsPayload = mapper.writeValueAsString(root);
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            args.add(Arguments.of("10k emails", operator, operator.getName(), emailsPayload, emails));
         }
         return args;
     }
