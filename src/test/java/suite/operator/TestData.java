@@ -335,7 +335,7 @@ public final class TestData {
         List<String> emailHashes = new ArrayList<>();
         List<String> phoneHashes = new ArrayList<>();
         for (int i = 0; i < 10_000; i++) {
-            emails.add(random_email());
+            emails.add(randomEmail());
             phones.add(randomPhoneNumber());
             emailHashes.add(randomHash());
             phoneHashes.add(randomHash());
@@ -361,7 +361,7 @@ public final class TestData {
         return mapper.writeValueAsString(json);
     }
 
-    private static String random_email() {
+    private static String randomEmail() {
         return "email_" + Math.abs(RANDOM.nextLong()) + "@example.com";
     }
 
