@@ -10,6 +10,9 @@ import com.uid2.client.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.Duration;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -104,6 +107,28 @@ public class V2ApiOperatorTest {
         // TODO: Assert the value
         assertThat(response.at("/status").asText()).isEqualTo("success");
     }
+
+    @ParameterizedTest(name = "/v2/identity/map - {0} - {2}")
+    @MethodSource({
+            "suite.operator.TestData#identityMapBigBatchArgs"
+    })
+    public void testV2IdentityMapLargeBatch(String label, Operator operator, String operatorName, String payload, List<String> diis) {
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () ->  { // Validate we didn't make mapping too slow.
+            JsonNode response = operator.v2IdentityMap(payload);
+
+            assertThat(response.at("/status").asText()).isEqualTo("success");
+
+            var mapped = response.at("/body/mapped");
+            assertThat(mapped.size()).isEqualTo(10_000);
+
+            for (int i = 0; i < 10_000; i++) {
+                assertThat(mapped.get(i).get("identifier").asText()).isEqualTo(diis.get(i));
+                assertThat(mapped.get(i).get("advertising_id").asText()).isNotNull().isNotEmpty();
+                assertThat(mapped.get(i).get("bucket_id").asText()).isNotNull().isNotEmpty();
+            }
+        });
+    }
+
 
     @ParameterizedTest(name = "/v2/identity/map - VALIDATE EMAIL - {0} - {2}")
     @MethodSource({

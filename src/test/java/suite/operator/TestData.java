@@ -3,13 +3,12 @@ package suite.operator;
 import app.AppsMap;
 import app.component.App;
 import app.component.Operator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uid2.client.DecryptionStatus;
 import org.junit.jupiter.params.provider.Arguments;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,6 +16,7 @@ import static org.junit.jupiter.api.Named.named;
 
 public final class TestData {
     public static final int RAW_UID2_LENGTH = 44;
+    private static final Random RANDOM = new Random();
 
     private TestData() {
     }
@@ -324,6 +324,57 @@ public final class TestData {
             }
         }
         return args;
+    }
+
+    public static Set<Arguments> identityMapBigBatchArgs() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
+
+        List<String> emails = new ArrayList<>();
+        List<String> phones = new ArrayList<>();
+        List<String> emailHashes = new ArrayList<>();
+        List<String> phoneHashes = new ArrayList<>();
+        for (int i = 0; i < 10_000; i++) {
+            emails.add(randomEmail());
+            phones.add(randomPhoneNumber());
+            emailHashes.add(randomHash());
+            phoneHashes.add(randomHash());
+        }
+
+        var emailsPayload = identityMapPayload(mapper, "email", emails);
+        var phonesPayload = identityMapPayload(mapper, "phone", phones);
+        var emailHashesPayload = identityMapPayload(mapper, "email_hash", emailHashes);
+        var phoneHashesPayload = identityMapPayload(mapper, "phone_hash", phoneHashes);
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            args.add(Arguments.of("10k emails", operator, operator.getName(), emailsPayload, emails));
+            args.add(Arguments.of("10k phones", operator, operator.getName(), phonesPayload, phones));
+            args.add(Arguments.of("10k email hashes", operator, operator.getName(), emailHashesPayload, emailHashes));
+            args.add(Arguments.of("10k phone hashes", operator, operator.getName(), phoneHashesPayload, phoneHashes));
+        }
+        return args;
+    }
+
+    private static String identityMapPayload(ObjectMapper mapper, String field, List<String> diis) throws JsonProcessingException {
+        var json = mapper.createObjectNode().putPOJO(field, diis).put("policy", 1);
+        return mapper.writeValueAsString(json);
+    }
+
+    private static String randomEmail() {
+        return "email_" + Math.abs(RANDOM.nextLong()) + "@example.com";
+    }
+
+    private static String randomPhoneNumber() {
+        // Phone numbers with 15 digits are technically valid but are not used in any country
+        return "+" + String.format("%015d", Math.abs(RANDOM.nextLong() % 1_000_000_000_000_000L));
+    }
+
+    private static String randomHash() {
+        // This isn't really a hashed DII but looks like one ot UID2
+        byte[] randomBytes = new byte[32];
+        RANDOM.nextBytes(randomBytes);
+        return Base64.getEncoder().encodeToString(randomBytes);
     }
 
     public static Set<Arguments> identityMapBatchEmailArgsBadPolicy() {
