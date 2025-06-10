@@ -151,7 +151,11 @@ function generateIdentityMapRequest(emailCount) {
 }
 
 function send(data, auth) {
-  var options = {};
+  var options = {
+    tags: {
+      endpoint: 'token/generate' // Static tag for this script's primary purpose
+    }
+  };
   if (auth) {
     options.headers = {
       'Authorization': `Bearer ${clientKey}`

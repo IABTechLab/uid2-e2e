@@ -4,7 +4,6 @@ import encoding from 'k6/encoding';
 import { check } from 'k6';
 import http from 'k6/http';
 
-const vus = 300;
 // Get Key and Secret from: https://start.1password.com/open/i?a=SWHBRR7FURBBXPZORJWBGP5UBM&v=cknem3yiubq6f2guyizd2ifsnm&i=ywhkqovi4p5wzoi7me4564hod4&h=thetradedesk.1password.com
 const baseUrl = __ENV.OPERATOR_URL;
 const clientSecret = __ENV.CLIENT_SECRET;
@@ -12,7 +11,7 @@ const clientKey = __ENV.CLIENT_KEY;
 const identityMapVUs = 300;
 const identityMapLargeBatchVUs = 10;
 
-const generateVUs = vus;
+const generateVUs = identityMapLargeBatchVUs;
 const testDuration = '5m'
 
 export const options = {
@@ -41,15 +40,15 @@ export const options = {
     //   executor: 'constant-vus',
     //   exec: 'identityMapLargeBatch',
     //   vus: 1,
-    //   duration: '300s',
+    //   duration: testDuration,
     //   gracefulStop: '0s',
     //   startTime: '40s',
     // },
     identityMapLargeBatch: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
-      vus: identityMapLargeBatchVUs,
-      duration: '300s',
+      vus: generateVUs,
+      duration: testDuration,
       gracefulStop: '0s',
       startTime: '40s',
     },
@@ -169,7 +168,11 @@ function generateIdentityMapRequest(emailCount) {
 }
 
 function send(data, auth) {
-  var options = {};
+  var options = {
+    tags: {
+      endpoint: 'identity/map' // Static tag for this script's primary purpose
+    }
+  };
   if (auth) {
     options.headers = {
       'Authorization': `Bearer ${clientKey}`
