@@ -10,10 +10,11 @@ COMMENT=$2
 
 EDITED_FILE_NAME=k6-test-resource-edited-${TEST_FILE%.js}.yml
 CONFIG_MAP_NAME=operator-stress-test-${TEST_FILE%.js}
+TEST_RUN_NAME=k6-uid2-load-test-${TEST_FILE%.js}
 
 echo "Delete existing tests"
-kubectl delete -f $EDITED_FILE_NAME
-kubectl delete configmap $CONFIG_MAP_NAME
+kubectl delete -f $EDITED_FILE_NAME --ignore-not-found=true
+kubectl delete configmap $CONFIG_MAP_NAME --ignore-not-found=true
 
 echo "Starting tests"
 rm $EDITED_FILE_NAME
@@ -21,6 +22,7 @@ cp ./k6-test-resource.yml $EDITED_FILE_NAME
 sed -i -e "s/replaced/$TEST_FILE/g" $EDITED_FILE_NAME
 sed -i -e "s/replacecomment/$COMMENT/g" $EDITED_FILE_NAME
 sed -i -e "s/operator-stress-test/$CONFIG_MAP_NAME/g" $EDITED_FILE_NAME
+sed -i -e "s/k6-uid2-load-test/$TEST_RUN_NAME/g" $EDITED_FILE_NAME
 
 operator_url_value=$OPERATOR_URL
 client_key_value=$CLIENT_KEY_VALUE
