@@ -11,7 +11,7 @@ const clientSecret = __ENV.CLIENT_SECRET;
 const clientKey = __ENV.CLIENT_KEY;
 
 const generateVUs = vus;
-const testDuration = '20m'
+const testDuration = '60m'
 
 export const options = {
   insecureSkipTLSVerify: true,

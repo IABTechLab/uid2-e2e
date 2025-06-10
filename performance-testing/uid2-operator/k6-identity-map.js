@@ -12,7 +12,7 @@ const identityMapVUs = 300;
 const identityMapLargeBatchVUs = 10;
 
 const generateVUs = identityMapLargeBatchVUs;
-const testDuration = '5m'
+const testDuration = '45m'
 
 export const options = {
   insecureSkipTLSVerify: true,
