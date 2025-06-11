@@ -9,7 +9,7 @@ const baseUrl = __ENV.OPERATOR_URL;
 const clientSecret = __ENV.CLIENT_SECRET;
 const clientKey = __ENV.CLIENT_KEY;
 const identityMapVUs = 300;
-const identityMapLargeBatchVUs = 10;
+const identityMapLargeBatchVUs = 30;
 
 const generateVUs = identityMapLargeBatchVUs;
 const testDuration = '45m'
