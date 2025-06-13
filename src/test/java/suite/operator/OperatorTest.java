@@ -11,13 +11,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unused")
-public class V2ApiOperatorTest {
+public class OperatorTest {
     /*
     TODO:
         /v2/token/generate - Add failure case
@@ -31,6 +33,7 @@ public class V2ApiOperatorTest {
 
     private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
     private static final String CLIENT_SITE_ID = EnvUtil.getEnv(Const.Config.Operator.CLIENT_SITE_ID);
+    private static final int RAW_UID_SIZE = 44;
 
     @ParameterizedTest(name = "/v2/token/generate - {0} - {2}")
     @MethodSource({
@@ -113,7 +116,7 @@ public class V2ApiOperatorTest {
             "suite.operator.TestData#identityMapBigBatchArgs"
     })
     public void testV2IdentityMapLargeBatch(String label, Operator operator, String operatorName, String payload, List<String> diis) {
-        assertTimeoutPreemptively(Duration.ofSeconds(5), () ->  { // Validate we didn't make mapping too slow.
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> { // Validate we didn't make mapping too slow.
             JsonNode response = operator.v2IdentityMap(payload);
 
             assertThat(response.at("/status").asText()).isEqualTo("success");
@@ -125,6 +128,50 @@ public class V2ApiOperatorTest {
                 assertThat(mapped.get(i).get("identifier").asText()).isEqualTo(diis.get(i));
                 assertThat(mapped.get(i).get("advertising_id").asText()).isNotNull().isNotEmpty();
                 assertThat(mapped.get(i).get("bucket_id").asText()).isNotNull().isNotEmpty();
+            }
+        });
+    }
+
+    @ParameterizedTest(name = "/v3/identity/map - {0} - {2}")
+    @MethodSource({
+            "suite.operator.TestData#identityMapV3BigBatchArgs"
+    })
+    public void testV3IdentityMapLargeBatch(
+            String label,
+            Operator operator,
+            String operatorName,
+            List<String> emails,
+            List<String> phones,
+            List<String> emailHashes,
+            List<String> phoneHashes,
+            List<String> diis
+    ) {
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> { // Validate we didn't make mapping too slow.
+            var response = operator.v3IdentityMap(emails, phones, emailHashes, phoneHashes);
+
+            assertThat(response.isSuccess()).isTrue();
+
+            var allMappedDiis = response.getMappedIdentities();
+            assertThat(allMappedDiis.size()).isEqualTo(10_000);
+
+
+            for (var dii : diis) {
+                var mappedDii = allMappedDiis.get(dii);
+                assertThat(mappedDii).isNotNull();
+
+                // Current UID should always be there and should have correct length
+                assertThat(mappedDii.getCurrentRawUid().length()).isEqualTo(RAW_UID_SIZE);
+
+                // Previous UID is there for 90 days after rotation only, then it's null.
+                // If it's there, it should have the correct size
+                assertThat(mappedDii.getPreviousRawUid()).satisfiesAnyOf(
+                        uid -> assertThat(uid).isNull(),
+                        uid -> assertThat(uid).hasSize(RAW_UID_SIZE)
+                );
+
+                // Sanity check that refresh from is a date not too far in the past.
+                // If it is, either there is an Operator issue or salt rotation hasn't been running for a long time.
+                assertThat(mappedDii.getRefreshFrom()).isAfter(Instant.now().minus(Duration.ofDays(10)));
             }
         });
     }

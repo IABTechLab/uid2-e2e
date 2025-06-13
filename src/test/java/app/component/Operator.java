@@ -25,6 +25,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
 
 public class Operator extends App {
     public enum Type {
@@ -264,6 +265,12 @@ public class Operator extends App {
         V2Envelope envelope = v2CreateEnvelope(payload, getClientApiSecret());
         String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/identity/map", envelope.envelope(), getClientApiKey());
         return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), getClientApiSecret());
+    }
+
+    public IdentityMapV3Response v3IdentityMap(List<String> emails, List<String> phones, List<String> emailHashes, List<String> phoneHashes) {
+        IdentityMapV3Client identityMapV3Client = new IdentityMapV3Client(getBaseUrl(), CLIENT_API_KEY, CLIENT_API_SECRET);
+        IdentityMapV3Input input = new IdentityMapV3Input().withEmails(emails).withPhones(phones).withHashedEmails(emailHashes).withHashedPhones(phoneHashes);
+        return identityMapV3Client.generateIdentityMap(input);
     }
 
     public JsonNode v2IdentityBuckets(String payload) throws Exception {

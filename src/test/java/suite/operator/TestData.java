@@ -103,8 +103,8 @@ public final class TestData {
         Set<Arguments> args = new HashSet<>();
         if (App.PHONE_SUPPORT) {
             for (Operator operator : operators) {
-                args.add(Arguments.of("optout special phone", operator, operator.getName(),  "phone", "+00000000000", true));
-                args.add(Arguments.of("optout special phone", operator, operator.getName(),  "phone", "+00000000000", false));
+                args.add(Arguments.of("optout special phone", operator, operator.getName(), "phone", "+00000000000", true));
+                args.add(Arguments.of("optout special phone", operator, operator.getName(), "phone", "+00000000000", false));
             }
         }
         return args;
@@ -352,6 +352,30 @@ public final class TestData {
             args.add(Arguments.of("10k phones", operator, operator.getName(), phonesPayload, phones));
             args.add(Arguments.of("10k email hashes", operator, operator.getName(), emailHashesPayload, emailHashes));
             args.add(Arguments.of("10k phone hashes", operator, operator.getName(), phoneHashesPayload, phoneHashes));
+        }
+        return args;
+    }
+
+    public static Set<Arguments> identityMapV3BigBatchArgs() {
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
+
+        List<String> emails = new ArrayList<>();
+        List<String> phones = new ArrayList<>();
+        List<String> emailHashes = new ArrayList<>();
+        List<String> phoneHashes = new ArrayList<>();
+        for (int i = 0; i < 10_000; i++) {
+            emails.add(randomEmail());
+            phones.add(randomPhoneNumber());
+            emailHashes.add(randomHash());
+            phoneHashes.add(randomHash());
+        }
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            args.add(Arguments.of("10k emails", operator, operator.getName(), emails, List.of(), List.of(), List.of(), emails));
+            args.add(Arguments.of("10k phones", operator, operator.getName(), List.of(), phones, List.of(), List.of(), phones));
+            args.add(Arguments.of("10k email hashes", operator, operator.getName(), List.of(), List.of(), emailHashes, List.of(), emailHashes));
+            args.add(Arguments.of("10k phone hashes", operator, operator.getName(), List.of(), List.of(), List.of(), phoneHashes, phoneHashes));
         }
         return args;
     }

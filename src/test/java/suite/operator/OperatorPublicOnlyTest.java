@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unused")
-public class V2ApiOperatorPublicOnlyTest {
+public class OperatorPublicOnlyTest {
     private static final String EMAIL_OPTOUT_ID = "optout@unifiedid.com";
     private static final String PHONE_OPTOUT_ID = "+00000000001";
 
