@@ -3,8 +3,6 @@ package suite.operator;
 import app.component.App;
 import app.component.Operator;
 import com.uid2.client.*;
-import common.Const;
-import common.EnvUtil;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIf("common.EnabledCondition#isLocal")
-public class V2ApiOperatorLocalOnlyTest {
+public class OperatorLocalOnlyTest {
     @ParameterizedTest(name = "{index} ==> Sender {0} encrypts with {1}, recipient {2} decrypts with {3}, expected result is {4}")
     @MethodSource({
             "suite.operator.TestData#sharingArgs",
