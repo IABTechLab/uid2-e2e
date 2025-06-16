@@ -9,6 +9,8 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -79,6 +81,24 @@ public class OperatorPublicOnlyTest {
         JsonNode response = operator.v2IdentityMap(payload);
 
         assertThat(response.get("body").get("unmapped").get(0).get("reason").asText()).isEqualTo("optout");
+    }
+
+    @ParameterizedTest(name = "/v3/identity/map - OPTOUT EMAIL, NO OPTOUT PARAM - {0} - {2} - Old Participant: {5}")
+    @MethodSource({
+            "suite.operator.TestData#tokenEmailArgsSpecialOptout",
+            "suite.operator.TestData#tokenPhoneArgsSpecialOptout"
+    })
+    public void testV3IdentityMapSpecialOptout(String label, Operator operator, String operatorName, String type, String identity) throws Exception {
+        if (isPrivateOperator(operator)) {
+            return;
+        }
+
+        // We need all properties to be there for Identity Map V3, so default all to empty
+        // In JSON if a property appears multiple times, the last value wins
+        String payload = "{\"email\":[], \"email_hash\":[], \"phone\":[], \"phone_hash\":[], \"" + type + "\": [\"" + identity + "\"]}";
+        JsonNode response = operator.v3IdentityMap(payload);
+
+        assertThat(response.get("body").get(type).get(0).get("e").asText()).isEqualTo("optout");
     }
 
     @EnabledIf("common.EnabledCondition#isLocal")
