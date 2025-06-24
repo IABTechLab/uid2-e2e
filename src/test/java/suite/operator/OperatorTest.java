@@ -183,7 +183,7 @@ public class OperatorTest {
 
                 // Sanity check that refresh from is a date not too far in the past.
                 // If it is, either there is an Operator issue or salt rotation hasn't been running for a long time.
-                assertThat(mappedDii.getRefreshFrom()).isAfter(Instant.now().minus(Duration.ofDays(10)));
+                assertThat(mappedDii.getRefreshFrom()).isAfter(Instant.now().minus(Duration.ofHours(1)));
             }
         });
     }
@@ -193,11 +193,11 @@ public class OperatorTest {
             "suite.operator.TestData#identityMapV3BatchBadEmailArgs",
             "suite.operator.TestData#identityMapV3BatchBadPhoneArgs"
     })
-    public void testV3IdentityMapUnmapped(String label, Operator operator, String operatorName, String payload, String section) throws Exception {
+    public void testV3IdentityMapUnmapped(String label, Operator operator, String operatorName, String payload, String identityType) throws Exception {
         JsonNode response = operator.v3IdentityMap(payload);
 
         assertThat(response.at("/status").asText()).isEqualTo("success");
-        assertThat(response.at("/body/" + section + "/0/e").asText()).isEqualTo("invalid identifier");
+        assertThat(response.at("/body/" + identityType + "/0/e").asText()).isEqualTo("invalid identifier");
     }
 
 

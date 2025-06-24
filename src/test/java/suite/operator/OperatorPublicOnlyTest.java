@@ -93,9 +93,7 @@ public class OperatorPublicOnlyTest {
             return;
         }
 
-        // We need all properties to be there for Identity Map V3, so default all to empty
-        // In JSON if a property appears multiple times, the last value wins
-        String payload = "{\"email\":[], \"email_hash\":[], \"phone\":[], \"phone_hash\":[], \"" + type + "\": [\"" + identity + "\"]}";
+        String payload = "{\"" + type + "\": [\"" + identity + "\"]}";
         JsonNode response = operator.v3IdentityMap(payload);
 
         assertThat(response.get("body").get(type).get(0).get("e").asText()).isEqualTo("optout");

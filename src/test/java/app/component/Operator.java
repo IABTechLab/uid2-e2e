@@ -25,7 +25,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.List;
 
 public class Operator extends App {
     public enum Type {
@@ -263,9 +262,9 @@ public class Operator extends App {
 
     // Need to use the manual mapping for error cases - SDK won't allow creating input with bad emails or disable optout check
     public JsonNode v2IdentityMap(String payload) throws Exception {
-        V2Envelope envelope = v2CreateEnvelope(payload, getClientApiSecret());
-        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/identity/map", envelope.envelope(), getClientApiKey());
-        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), getClientApiSecret());
+        V2Envelope envelope = v2CreateEnvelope(payload, CLIENT_API_SECRET);
+        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/identity/map", envelope.envelope(), CLIENT_API_KEY);
+        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
     }
 
     public IdentityMapResponse v2IdentityMap(IdentityMapInput input) {
@@ -275,9 +274,9 @@ public class Operator extends App {
 
     // Need to use the manual mapping for error cases - SDK won't allow creating input with bad emails
     public JsonNode v3IdentityMap(String payload) throws Exception {
-        V2Envelope envelope = v2CreateEnvelope(payload, getClientApiSecret());
-        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v3/identity/map", envelope.envelope(), getClientApiKey());
-        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), getClientApiSecret());
+        V2Envelope envelope = v2CreateEnvelope(payload, CLIENT_API_SECRET);
+        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v3/identity/map", envelope.envelope(), CLIENT_API_KEY);
+        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
     }
 
     public IdentityMapV3Response v3IdentityMap(IdentityMapV3Input input) {
@@ -301,14 +300,6 @@ public class Operator extends App {
         V2Envelope envelope = v2CreateEnvelope("", CLIENT_API_SECRET);
         String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/key/sharing", envelope.envelope(), CLIENT_API_KEY);
         return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
-    }
-
-    private String getClientApiKey() {
-        return CLIENT_API_KEY;
-    }
-
-    private String getClientApiSecret() {
-        return CLIENT_API_SECRET;
     }
 
     private V2Envelope v2CreateEnvelope(String payload, String secret) throws Exception {
