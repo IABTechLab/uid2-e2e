@@ -14,9 +14,9 @@ import suite.validator.V2ApiValidatorTest;
         BasicTest.class,
         CoreTest.class,
         CoreRefreshTest.class,
-        V2ApiOperatorTest.class,
-        V2ApiOperatorPublicOnlyTest.class,
-        V2ApiOperatorLocalOnlyTest.class,
+        OperatorTest.class,
+        OperatorPublicOnlyTest.class,
+        OperatorLocalOnlyTest.class,
         OptoutTest.class,
         V2ApiValidatorTest.class
 })
