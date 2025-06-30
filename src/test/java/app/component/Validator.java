@@ -8,7 +8,6 @@ import java.io.IOException;
 
 public class Validator extends App {
     private final PublisherUid2Helper publisherHelper;
-    private final UID2Client dspClient;
     private final Headers standardHeaders;
     private final MediaType FORM = MediaType.get("application/x-www-form-urlencoded");;
 
@@ -20,12 +19,6 @@ public class Validator extends App {
                 .add("Authorization", "Bearer " + clientApiKey)
                 .add("X-UID2-Client-Version: java-e2e-test")
                 .build();
-
-        dspClient = new UID2Client(
-                this.getBaseUrl(),
-                clientApiKey,
-                clientSecret,
-                IdentityScope.UID2);
     }
 
     public Response triggerGenerateTokenFromEmail(String email) throws IOException {

@@ -260,10 +260,28 @@ public class Operator extends App {
         return dspClient.decrypt(token);
     }
 
+    // Need to use the manual mapping for error cases - SDK won't allow creating input with bad emails or disable optout check
     public JsonNode v2IdentityMap(String payload) throws Exception {
-        V2Envelope envelope = v2CreateEnvelope(payload, getClientApiSecret());
-        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/identity/map", envelope.envelope(), getClientApiKey());
-        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), getClientApiSecret());
+        V2Envelope envelope = v2CreateEnvelope(payload, CLIENT_API_SECRET);
+        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/identity/map", envelope.envelope(), CLIENT_API_KEY);
+        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
+    }
+
+    public IdentityMapResponse v2IdentityMap(IdentityMapInput input) {
+        IdentityMapClient identityMapClient = new IdentityMapClient(getBaseUrl(), CLIENT_API_KEY, CLIENT_API_SECRET);
+        return identityMapClient.generateIdentityMap(input);
+    }
+
+    // Need to use the manual mapping for error cases - SDK won't allow creating input with bad emails
+    public JsonNode v3IdentityMap(String payload) throws Exception {
+        V2Envelope envelope = v2CreateEnvelope(payload, CLIENT_API_SECRET);
+        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v3/identity/map", envelope.envelope(), CLIENT_API_KEY);
+        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
+    }
+
+    public IdentityMapV3Response v3IdentityMap(IdentityMapV3Input input) {
+        IdentityMapV3Client identityMapV3Client = new IdentityMapV3Client(getBaseUrl(), CLIENT_API_KEY, CLIENT_API_SECRET);
+        return identityMapV3Client.generateIdentityMap(input);
     }
 
     public JsonNode v2IdentityBuckets(String payload) throws Exception {
@@ -282,14 +300,6 @@ public class Operator extends App {
         V2Envelope envelope = v2CreateEnvelope("", CLIENT_API_SECRET);
         String encryptedResponse = HttpClient.post(getBaseUrl() + "/v2/key/sharing", envelope.envelope(), CLIENT_API_KEY);
         return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
-    }
-
-    private String getClientApiKey() {
-        return CLIENT_API_KEY;
-    }
-
-    private String getClientApiSecret() {
-        return CLIENT_API_SECRET;
     }
 
     private V2Envelope v2CreateEnvelope(String payload, String secret) throws Exception {

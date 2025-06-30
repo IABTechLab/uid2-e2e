@@ -3,9 +3,9 @@ package suite.operator;
 import app.AppsMap;
 import app.component.App;
 import app.component.Operator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uid2.client.DecryptionStatus;
+import com.uid2.client.IdentityMapInput;
+import com.uid2.client.IdentityMapV3Input;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.*;
@@ -103,8 +103,8 @@ public final class TestData {
         Set<Arguments> args = new HashSet<>();
         if (App.PHONE_SUPPORT) {
             for (Operator operator : operators) {
-                args.add(Arguments.of("optout special phone", operator, operator.getName(),  "phone", "+00000000000", true));
-                args.add(Arguments.of("optout special phone", operator, operator.getName(),  "phone", "+00000000000", false));
+                args.add(Arguments.of("optout special phone", operator, operator.getName(), "phone", "+00000000000", true));
+                args.add(Arguments.of("optout special phone", operator, operator.getName(), "phone", "+00000000000", false));
             }
         }
         return args;
@@ -268,42 +268,43 @@ public final class TestData {
         return args;
     }
 
-    public static Set<Arguments> identityMapBadEmailArgs() {
+    public static Set<Arguments> identityMapBatchBadEmailArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
         Set<List<String>> inputs = Set.of(
-                List.of("empty email", "email", ""),
-                List.of("empty email hash", "email_hash", ""),
-                List.of("bad email", "email", "abc"),
-                List.of("bad email hash", "email_hash", "abc")
+                List.of("bad email list policy=1", "{\"email\":[\"abc\",\"user2@example.com\"], \"policy\":1}"),
+                List.of("bad email hash list policy=1", "{\"email_hash\":[\"eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=\",\"abc\"], \"policy\":1}"),
+                List.of("bad email list optout_check=1", "{\"email\":[\"abc\",\"user2@example.com\"], \"optout_check\":1}"),
+                List.of("bad email hash list optout_check=1", "{\"email_hash\":[\"eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=\",\"abc\"], \"optout_check\":1}")
         );
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
             for (List<String> input : inputs) {
-                args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1), input.get(2)));
+                args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1)));
             }
         }
         return args;
     }
 
-    public static Set<Arguments> identityMapBadPhoneArgs() {
+    public static Set<Arguments> identityMapBatchBadPhoneArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
         Set<List<String>> inputs = Set.of(
-                List.of("empty phone", "phone", ""),
-                List.of("empty phone hash", "phone_hash", ""),
-                List.of("bad phone", "phone", "abc"),
-                List.of("bad phone hash", "phone_hash", "abc")
+                List.of("bad phone list policy=1", "{\"phone\":[\"+1111111111\",\"abc\"], \"policy\":1}"),
+                List.of("bad phone hash list policy=1", "{\"phone_hash\":[\"abc\",\"tMmiiTI7IaAcPpQPFQ65uMVCWH8av9jw4cwf/F5HVRQ=\"], \"policy\":1}"),
+                List.of("bad phone list optout_check=1", "{\"phone\":[\"+1111111111\",\"abc\"], \"optout_check\":1}"),
+                List.of("bad phone hash list optout_check=1", "{\"phone_hash\":[\"abc\",\"tMmiiTI7IaAcPpQPFQ65uMVCWH8av9jw4cwf/F5HVRQ=\"], \"optout_check\":1}")
         );
 
         Set<Arguments> args = new HashSet<>();
-        for (Operator operator : operators) {
-            for (List<String> input : inputs) {
-                args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1), input.get(2)));
+        if (App.PHONE_SUPPORT) {
+            for (Operator operator : operators) {
+                for (List<String> input : inputs) {
+                    args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1)));
+                }
             }
         }
         return args;
     }
-
     public static Set<Arguments> identityMapBatchEmailArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
         Set<List<String>> inputs = Set.of(
@@ -326,8 +327,7 @@ public final class TestData {
         return args;
     }
 
-    public static Set<Arguments> identityMapBigBatchArgs() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
+    public static Set<Arguments> identityMapArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
 
         List<String> emails = new ArrayList<>();
@@ -341,25 +341,102 @@ public final class TestData {
             phoneHashes.add(randomHash());
         }
 
-        var emailsPayload = identityMapPayload(mapper, "email", emails);
-        var phonesPayload = identityMapPayload(mapper, "phone", phones);
-        var emailHashesPayload = identityMapPayload(mapper, "email_hash", emailHashes);
-        var phoneHashesPayload = identityMapPayload(mapper, "phone_hash", phoneHashes);
-
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
-            args.add(Arguments.of("10k emails", operator, operator.getName(), emailsPayload, emails));
-            args.add(Arguments.of("10k phones", operator, operator.getName(), phonesPayload, phones));
-            args.add(Arguments.of("10k email hashes", operator, operator.getName(), emailHashesPayload, emailHashes));
-            args.add(Arguments.of("10k phone hashes", operator, operator.getName(), phoneHashesPayload, phoneHashes));
+            args.add(Arguments.of("10k emails", operator, operator.getName(), IdentityMapInput.fromEmails(emails), emails));
+            args.add(Arguments.of("10k phones", operator, operator.getName(), IdentityMapInput.fromPhones(phones), phones));
+            args.add(Arguments.of("10k email hashes", operator, operator.getName(), IdentityMapInput.fromHashedEmails(emailHashes), emailHashes));
+            args.add(Arguments.of("10k phone hashes", operator, operator.getName(), IdentityMapInput.fromHashedPhones(phoneHashes), phoneHashes));
         }
         return args;
     }
 
-    private static String identityMapPayload(ObjectMapper mapper, String field, List<String> diis) throws JsonProcessingException {
-        var json = mapper.createObjectNode().putPOJO(field, diis).put("policy", 1);
-        return mapper.writeValueAsString(json);
+    public static Set<Arguments> identityMapV3Args() {
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
+
+        List<String> emails = new ArrayList<>();
+        List<String> phones = new ArrayList<>();
+        List<String> emailHashes = new ArrayList<>();
+        List<String> phoneHashes = new ArrayList<>();
+        List<String> mixedDIIs = new ArrayList<>();
+
+        IdentityMapV3Input emailInput = IdentityMapV3Input.fromEmails(emails);
+        IdentityMapV3Input phoneInput = IdentityMapV3Input.fromPhones(phones);
+        IdentityMapV3Input emailHashInput = IdentityMapV3Input.fromHashedEmails(emailHashes);
+        IdentityMapV3Input phoneHashInput = IdentityMapV3Input.fromHashedPhones(phoneHashes);
+        IdentityMapV3Input mixedInput = IdentityMapV3Input.fromHashedPhones(phoneHashes);
+        for (int i = 0; i < 10_000; i++) {
+            String email = randomEmail();
+            String phone = randomPhoneNumber();
+            String emailHash = randomHash();
+            String phoneHash = randomHash();
+
+            emails.add(email);
+            phones.add(phone);
+            emailHashes.add(emailHash);
+            phoneHashes.add(phoneHash);
+
+            emailInput.withEmail(email);
+            phoneInput.withPhone(phone);
+            emailHashInput.withHashedEmail(emailHash);
+            phoneHashInput.withHashedPhone(phoneHash);
+
+            if (i < 2_500) { // all 4 DII types in the same collection, so we only need 2.5k of each
+                mixedDIIs.add(email);
+                mixedDIIs.add(phone);
+                mixedDIIs.add(emailHash);
+                mixedDIIs.add(phoneHash);
+
+                mixedInput.withEmail(email).withPhone(phone).withHashedEmail(emailHash).withHashedPhone(phoneHash);
+            }
+
+        }
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            args.add(Arguments.of("10k emails", operator, operator.getName(), emailInput, emails));
+            args.add(Arguments.of("10k phones", operator, operator.getName(), phoneInput, phones));
+            args.add(Arguments.of("10k email hashes", operator, operator.getName(), emailHashInput, emailHashes));
+            args.add(Arguments.of("10k phone hashes", operator, operator.getName(), phoneHashInput, phoneHashes));
+            args.add(Arguments.of("10k mixed DIIs", operator, operator.getName(), mixedInput, mixedDIIs));
+        }
+        return args;
     }
+
+    public static Set<Arguments> identityMapV3BatchBadEmailArgs() {
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
+        Set<List<String>> inputs = Set.of(
+                List.of("bad email", "{\"email\":[\"abc\"], \"email_hash\":[], \"phone\":[], \"phone_hash\":[]}", "email"),
+                List.of("bad email hash", "{\"email\":[], \"email_hash\":[\"abc\"], \"phone\":[], \"phone_hash\":[]}", "email_hash")
+        );
+
+        Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            for (List<String> input : inputs) {
+                args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1), input.get(2)));
+            }
+        }
+        return args;
+    }
+
+    public static Set<Arguments> identityMapV3BatchBadPhoneArgs() {
+        Set<Operator> operators = AppsMap.getApps(Operator.class);
+        Set<List<String>> inputs = Set.of(
+                List.of("bad phone", "{\"email\":[], \"email_hash\":[], \"phone\":[\"abc\"], \"phone_hash\":[]}", "phone"),
+                List.of("bad phone hash", "{\"email\":[], \"email_hash\":[], \"phone\":[], \"phone_hash\":[\"abc\"]}", "phone_hash")
+        );
+
+        Set<Arguments> args = new HashSet<>();
+        if (App.PHONE_SUPPORT) {
+            for (Operator operator : operators) {
+                for (List<String> input : inputs) {
+                    args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1), input.get(2)));
+                }
+            }
+        }
+        return args;
+    }
+
 
     private static String randomEmail() {
         return "email_" + Math.abs(RANDOM.nextLong()) + "@example.com";
@@ -371,7 +448,7 @@ public final class TestData {
     }
 
     private static String randomHash() {
-        // This isn't really a hashed DII but looks like one ot UID2
+        // This isn't really a hashed DII but looks like one to UID2
         byte[] randomBytes = new byte[32];
         RANDOM.nextBytes(randomBytes);
         return Base64.getEncoder().encodeToString(randomBytes);
@@ -517,39 +594,45 @@ public final class TestData {
         return args;
     }
 
-    public static Set<Arguments> identityMapBatchBadEmailArgs() {
+    public static Set<Arguments> identityMapBadInputArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
-        Set<List<String>> inputs = Set.of(
-                List.of("bad email list policy=1", "{\"email\":[\"abc\",\"user2@example.com\"], \"policy\":1}"),
-                List.of("bad email hash list policy=1", "{\"email_hash\":[\"eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=\",\"abc\"], \"policy\":1}"),
-                List.of("bad email list optout_check=1", "{\"email\":[\"abc\",\"user2@example.com\"], \"optout_check\":1}"),
-                List.of("bad email hash list optout_check=1", "{\"email_hash\":[\"eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=\",\"abc\"], \"optout_check\":1}")
-        );
+
+        List<String> badEmails = List.of("abc", "user2@example.com");
+        List<String> badEmailHashes = List.of("eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=", "abc");
 
         Set<Arguments> args = new HashSet<>();
         for (Operator operator : operators) {
-            for (List<String> input : inputs) {
-                args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1)));
+            args.add(Arguments.of("bad emails", operator, operator.getName(), IdentityMapInput.fromEmails(badEmails), badEmails));
+            args.add(Arguments.of("bad email hashes", operator, operator.getName(), IdentityMapInput.fromHashedEmails(badEmailHashes), badEmailHashes));
+        }
+
+        List<String> badPhones = List.of("+1111111111", "abc");
+        List<String> badPhoneHashes = List.of("abc", "tMmiiTI7IaAcPpQPFQ65uMVCWH8av9jw4cwf/F5HVRQ=");
+
+        if (App.PHONE_SUPPORT) {
+            for (Operator operator : operators) {
+                args.add(Arguments.of("bad phones", operator, operator.getName(), IdentityMapInput.fromPhones(badPhones), badPhones));
+                args.add(Arguments.of("bad phone hashes", operator, operator.getName(), IdentityMapInput.fromHashedPhones(badPhoneHashes), badPhoneHashes));
             }
         }
         return args;
     }
 
-    public static Set<Arguments> identityMapBatchBadPhoneArgs() {
+    public static Set<Arguments> identityMapV3BadInputArgs() {
         Set<Operator> operators = AppsMap.getApps(Operator.class);
-        Set<List<String>> inputs = Set.of(
-                List.of("bad phone list policy=1", "{\"phone\":[\"+1111111111\",\"abc\"], \"policy\":1}"),
-                List.of("bad phone hash list policy=1", "{\"phone_hash\":[\"abc\",\"tMmiiTI7IaAcPpQPFQ65uMVCWH8av9jw4cwf/F5HVRQ=\"], \"policy\":1}"),
-                List.of("bad phone list optout_check=1", "{\"phone\":[\"+1111111111\",\"abc\"], \"optout_check\":1}"),
-                List.of("bad phone hash list optout_check=1", "{\"phone_hash\":[\"abc\",\"tMmiiTI7IaAcPpQPFQ65uMVCWH8av9jw4cwf/F5HVRQ=\"], \"optout_check\":1}")
-        );
+
+        List<String> badEmailHashes = List.of("eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=", "abc");
 
         Set<Arguments> args = new HashSet<>();
+        for (Operator operator : operators) {
+            args.add(Arguments.of("bad email hashes", operator, operator.getName(), IdentityMapV3Input.fromHashedEmails(badEmailHashes), badEmailHashes));
+        }
+
+        List<String> badPhoneHashes = List.of("abc", "tMmiiTI7IaAcPpQPFQ65uMVCWH8av9jw4cwf/F5HVRQ=");
+
         if (App.PHONE_SUPPORT) {
             for (Operator operator : operators) {
-                for (List<String> input : inputs) {
-                    args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1)));
-                }
+                args.add(Arguments.of("bad phone hashes", operator, operator.getName(), IdentityMapV3Input.fromHashedPhones(badPhoneHashes), badPhoneHashes));
             }
         }
         return args;
