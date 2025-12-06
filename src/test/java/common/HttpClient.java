@@ -74,7 +74,7 @@ public final class HttpClient {
 
     public static String execute(Request request, HttpMethod method) throws Exception {
         final String url = request.url().toString();
-        final String requestBody = extractRequestBody(request);
+        final String requestBodyForLog = extractRequestBodyForLog(request);
         final String authHeader = extractAuthHeader(request);
         final Headers headers = request.headers();
         
@@ -85,16 +85,20 @@ public final class HttpClient {
             "  Headers: %s",
             method, url,
             authHeader,
-            requestBody,
+            requestBodyForLog,
             headers.toString()
         ));
         
         try (Response response = RAW_CLIENT.newCall(request).execute()) {
             final ResponseBody body = response.body();
-            final String responseBody = extractResponseBody(body);
+            // Read the FULL response body - don't truncate the actual data!
+            final String fullResponseBody = (body != null) ? body.string() : "";
             final int statusCode = response.code();
             final String statusMessage = response.message();
             final Headers responseHeaders = response.headers();
+            
+            // Only truncate for logging display
+            final String responseBodyForLog = truncateForLog(fullResponseBody, 1000);
             
             LOGGER.info(() -> String.format(
                 "[HTTP RESPONSE] %s %s%n" +
@@ -104,21 +108,32 @@ public final class HttpClient {
                 method, url,
                 statusCode, statusMessage,
                 responseHeaders.toString(),
-                responseBody
+                responseBodyForLog
             ));
             
             if (!response.isSuccessful()) {
                 LOGGER.error(() -> String.format(
                     "[HTTP ERROR] Request failed: %s %s - Status: %d %s - Response: %s",
-                    method, url, statusCode, statusMessage, responseBody
+                    method, url, statusCode, statusMessage, responseBodyForLog
                 ));
-                throw new HttpException(method, url, statusCode, statusMessage, responseBody);
+                throw new HttpException(method, url, statusCode, statusMessage, fullResponseBody);
             }
-            return responseBody;
+            // Return the FULL response body, not truncated
+            return fullResponseBody;
         }
     }
     
-    private static String extractRequestBody(Request request) {
+    private static String truncateForLog(String text, int maxLength) {
+        if (text == null || text.isEmpty()) {
+            return "[empty]";
+        }
+        if (text.length() > maxLength) {
+            return text.substring(0, maxLength) + "... [truncated, total length=" + text.length() + "]";
+        }
+        return text;
+    }
+    
+    private static String extractRequestBodyForLog(Request request) {
         if (request.body() == null) {
             return "[empty]";
         }
@@ -126,11 +141,7 @@ public final class HttpClient {
             okio.Buffer buffer = new okio.Buffer();
             request.body().writeTo(buffer);
             String body = buffer.readUtf8();
-            // Truncate very long bodies for readability
-            if (body.length() > 500) {
-                return body.substring(0, 500) + "... [truncated, length=" + body.length() + "]";
-            }
-            return body;
+            return truncateForLog(body, 500);
         } catch (Exception e) {
             return "[unable to read request body: " + e.getMessage() + "]";
         }
@@ -150,22 +161,6 @@ public final class HttpClient {
             }
         }
         return "[none]";
-    }
-    
-    private static String extractResponseBody(ResponseBody body) {
-        if (body == null) {
-            return "[empty]";
-        }
-        try {
-            String bodyString = body.string();
-            // Truncate very long responses
-            if (bodyString.length() > 1000) {
-                return bodyString.substring(0, 1000) + "... [truncated, length=" + bodyString.length() + "]";
-            }
-            return bodyString;
-        } catch (Exception e) {
-            return "[unable to read response body: " + e.getMessage() + "]";
-        }
     }
 
     private static Request buildRequest(HttpMethod method, String url, String body, String bearerToken) {
