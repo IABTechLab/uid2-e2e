@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uid2.shared.util.Mapper;
 import lombok.Getter;
 import okhttp3.*;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 
 import java.util.Map;
-import java.util.Objects;
 
 public final class HttpClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);
     private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
 
     public static final OkHttpClient RAW_CLIENT = new OkHttpClient();
@@ -71,11 +73,98 @@ public final class HttpClient {
     }
 
     public static String execute(Request request, HttpMethod method) throws Exception {
+        final String url = request.url().toString();
+        final String requestBody = extractRequestBody(request);
+        final String authHeader = extractAuthHeader(request);
+        final Headers headers = request.headers();
+        
+        LOGGER.info(() -> String.format(
+            "[HTTP REQUEST] %s %s%n" +
+            "  Authorization: %s%n" +
+            "  Request Body: %s%n" +
+            "  Headers: %s",
+            method, url,
+            authHeader,
+            requestBody,
+            headers.toString()
+        ));
+        
         try (Response response = RAW_CLIENT.newCall(request).execute()) {
+            final ResponseBody body = response.body();
+            final String responseBody = extractResponseBody(body);
+            final int statusCode = response.code();
+            final String statusMessage = response.message();
+            final Headers responseHeaders = response.headers();
+            
+            LOGGER.info(() -> String.format(
+                "[HTTP RESPONSE] %s %s%n" +
+                "  Status: %d %s%n" +
+                "  Response Headers: %s%n" +
+                "  Response Body: %s",
+                method, url,
+                statusCode, statusMessage,
+                responseHeaders.toString(),
+                responseBody
+            ));
+            
             if (!response.isSuccessful()) {
-                throw new HttpException(method, request.url().toString(), response.code(), response.message(), Objects.requireNonNull(response.body()).string());
+                LOGGER.error(() -> String.format(
+                    "[HTTP ERROR] Request failed: %s %s - Status: %d %s - Response: %s",
+                    method, url, statusCode, statusMessage, responseBody
+                ));
+                throw new HttpException(method, url, statusCode, statusMessage, responseBody);
             }
-            return Objects.requireNonNull(response.body()).string();
+            return responseBody;
+        }
+    }
+    
+    private static String extractRequestBody(Request request) {
+        if (request.body() == null) {
+            return "[empty]";
+        }
+        try {
+            okio.Buffer buffer = new okio.Buffer();
+            request.body().writeTo(buffer);
+            String body = buffer.readUtf8();
+            // Truncate very long bodies for readability
+            if (body.length() > 500) {
+                return body.substring(0, 500) + "... [truncated, length=" + body.length() + "]";
+            }
+            return body;
+        } catch (Exception e) {
+            return "[unable to read request body: " + e.getMessage() + "]";
+        }
+    }
+    
+    private static String extractAuthHeader(Request request) {
+        Headers headers = request.headers();
+        for (int i = 0; i < headers.size(); i++) {
+            if ("Authorization".equalsIgnoreCase(headers.name(i))) {
+                String authValue = headers.value(i);
+                // Mask the token for security, but show first/last few chars
+                if (authValue.length() > 20) {
+                    return authValue.substring(0, 10) + "..." + authValue.substring(authValue.length() - 10);
+                } else {
+                    return "[masked]";
+                }
+            }
+        }
+        return "[none]";
+    }
+    
+    private static String extractResponseBody(ResponseBody body) {
+        if (body == null) {
+            return "[empty]";
+        }
+        try {
+            String bodyString = body.string();
+            // Truncate very long responses
+            if (bodyString.length() > 1000) {
+                return bodyString.substring(0, 1000) + "... [truncated, length=" + bodyString.length() + "]";
+            }
+            return bodyString;
+        } catch (Exception e) {
+            return "[unable to read response body: " + e.getMessage() + "]";
         }
     }
 
