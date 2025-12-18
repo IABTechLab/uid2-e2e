@@ -102,7 +102,18 @@ public class OperatorTest {
             "suite.operator.TestData#identityMapBatchBadPhoneArgs"
     })
     public void testV2IdentityMapUnmapped(String label, Operator operator, String operatorName, String payload) throws Exception {
+        System.out.println("========================================");
+        System.out.println("TEST: testV2IdentityMapUnmapped");
+        System.out.println("Label: " + label);
+        System.out.println("Operator: " + operatorName);
+        System.out.println("Payload: " + payload);
+        
         JsonNode response = operator.v2IdentityMap(payload);
+        
+        System.out.println("Response: " + response.toString());
+        System.out.println("Status: " + response.at("/status").asText());
+        System.out.println("Unmapped reason: " + response.at("/body/unmapped/0/reason").asText());
+        System.out.println("========================================");
 
         assertThat(response.at("/status").asText()).isEqualTo("success");
         assertThat(response.at("/body/unmapped/0/reason").asText()).isEqualTo("invalid identifier");
