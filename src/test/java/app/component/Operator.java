@@ -11,6 +11,8 @@ import common.*;
 import lombok.Getter;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
@@ -68,6 +70,7 @@ public class Operator extends App {
     // When running via IntelliJ, environment variables are defined in the uid2-dev-workspace repo under .idea/runConfigurations.
     // Test data is defined in the uid2-admin repo.
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Operator.class);
     private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final int TIMESTAMP_LENGTH = 8;
@@ -78,6 +81,27 @@ public class Operator extends App {
 
     public static final String CLIENT_API_KEY = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY);
     public static final String CLIENT_API_SECRET = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_SECRET);
+    
+    static {
+        // Log operator configuration at class initialization
+        String maskedKey = CLIENT_API_KEY != null && CLIENT_API_KEY.length() > 20 
+            ? CLIENT_API_KEY.substring(0, 10) + "..." + CLIENT_API_KEY.substring(CLIENT_API_KEY.length() - 10)
+            : "[null or too short]";
+        String maskedSecret = CLIENT_API_SECRET != null && CLIENT_API_SECRET.length() > 20
+            ? CLIENT_API_SECRET.substring(0, 10) + "..." + CLIENT_API_SECRET.substring(CLIENT_API_SECRET.length() - 10)
+            : "[null or too short]";
+        LOGGER.info(() -> String.format(
+            "[OPERATOR CONFIG] Initialized with:%n" +
+            "  CLIENT_API_KEY: %s (length: %d)%n" +
+            "  CLIENT_API_SECRET: %s (length: %d)%n" +
+            "  E2E_ENV: %s%n" +
+            "  IDENTITY_SCOPE: %s",
+            maskedKey, CLIENT_API_KEY != null ? CLIENT_API_KEY.length() : 0,
+            maskedSecret, CLIENT_API_SECRET != null ? CLIENT_API_SECRET.length() : 0,
+            EnvUtil.getEnv(Const.Config.ENV, false),
+            EnvUtil.getEnv(Const.Config.IDENTITY_SCOPE, false)
+        ));
+    }
 
     // Local only - Sharing
     public static final String CLIENT_API_KEY_SHARING_RECIPIENT = EnvUtil.getEnv(Const.Config.Operator.CLIENT_API_KEY_SHARING_RECIPIENT, EnabledCondition.isLocal());
@@ -274,9 +298,55 @@ public class Operator extends App {
 
     // Need to use the manual mapping for error cases - SDK won't allow creating input with bad emails
     public JsonNode v3IdentityMap(String payload) throws Exception {
+        String baseUrl = getBaseUrl();
+        String endpoint = baseUrl + "/v3/identity/map";
+        
+        LOGGER.info(() -> String.format(
+            "[v3IdentityMap] Preparing request:%n" +
+            "  Operator Name: %s%n" +
+            "  Operator Type: %s%n" +
+            "  Base URL: %s%n" +
+            "  Full Endpoint: %s%n" +
+            "  CLIENT_API_KEY: %s (length: %d)%n" +
+            "  CLIENT_API_SECRET: %s (length: %d)%n" +
+            "  Payload (raw): %s",
+            getName(), type, baseUrl, endpoint,
+            CLIENT_API_KEY != null ? CLIENT_API_KEY.substring(0, Math.min(20, CLIENT_API_KEY.length())) + "..." : "[null]",
+            CLIENT_API_KEY != null ? CLIENT_API_KEY.length() : 0,
+            CLIENT_API_SECRET != null ? CLIENT_API_SECRET.substring(0, Math.min(20, CLIENT_API_SECRET.length())) + "..." : "[null]",
+            CLIENT_API_SECRET != null ? CLIENT_API_SECRET.length() : 0,
+            payload != null && payload.length() > 200 ? payload.substring(0, 200) + "..." : payload
+        ));
+        
         V2Envelope envelope = v2CreateEnvelope(payload, CLIENT_API_SECRET);
-        String encryptedResponse = HttpClient.post(getBaseUrl() + "/v3/identity/map", envelope.envelope(), CLIENT_API_KEY);
-        return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
+        
+        LOGGER.info(() -> String.format(
+            "[v3IdentityMap] Created envelope:%n" +
+            "  Envelope length: %d%n" +
+            "  Nonce length: %d",
+            envelope.envelope().length(),
+            envelope.nonce().length
+        ));
+        
+        try {
+            String encryptedResponse = HttpClient.post(endpoint, envelope.envelope(), CLIENT_API_KEY);
+            LOGGER.info(() -> String.format(
+                "[v3IdentityMap] Request successful, response length: %d",
+                encryptedResponse != null ? encryptedResponse.length() : 0
+            ));
+            return v2DecryptEncryptedResponse(encryptedResponse, envelope.nonce(), CLIENT_API_SECRET);
+        } catch (Exception e) {
+            final String errorMsg = e.getMessage();
+            final String errorType = e.getClass().getName();
+            LOGGER.error(() -> String.format(
+                "[v3IdentityMap] Request failed:%n" +
+                "  Endpoint: %s%n" +
+                "  Error: %s%n" +
+                "  Error Type: %s",
+                endpoint, errorMsg, errorType
+            ));
+            throw e;
+        }
     }
 
     public IdentityMapV3Response v3IdentityMap(IdentityMapV3Input input) {
