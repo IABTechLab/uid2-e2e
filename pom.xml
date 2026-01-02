@@ -43,6 +43,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Override transitive grpc-netty-shaded to fix CVE-2025-55163 -->
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-netty-shaded</artifactId>
+                <version>1.75.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

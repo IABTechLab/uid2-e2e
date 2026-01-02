@@ -1,5 +1,3 @@
-
-import { crypto } from "k6/experimental/webcrypto";
 import encoding from 'k6/encoding';
 import { check } from 'k6';
 import http from 'k6/http';
