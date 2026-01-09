@@ -14,7 +14,7 @@ services:
       - "./docker/uid2-optout/src/s3/optout:/s3/optout"
     environment:
       - GATEWAY_LISTEN=0.0.0.0:5001
-      - LOCALSTACK_HOST=localhost:5001
+      - LOCALSTACK_HOST=localstack:5001
       - SQS_ENDPOINT_STRATEGY=path
       - KMS_PROVIDER=local-kms
     healthcheck:
