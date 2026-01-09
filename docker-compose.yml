@@ -15,6 +15,7 @@ services:
     environment:
       - GATEWAY_LISTEN=0.0.0.0:5001
       - LOCALSTACK_HOST=localhost:5001
+      - SQS_ENDPOINT_STRATEGY=path
       - KMS_PROVIDER=local-kms
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
