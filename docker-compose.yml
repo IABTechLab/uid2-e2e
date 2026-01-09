@@ -13,7 +13,7 @@ services:
       - "./docker/uid2-optout/src/init-aws.sh:/etc/localstack/init/ready.d/init-aws-optout.sh"
       - "./docker/uid2-optout/src/s3/optout:/s3/optout"
     environment:
-      - EDGE_PORT=5001
+      - GATEWAY_LISTEN=0.0.0.0:5001
       - KMS_PROVIDER=local-kms
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
