@@ -14,6 +14,7 @@ services:
       - "./docker/uid2-optout/src/s3/optout:/s3/optout"
     environment:
       - GATEWAY_LISTEN=0.0.0.0:5001
+      - LOCALSTACK_HOST=localhost:5001
       - KMS_PROVIDER=local-kms
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
