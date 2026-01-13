@@ -13,6 +13,7 @@ public final class Const {
         public static final class Core {
             public static final String OPERATOR_API_KEY = "UID2_CORE_E2E_OPERATOR_API_KEY";
             public static final String OPTOUT_API_KEY = "UID2_CORE_E2E_OPTOUT_API_KEY";
+            public static final String OPTOUT_INTERNAL_API_KEY = "UID2_CORE_E2E_OPTOUT_INTERNAL_API_KEY";
             public static final String CORE_URL = "UID2_CORE_E2E_CORE_URL";
             public static final String OPTOUT_URL = "UID2_CORE_E2E_OPTOUT_URL";
         }

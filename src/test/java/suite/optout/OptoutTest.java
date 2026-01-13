@@ -1,6 +1,7 @@
 package suite.optout;
 
 import app.component.Operator;
+import app.component.Optout;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uid2.client.IdentityTokens;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -23,19 +26,23 @@ import static org.awaitility.Awaitility.with;
 @SuppressWarnings("unused")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OptoutTest {
-    // TODO: Test failure case
+    private static final Logger LOGGER = LoggerFactory.getLogger(OptoutTest.class);
 
     private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
     private static final int OPTOUT_DELAY_MS = 1000;
     private static final int OPTOUT_WAIT_SECONDS = 300;
+    private static final int DELTA_PRODUCE_WAIT_SECONDS = 120;
 
     private static Set<Arguments> outputArgs;
     private static Set<Arguments> outputAdvertisingIdArgs;
+    private static Optout optoutService;
 
     @BeforeAll
     public static void setupAll() {
         outputArgs = new HashSet<>();
         outputAdvertisingIdArgs = new HashSet<>();
+        // Initialize optout service component for delta production
+        optoutService = new Optout("optout", 8081, "Optout Service");
     }
 
     @ParameterizedTest(name = "/v2/token/logout with /v2/token/generate - {0} - {2}")
@@ -78,7 +85,30 @@ public class OptoutTest {
         outputAdvertisingIdArgs.add(Arguments.of(label, operator, operatorName, rawUID, toOptOut, beforeOptOutTimestamp));
     }
 
+    /**
+     * Triggers delta production on the optout service after all logout requests.
+     * This reads the opt-out requests from SQS and produces delta files that
+     * the operator will sync to reflect the opt-outs.
+     */
+    @Test
     @Order(4)
+    public void triggerDeltaProduction() throws Exception {
+        LOGGER.info("Triggering delta production on optout service");
+        
+        // Trigger delta production
+        JsonNode response = optoutService.triggerDeltaProduce();
+        LOGGER.info("Delta production triggered: {}", response);
+        
+        // Wait for completion
+        boolean success = optoutService.triggerDeltaProduceAndWait(DELTA_PRODUCE_WAIT_SECONDS);
+        assertThat(success).as("Delta production should complete successfully").isTrue();
+        
+        // Get final status
+        JsonNode status = optoutService.getDeltaProduceStatus();
+        LOGGER.info("Delta production completed: {}", status);
+    }
+
+    @Order(5)
     @ParameterizedTest(name = "/v2/token/refresh after {2} generate and {3} logout - {0} - {1}")
     @MethodSource({
             "afterOptoutTokenArgs"
@@ -89,7 +119,7 @@ public class OptoutTest {
         with().pollInterval(5, TimeUnit.SECONDS).await("Get V2 Token Response").atMost(OPTOUT_WAIT_SECONDS, TimeUnit.SECONDS).until(() -> operator.v2TokenRefresh(refreshToken, refreshResponseKey).equals(OBJECT_MAPPER.readTree("{\"status\":\"optout\"}")));
     }
 
-    @Order(5)
+    @Order(6)
     @ParameterizedTest(name = "/v2/optout/status after v2/identity/map and v2/token/logout - DII {0} - expecting {4} - {2}")
     @MethodSource({"afterOptoutAdvertisingIdArgs"})
     public void testV2OptOutStatus(String label, Operator operator, String operatorName, String rawUID,
