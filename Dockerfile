@@ -3,6 +3,9 @@
 ######################
 FROM maven:3.9.11-eclipse-temurin-21
 
+# UID2-6486: Fix CVE-2025-68973 (GnuPG out-of-bounds write)
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY ./pom.xml ./pom.xml
