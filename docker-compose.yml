@@ -3,7 +3,7 @@ version: "3.8"
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:3.0.0
+    image: localstack/localstack:1.3.0
     ports:
       - "127.0.0.1:5001:5001"
     volumes:
@@ -13,10 +13,9 @@ services:
       - "./docker/uid2-optout/src/init-aws.sh:/etc/localstack/init/ready.d/init-aws-optout.sh"
       - "./docker/uid2-optout/src/s3/optout:/s3/optout"
     environment:
-      - GATEWAY_LISTEN=0.0.0.0:5001
-      - LOCALSTACK_HOST=localstack:5001
-      - SQS_ENDPOINT_STRATEGY=path
+      - EDGE_PORT=5001
       - KMS_PROVIDER=local-kms
+      - LOCALSTACK_HOST=localstack
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
         && awslocal s3api wait bucket-exists --bucket test-optout-bucket
@@ -51,6 +50,7 @@ services:
     image: ghcr.io/iabtechlab/uid2-optout:latest
     ports:
       - "127.0.0.1:8081:8081"
+      - "127.0.0.1:8082:8082"
       - "127.0.0.1:5090:5005"
     volumes:
       - ./docker/uid2-optout/conf/default-config.json:/app/conf/default-config.json
