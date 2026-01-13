@@ -278,9 +278,12 @@ public final class TestData {
         );
 
         Set<Arguments> args = new HashSet<>();
+        int index = 0;
         for (Operator operator : operators) {
             for (List<String> input : inputs) {
+                System.out.println("[EMAIL-BAD-" + index + "] " + input.get(0) + " | Operator: " + operator.getName());
                 args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1)));
+                index++;
             }
         }
         return args;
@@ -297,11 +300,17 @@ public final class TestData {
 
         Set<Arguments> args = new HashSet<>();
         if (App.PHONE_SUPPORT) {
+            System.out.println("PHONE_SUPPORT is TRUE - generating phone tests");
+            int index = 0;
             for (Operator operator : operators) {
                 for (List<String> input : inputs) {
+                    System.out.println("[PHONE-BAD-" + index + "] " + input.get(0) + " | Operator: " + operator.getName());
                     args.add(Arguments.of(input.get(0), operator, operator.getName(), input.get(1)));
+                    index++;
                 }
             }
+        } else {
+            System.out.println("PHONE_SUPPORT is FALSE - skipping phone tests");
         }
         return args;
     }
