@@ -26,7 +26,6 @@ export const options = {
       stages: [
         { duration: '30s', target: generateRPS}
       ],
-      gracefulRampDown: '0s',
     },
     tokenRefreshWarmup: {
       executor: 'ramping-arrival-rate',
@@ -37,7 +36,6 @@ export const options = {
       stages: [
         { duration: '30s', target: refreshRPS}
       ],
-      gracefulRampDown: '0s',
     },
     identityMapWarmup: {
       executor: 'ramping-arrival-rate',
@@ -48,7 +46,6 @@ export const options = {
       stages: [
         { duration: '30s', target: identityMapRPS}
       ],
-      gracefulRampDown: '0s',
     },/*
     keySharingWarmup: {
       executor: 'ramping-vus',
