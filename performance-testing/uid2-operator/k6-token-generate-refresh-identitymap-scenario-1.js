@@ -7,10 +7,12 @@ const baseUrl = __ENV.OPERATOR_URL;
 const clientSecret = __ENV.CLIENT_SECRET;
 const clientKey = __ENV.CLIENT_KEY;
 
-const generateRPS = 500000;
+const generateRPS = 450000;
 const refreshRPS = 25000;
 const identityMapRPS = 1500;
-const testDuration = '15m'
+
+const warmUpTime = '10m'
+const testDuration = '30m'
 
 export const options = {
   insecureSkipTLSVerify: true,
@@ -21,10 +23,10 @@ export const options = {
       executor: 'ramping-arrival-rate',
       exec: 'tokenGenerate',      
       timeUnit: '1s',         
-      preAllocatedVUs: 500, 
-      maxVUs: 1000,  
+      preAllocatedVUs: 1500, 
+      maxVUs: 2000,  
       stages: [
-        { duration: '30s', target: generateRPS}
+        { duration: warmUpTime, target: generateRPS}
       ],
     },
     tokenRefreshWarmup: {
@@ -34,7 +36,7 @@ export const options = {
       preAllocatedVUs: 200, 
       maxVUs: 400,  
       stages: [
-        { duration: '30s', target: refreshRPS}
+        { duration: warmUpTime, target: refreshRPS}
       ],
     },
     identityMapWarmup: {
@@ -44,14 +46,14 @@ export const options = {
       preAllocatedVUs: 75, 
       maxVUs: 150,  
       stages: [
-        { duration: '30s', target: identityMapRPS}
+        { duration: warmUpTime, target: identityMapRPS}
       ],
     },/*
     keySharingWarmup: {
       executor: 'ramping-vus',
       exec: 'keySharing',
       stages: [
-        { duration: '30s', target: keySharingVUs}
+        { duration: warmUpTime, target: keySharingVUs}
       ],
       gracefulRampDown: '0s',
     },*/
@@ -61,11 +63,11 @@ export const options = {
       exec: 'tokenGenerate',
       rate: generateRPS,
       timeUnit: '1s',
-      preAllocatedVUs: 500,
-      maxVUs: 1000,
+      preAllocatedVUs: 1500,
+      maxVUs: 2000,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
     },
     tokenRefresh: {
       executor: 'constant-arrival-rate',
@@ -76,7 +78,7 @@ export const options = {
       maxVUs: 400,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
     },
     identityMap: {
       executor: 'constant-arrival-rate',
@@ -87,7 +89,7 @@ export const options = {
       maxVUs: 150,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
     },/*
     keySharing:{
       executor: 'constant-vus',

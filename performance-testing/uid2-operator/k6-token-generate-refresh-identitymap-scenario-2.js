@@ -41,8 +41,8 @@ export const options = {
       executor: 'ramping-arrival-rate',
       exec: 'identityMap',      
       timeUnit: '1s',         
-      preAllocatedVUs: 500, 
-      maxVUs: 1000,  
+      preAllocatedVUs: 1000, 
+      maxVUs: 1500,  
       stages: [
         { duration: '30s', target: identityMapRPS}
       ],
@@ -83,8 +83,8 @@ export const options = {
       exec: 'identityMap',
       rate: identityMapRPS,
       timeUnit: '1s',
-      preAllocatedVUs: 500,
-      maxVUs: 1000,
+      preAllocatedVUs: 1000,
+      maxVUs: 1500,
       duration: testDuration,
       gracefulStop: '0s',
       startTime: '30s',
