@@ -10,7 +10,9 @@ const clientKey = __ENV.CLIENT_KEY;
 const generateRPS = 25000;
 const refreshRPS = 25000;
 const identityMapRPS = 1500;
-const testDuration = '15m'
+
+const warmUpTime = '10m'
+const testDuration = '20m'
 
 export const options = {
   insecureSkipTLSVerify: true,
@@ -24,7 +26,7 @@ export const options = {
       preAllocatedVUs: 200, 
       maxVUs: 400,  
       stages: [
-        { duration: '30s', target: generateRPS}
+        { duration: warmUpTime, target: generateRPS}
       ],
     },
     tokenRefreshWarmup: {
@@ -34,7 +36,7 @@ export const options = {
       preAllocatedVUs: 200, 
       maxVUs: 400,  
       stages: [
-        { duration: '30s', target: refreshRPS}
+        { duration: warmUpTime, target: refreshRPS}
       ],
     },
     identityMapWarmup: {
@@ -44,14 +46,14 @@ export const options = {
       preAllocatedVUs: 1000, 
       maxVUs: 1500,  
       stages: [
-        { duration: '30s', target: identityMapRPS}
+        { duration: warmUpTime, target: identityMapRPS}
       ],
     },/*
     keySharingWarmup: {
       executor: 'ramping-vus',
       exec: 'keySharing',
       stages: [
-        { duration: '30s', target: keySharingVUs}
+        { duration: warmUpTime, target: keySharingVUs}
       ],
       gracefulRampDown: '0s',
     },*/
@@ -65,7 +67,7 @@ export const options = {
       maxVUs: 400,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
     },
     tokenRefresh: {
       executor: 'constant-arrival-rate',
@@ -76,7 +78,7 @@ export const options = {
       maxVUs: 400,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
     },
     identityMap: {
       executor: 'constant-arrival-rate',
@@ -87,7 +89,7 @@ export const options = {
       maxVUs: 1500,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
     },/*
     keySharing:{
       executor: 'constant-vus',
@@ -95,7 +97,7 @@ export const options = {
       vus: keySharingVUs,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
     },*/
     /*identityMapLargeBatchSequential: {
       executor: 'constant-vus',
@@ -152,7 +154,8 @@ export async function setup() {
   };
 
   async function generateRefreshRequest() {
-    let request = await createReq( {'optout_check': 1, 'email': 'test5000@example.com'});
+    let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+    let request = await createReq( {'optout_check': 1, 'email': `test${randomSuffix}@example.com`});
     var requestData = {
       endpoint: '/v2/token/generate',
       requestBody: request,
@@ -267,8 +270,9 @@ function generateIdentityMapRequest(emailCount) {
     "email": []
   };
 
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
   for (var i = 0; i < emailCount; ++i) {
-    data.email.push(`test${i}@example.com`);
+    data.email.push(`test${randomSuffix}${i}@example.com`);
   }
 
   return data;
@@ -434,7 +438,8 @@ async function generateRequestWithTime(obj) {
 
 
 async function generateTokenGenerateRequestWithTime() {
-  let requestData = { 'optout_check': 1, 'email': 'test500@example.com' };
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+  let requestData = { 'optout_check': 1, 'email': `test${randomSuffix}@example.com` };
   return await generateRequestWithTime(requestData);
 }
 

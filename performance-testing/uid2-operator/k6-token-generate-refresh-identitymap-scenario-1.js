@@ -12,7 +12,8 @@ const refreshRPS = 25000;
 const identityMapRPS = 1500;
 
 const warmUpTime = '10m'
-const testDuration = '30m'
+const testDuration = '20m'
+
 
 export const options = {
   insecureSkipTLSVerify: true,
@@ -154,7 +155,8 @@ export async function setup() {
   };
 
   async function generateRefreshRequest() {
-    let request = await createReq( {'optout_check': 1, 'email': 'test5000@example.com'});
+    let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+    let request = await createReq( {'optout_check': 1, 'email': `test${randomSuffix}@example.com`});
     var requestData = {
       endpoint: '/v2/token/generate',
       requestBody: request,
@@ -269,8 +271,9 @@ function generateIdentityMapRequest(emailCount) {
     "email": []
   };
 
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
   for (var i = 0; i < emailCount; ++i) {
-    data.email.push(`test${i}@example.com`);
+    data.email.push(`test${randomSuffix}${i}@example.com`);
   }
 
   return data;
@@ -436,7 +439,8 @@ async function generateRequestWithTime(obj) {
 
 
 async function generateTokenGenerateRequestWithTime() {
-  let requestData = { 'optout_check': 1, 'email': 'test500@example.com' };
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+  let requestData = { 'optout_check': 1, 'email': `test${randomSuffix}@example.com` };
   return await generateRequestWithTime(requestData);
 }
 
