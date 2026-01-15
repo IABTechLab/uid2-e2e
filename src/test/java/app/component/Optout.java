@@ -41,11 +41,21 @@ public class Optout extends App {
      * Triggers delta production on the optout service.
      * This reads from the SQS queue and produces delta files.
      * The endpoint is on port 8082 (optout port + 1).
+     * 
+     * @return JsonNode with response, or null if job already running (409)
      */
     public JsonNode triggerDeltaProduce() throws Exception {
         String deltaProduceUrl = getDeltaProducerBaseUrl() + "/optout/deltaproduce";
-        String response = HttpClient.post(deltaProduceUrl, "", getOptoutInternalApiKey());
-        return OBJECT_MAPPER.readTree(response);
+        try {
+            String response = HttpClient.post(deltaProduceUrl, "", getOptoutInternalApiKey());
+            return OBJECT_MAPPER.readTree(response);
+        } catch (HttpClient.HttpException e) {
+            if (e.getCode() == 409) {
+                // Job already running - this is fine, we'll just wait for it
+                return null;
+            }
+            throw e;
+        }
     }
 
     /**
@@ -59,10 +69,12 @@ public class Optout extends App {
 
     /**
      * Triggers delta production and waits for it to complete.
+     * If a job is already running, waits for that job instead.
      * @param maxWaitSeconds Maximum time to wait for completion
      * @return true if delta production completed successfully
      */
     public boolean triggerDeltaProduceAndWait(int maxWaitSeconds) throws Exception {
+        // Try to trigger - will return null if job already running (409)
         triggerDeltaProduce();
         
         long startTime = System.currentTimeMillis();
@@ -76,6 +88,11 @@ public class Optout extends App {
             
             if ("COMPLETED".equals(state) || "FAILED".equals(state)) {
                 return "COMPLETED".equals(state);
+            }
+            
+            // If idle (no job), try to trigger again
+            if ("idle".equalsIgnoreCase(state) || state.isEmpty()) {
+                triggerDeltaProduce();
             }
         }
         

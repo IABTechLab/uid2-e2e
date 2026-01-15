@@ -95,17 +95,15 @@ public class OptoutTest {
     public void triggerDeltaProduction() throws Exception {
         LOGGER.info("Triggering delta production on optout service");
         
-        // Trigger delta production
-        JsonNode response = optoutService.triggerDeltaProduce();
-        LOGGER.info("Delta production triggered: {}", response);
-        
-        // Wait for completion
+        // Trigger delta production and wait for completion
+        // This handles 409 (job already running) gracefully
         boolean success = optoutService.triggerDeltaProduceAndWait(DELTA_PRODUCE_WAIT_SECONDS);
-        assertThat(success).as("Delta production should complete successfully").isTrue();
         
         // Get final status
         JsonNode status = optoutService.getDeltaProduceStatus();
-        LOGGER.info("Delta production completed: {}", status);
+        LOGGER.info("Delta production completed with status: {}", status);
+        
+        assertThat(success).as("Delta production should complete successfully").isTrue();
     }
 
     @Order(5)
