@@ -3,7 +3,7 @@ version: "3.8"
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:2.0.0
+    image: localstack/localstack:3.0.0
     ports:
       - "127.0.0.1:5001:5001"
     volumes:
@@ -19,7 +19,7 @@ services:
       - SERVICES=s3,sqs,kms
       - DEFAULT_REGION=us-east-1
       - AWS_DEFAULT_REGION=us-east-1
-      - SQS_ENDPOINT_STRATEGY=off
+      - SQS_ENDPOINT_STRATEGY=path
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
         && awslocal s3api wait bucket-exists --bucket test-optout-bucket
