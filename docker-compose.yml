@@ -3,7 +3,7 @@ version: "3.8"
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:2.3.0
+    image: localstack/localstack:2.0.0
     ports:
       - "127.0.0.1:5001:5001"
     volumes:
@@ -15,7 +15,7 @@ services:
     environment:
       - GATEWAY_LISTEN=0.0.0.0:5001
       - KMS_PROVIDER=local-kms
-      - LOCALSTACK_HOST=localstack
+      - LOCALSTACK_HOST=localstack:5001
       - SERVICES=s3,sqs,kms
       - DEFAULT_REGION=us-east-1
       - AWS_DEFAULT_REGION=us-east-1
