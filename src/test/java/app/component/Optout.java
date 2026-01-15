@@ -12,18 +12,29 @@ import common.HttpClient;
  */
 public class Optout extends App {
     private static final ObjectMapper OBJECT_MAPPER = Mapper.getInstance();
-    private static final String OPTOUT_INTERNAL_API_KEY = EnvUtil.getEnv(Const.Config.Core.OPTOUT_INTERNAL_API_KEY);
-    public static final String OPTOUT_URL = EnvUtil.getEnv(Const.Config.Core.OPTOUT_URL);
-
+    
     // The SQS delta producer runs on port 8082 (8081 + 1)
     private static final int DELTA_PRODUCER_PORT_OFFSET = 1;
+    
+    // Loaded lazily to avoid crashing when env var is missing
+    private String optoutInternalApiKey;
 
     public Optout(String host, Integer port, String name) {
         super(host, port, name);
+        // Load API key lazily - only fail when actually used
+        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_INTERNAL_API_KEY, false);
     }
 
     public Optout(String host, String name) {
         super(host, null, name);
+        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_INTERNAL_API_KEY, false);
+    }
+    
+    private String getOptoutInternalApiKey() {
+        if (optoutInternalApiKey == null || optoutInternalApiKey.isEmpty()) {
+            throw new IllegalStateException("Missing environment variable: " + Const.Config.Core.OPTOUT_INTERNAL_API_KEY);
+        }
+        return optoutInternalApiKey;
     }
 
     /**
@@ -33,7 +44,7 @@ public class Optout extends App {
      */
     public JsonNode triggerDeltaProduce() throws Exception {
         String deltaProduceUrl = getDeltaProducerBaseUrl() + "/optout/deltaproduce";
-        String response = HttpClient.post(deltaProduceUrl, "", OPTOUT_INTERNAL_API_KEY);
+        String response = HttpClient.post(deltaProduceUrl, "", getOptoutInternalApiKey());
         return OBJECT_MAPPER.readTree(response);
     }
 
@@ -42,7 +53,7 @@ public class Optout extends App {
      */
     public JsonNode getDeltaProduceStatus() throws Exception {
         String statusUrl = getDeltaProducerBaseUrl() + "/optout/deltaproduce/status";
-        String response = HttpClient.get(statusUrl, OPTOUT_INTERNAL_API_KEY);
+        String response = HttpClient.get(statusUrl, getOptoutInternalApiKey());
         return OBJECT_MAPPER.readTree(response);
     }
 
