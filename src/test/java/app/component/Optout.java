@@ -86,12 +86,12 @@ public class Optout extends App {
             JsonNode status = getDeltaProduceStatus();
             String state = status.path("state").asText();
             
-            if ("COMPLETED".equals(state) || "FAILED".equals(state)) {
-                return "COMPLETED".equals(state);
+            if ("completed".equalsIgnoreCase(state) || "failed".equalsIgnoreCase(state)) {
+                return "completed".equalsIgnoreCase(state);
             }
             
             // If idle (no job), try to trigger again
-            if ("idle".equalsIgnoreCase(state) || state.isEmpty()) {
+            if ("idle".equalsIgnoreCase(state) || "none".equalsIgnoreCase(state) || state.isEmpty()) {
                 triggerDeltaProduce();
             }
         }
