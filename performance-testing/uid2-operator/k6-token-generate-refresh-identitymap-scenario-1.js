@@ -25,7 +25,7 @@ export const options = {
       exec: 'tokenGenerate',      
       timeUnit: '1s',         
       preAllocatedVUs: 1500, 
-      maxVUs: 2000,  
+      maxVUs: 2500,  
       stages: [
         { duration: warmUpTime, target: generateRPS}
       ],
@@ -64,8 +64,8 @@ export const options = {
       exec: 'tokenGenerate',
       rate: generateRPS,
       timeUnit: '1s',
-      preAllocatedVUs: 1500,
-      maxVUs: 2000,
+      preAllocatedVUs: 1800,
+      maxVUs: 2500,
       duration: testDuration,
       gracefulStop: '0s',
       startTime: warmUpTime,
