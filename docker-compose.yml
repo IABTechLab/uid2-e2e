@@ -19,7 +19,7 @@ services:
       - SERVICES=s3,sqs,kms
       - DEFAULT_REGION=us-east-1
       - AWS_DEFAULT_REGION=us-east-1
-      - SQS_ENDPOINT_STRATEGY=path
+      - SQS_ENDPOINT_STRATEGY=off
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
         && awslocal s3api wait bucket-exists --bucket test-optout-bucket
