@@ -3,7 +3,7 @@ version: "3.8"
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:4.0.0
+    image: localstack/localstack:2.3.2
     ports:
       - "127.0.0.1:5001:5001"
     volumes:
@@ -13,20 +13,17 @@ services:
       - "./docker/uid2-optout/src/init-aws.sh:/etc/localstack/init/ready.d/init-aws-optout.sh"
       - "./docker/uid2-optout/src/s3/optout:/s3/optout"
     environment:
-      - GATEWAY_LISTEN=0.0.0.0:5001
+      - EDGE_PORT=5001
       - KMS_PROVIDER=local-kms
-      - LOCALSTACK_HOST=localstack:5001
+      - LOCALSTACK_HOST=localstack
       - SERVICES=s3,sqs,kms
       - DEFAULT_REGION=us-east-1
       - AWS_DEFAULT_REGION=us-east-1
-      - SQS_ENDPOINT_STRATEGY=path
     healthcheck:
-      test: awslocal s3api wait bucket-exists --bucket test-core-bucket
-        && awslocal s3api wait bucket-exists --bucket test-optout-bucket
-        && awslocal sqs get-queue-url --queue-name optout-queue
+      test: curl -f http://localhost:5001/_localstack/health || exit 1
       interval: 5s
       timeout: 10s
-      retries: 6
+      retries: 10
     networks:
       - e2e_default
 
