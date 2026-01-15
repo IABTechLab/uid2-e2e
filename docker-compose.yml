@@ -19,9 +19,10 @@ services:
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
         && awslocal s3api wait bucket-exists --bucket test-optout-bucket
+        && awslocal sqs get-queue-url --queue-name optout-queue
       interval: 5s
-      timeout: 5s
-      retries: 3
+      timeout: 10s
+      retries: 6
     networks:
       - e2e_default
 
@@ -57,11 +58,16 @@ services:
       - ./docker/uid2-optout/conf/local-e2e-docker-config.json:/app/conf/local-config.json
       - ./docker/uid2-optout/mount/:/opt/uid2/optout/
     depends_on:
+      localstack:
+        condition: service_healthy
       core:
         condition: service_healthy
     healthcheck:
-      test: wget --tries=1 --spider http://localhost:8081/ops/healthcheck || exit 1
+      test: wget --tries=1 --spider http://localhost:8081/ops/healthcheck
+        && wget --tries=1 --spider http://localhost:8082/ops/healthcheck || exit 1
       interval: 5s
+      timeout: 10s
+      retries: 6
     networks:
       - e2e_default
 
