@@ -13,12 +13,13 @@ services:
       - "./docker/uid2-optout/src/init-aws.sh:/etc/localstack/init/ready.d/init-aws-optout.sh"
       - "./docker/uid2-optout/src/s3/optout:/s3/optout"
     environment:
+      - GATEWAY_LISTEN=0.0.0.0:5001
       - KMS_PROVIDER=local-kms
       - LOCALSTACK_HOST=localstack
       - SERVICES=s3,sqs,kms
       - DEFAULT_REGION=us-east-1
       - AWS_DEFAULT_REGION=us-east-1
-      - SQS_ENDPOINT_STRATEGY=off
+      - SQS_ENDPOINT_STRATEGY=path
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
         && awslocal s3api wait bucket-exists --bucket test-optout-bucket
