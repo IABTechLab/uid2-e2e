@@ -3,7 +3,7 @@ version: "3.8"
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:1.3.0
+    image: localstack/localstack:2.0.0
     ports:
       - "127.0.0.1:5001:5001"
     volumes:
@@ -13,9 +13,9 @@ services:
       - "./docker/uid2-optout/src/init-aws.sh:/etc/localstack/init/ready.d/init-aws-optout.sh"
       - "./docker/uid2-optout/src/s3/optout:/s3/optout"
     environment:
-      - EDGE_PORT=5001
+      - GATEWAY_LISTEN=0.0.0.0:5001
       - KMS_PROVIDER=local-kms
-      - LOCALSTACK_HOST=localstack
+      - LOCALSTACK_HOST=localstack:5001
       - SERVICES=s3,sqs,kms
       - DEFAULT_REGION=us-east-1
       - AWS_DEFAULT_REGION=us-east-1
