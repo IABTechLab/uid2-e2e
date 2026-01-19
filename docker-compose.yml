@@ -3,27 +3,25 @@ version: "3.8"
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:3.0.0
+    image: localstack/localstack:4.0.3
     ports:
       - "127.0.0.1:5001:5001"
     volumes:
       - "./docker/uid2-core/src/init-aws.sh:/etc/localstack/init/ready.d/init-aws-core.sh"
       - "./docker/uid2-core/src/s3/core:/s3/core"
-      - "./docker/uid2-core/src/kms/seed.yaml:/init/seed.yaml"
       - "./docker/uid2-optout/src/init-aws.sh:/etc/localstack/init/ready.d/init-aws-optout.sh"
       - "./docker/uid2-optout/src/s3/optout:/s3/optout"
     environment:
       - GATEWAY_LISTEN=0.0.0.0:5001
-      - KMS_PROVIDER=local-kms
       - LOCALSTACK_HOST=localstack:5001
       - SERVICES=s3,sqs,kms
       - DEFAULT_REGION=us-east-1
       - AWS_DEFAULT_REGION=us-east-1
-      - SQS_ENDPOINT_STRATEGY=path
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
         && awslocal s3api wait bucket-exists --bucket test-optout-bucket
         && awslocal sqs get-queue-url --queue-name optout-queue
+        && awslocal kms describe-key --key-id ff275b92-0def-4dfc-b0f6-87c96b26c6c7
       interval: 5s
       timeout: 10s
       retries: 6
