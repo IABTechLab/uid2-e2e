@@ -15,8 +15,8 @@ services:
       - GATEWAY_LISTEN=0.0.0.0:5001
       - LOCALSTACK_HOST=localstack:5001
       - SERVICES=s3,sqs,kms
-      - DEFAULT_REGION=us-east-1
-      - AWS_DEFAULT_REGION=us-east-1
+      - DEFAULT_REGION=us-east-2
+      - AWS_DEFAULT_REGION=us-east-2
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
         && awslocal s3api wait bucket-exists --bucket test-optout-bucket
