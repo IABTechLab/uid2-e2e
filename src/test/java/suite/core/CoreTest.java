@@ -29,18 +29,6 @@ public class CoreTest {
         assertEquals("Unsuccessful POST request - URL: " + coreUrl + "/attest - Code: 400 Bad Request - Response body: {\"status\":\"no attestation_request attached\"}", exception.getMessage());
     }
 
-    /**
-     * Tests valid attestation request with JWT signing.
-     * 
-     * Note: This test uses LocalStack 4.x with _custom_id_ tag to create a KMS key with a specific ID.
-     * JWT validation is optional because LocalStack generates its own key material, which won't match
-     * the hardcoded public key in the test config. The test still validates:
-     * - Attestation endpoint works
-     * - Response structure is correct
-     * - JWTs are generated (not null/empty)
-     * 
-     * See: https://docs.localstack.cloud/aws/services/kms/
-     */
     @ParameterizedTest(name = "/attest - {0}")
     @MethodSource({
             "suite.core.TestData#baseArgs"
@@ -50,7 +38,7 @@ public class CoreTest {
 
         JsonNode response = core.attest(validTrustedAttestationRequest);
 
-        assertAll("Attestation response status",
+        assertAll("",
                 () -> assertNotNull(response.get("status")),
                 () -> assertEquals("success", response.get("status").asText()));
 
@@ -60,21 +48,18 @@ public class CoreTest {
                 () -> assertNotNull(body.get("attestation_token")),
                 () -> assertNotNull(body.get("expiresAt")));
 
-        // Verify JWTs are generated (LocalStack 4.x with custom key ID should generate them)
-        JsonNode jwtOptoutNode = body.get("attestation_jwt_optout");
-        JsonNode jwtCoreNode = body.get("attestation_jwt_core");
-        
-        assertAll("JWTs should be generated",
-                () -> assertNotNull(jwtOptoutNode, "attestation_jwt_optout should not be null"),
-                () -> assertFalse(jwtOptoutNode.isNull(), "attestation_jwt_optout should not be JSON null"),
-                () -> assertFalse(jwtOptoutNode.asText().isEmpty(), "attestation_jwt_optout should not be empty"),
-                () -> assertNotNull(jwtCoreNode, "attestation_jwt_core should not be null"),
-                () -> assertFalse(jwtCoreNode.isNull(), "attestation_jwt_core should not be JSON null"),
-                () -> assertFalse(jwtCoreNode.asText().isEmpty(), "attestation_jwt_core should not be empty"));
+        JwtService jwtService = new JwtService(getConfig());
+        assertNotNull(body.get("attestation_jwt_optout"));
+        JwtValidationResponse validationResponseOptOut = jwtService.validateJwt(body.get("attestation_jwt_optout").asText(), Core.OPTOUT_URL, Core.CORE_URL);
+        assertAll("testAttest_ValidAttestationRequest valid OptOut JWT. Local OptOut URL: '" + Core.OPTOUT_URL + "', Core URL: '" + Core.CORE_URL + "'",
+                () -> assertNotNull(validationResponseOptOut),
+                () -> assertTrue(validationResponseOptOut.getIsValid()));
 
-        // Note: JWT signature validation is skipped because LocalStack generates its own key material
-        // which doesn't match the hardcoded public key. The important thing is that JWTs are generated.
-        // Full JWT validation should be tested against real AWS KMS.
+        assertNotNull(body.get("attestation_jwt_core"));
+        JwtValidationResponse validationResponseCore = jwtService.validateJwt(body.get("attestation_jwt_core").asText(), Core.CORE_URL, Core.CORE_URL);
+        assertAll("testAttest_ValidAttestationRequest valid Core JWT. Local Core URL: '" + Core.CORE_URL + "'",
+                () -> assertNotNull(validationResponseCore),
+                () -> assertTrue(validationResponseCore.getIsValid()));
 
         String optoutUrl = body.get("optout_url").asText();
         assertAll("testAttest_ValidAttestationRequest OptOut URL not null",
