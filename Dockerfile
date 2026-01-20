@@ -3,6 +3,8 @@
 ######################
 FROM maven:3.9.11-eclipse-temurin-21
 
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY ./pom.xml ./pom.xml
