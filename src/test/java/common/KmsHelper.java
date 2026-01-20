@@ -22,11 +22,16 @@ import java.util.Base64;
  */
 public final class KmsHelper {
     
-    private static final String LOCALSTACK_ENDPOINT = "http://localhost:5001";
+    private static final String DEFAULT_LOCALSTACK_ENDPOINT = "http://localstack:5001";
     private static final String KMS_KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final Region REGION = Region.US_EAST_1;
     
     private KmsHelper() {
+    }
+    
+    private static String getLocalstackEndpoint() {
+        String endpoint = EnvUtil.getEnv(Const.Config.Core.LOCALSTACK_URL, false);
+        return (endpoint != null && !endpoint.isBlank()) ? endpoint : DEFAULT_LOCALSTACK_ENDPOINT;
     }
     
     /**
@@ -76,8 +81,9 @@ public final class KmsHelper {
     }
     
     private static KmsClient createLocalstackKmsClient() {
+        String endpoint = getLocalstackEndpoint();
         return KmsClient.builder()
-                .endpointOverride(URI.create(LOCALSTACK_ENDPOINT))
+                .endpointOverride(URI.create(endpoint))
                 .region(REGION)
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create("test", "test")))
