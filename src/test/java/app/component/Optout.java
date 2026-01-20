@@ -20,17 +20,17 @@ public class Optout extends App {
 
     public Optout(String host, Integer port, String name) {
         super(host, port, name);
-        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_API_KEY, false);
+        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_INTERNAL_API_KEY, false);
     }
 
     public Optout(String host, String name) {
         super(host, null, name);
-        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_API_KEY, false);
+        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_INTERNAL_API_KEY, false);
     }
     
     private String getOptoutInternalApiKey() {
         if (optoutInternalApiKey == null || optoutInternalApiKey.isEmpty()) {
-            throw new IllegalStateException("Missing environment variable: " + Const.Config.Core.OPTOUT_API_KEY);
+            throw new IllegalStateException("Missing environment variable: " + Const.Config.Core.OPTOUT_INTERNAL_API_KEY);
         }
         return optoutInternalApiKey;
     }
