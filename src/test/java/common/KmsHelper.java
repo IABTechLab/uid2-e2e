@@ -22,7 +22,7 @@ import java.util.Base64;
  */
 public final class KmsHelper {
     
-    private static final String DEFAULT_LOCALSTACK_ENDPOINT = "http://localstack:5001";
+    private static final String DEFAULT_LOCALSTACK_ENDPOINT = "http://localhost:5001";
     private static final String KMS_KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final Region REGION = Region.US_EAST_1;
     
