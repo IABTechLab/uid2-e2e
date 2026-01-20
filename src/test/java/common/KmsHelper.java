@@ -32,7 +32,7 @@ public final class KmsHelper {
     /**
      * Fetches the public key from LocalStack KMS for the configured key ID.
      * 
-     * @return The public key as a base64-encoded string (without PEM headers)
+     * @return The public key as a base64-encoded string
      * @throws Exception if the key cannot be fetched or parsed
      */
     public static String getPublicKeyFromLocalstack() throws Exception {
@@ -42,8 +42,6 @@ public final class KmsHelper {
                     .build();
             
             GetPublicKeyResponse response = kmsClient.getPublicKey(request);
-            
-            // The public key is returned as raw DER-encoded bytes
             byte[] publicKeyBytes = response.publicKey().asByteArray();
             
             // Return as base64-encoded string (format expected by JwtService)
@@ -65,10 +63,8 @@ public final class KmsHelper {
             
             GetPublicKeyResponse response = kmsClient.getPublicKey(request);
             
-            // The public key is returned as raw DER-encoded X.509 SubjectPublicKeyInfo
             byte[] publicKeyBytes = response.publicKey().asByteArray();
             
-            // Convert to Java PublicKey
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
             return keyFactory.generatePublic(keySpec);

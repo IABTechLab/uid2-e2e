@@ -16,23 +16,21 @@ public class Optout extends App {
     // The SQS delta producer runs on port 8082 (8081 + 1)
     private static final int DELTA_PRODUCER_PORT_OFFSET = 1;
     
-    // Loaded lazily to avoid crashing when env var is missing
     private String optoutInternalApiKey;
 
     public Optout(String host, Integer port, String name) {
         super(host, port, name);
-        // Load API key lazily - only fail when actually used
-        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_INTERNAL_API_KEY, false);
+        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_API_KEY, false);
     }
 
     public Optout(String host, String name) {
         super(host, null, name);
-        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_INTERNAL_API_KEY, false);
+        this.optoutInternalApiKey = EnvUtil.getEnv(Const.Config.Core.OPTOUT_API_KEY, false);
     }
     
     private String getOptoutInternalApiKey() {
         if (optoutInternalApiKey == null || optoutInternalApiKey.isEmpty()) {
-            throw new IllegalStateException("Missing environment variable: " + Const.Config.Core.OPTOUT_INTERNAL_API_KEY);
+            throw new IllegalStateException("Missing environment variable: " + Const.Config.Core.OPTOUT_API_KEY);
         }
         return optoutInternalApiKey;
     }

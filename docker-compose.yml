@@ -16,7 +16,6 @@ services:
       - LOCALSTACK_HOST=localstack:5001
       - SERVICES=s3,sqs,kms
       - DEFAULT_REGION=us-east-1
-      - AWS_DEFAULT_REGION=us-east-1
     healthcheck:
       test: awslocal s3api wait bucket-exists --bucket test-core-bucket
         && awslocal s3api wait bucket-exists --bucket test-optout-bucket
@@ -65,10 +64,7 @@ services:
       core:
         condition: service_healthy
     healthcheck:
-      test: wget --tries=1 --spider http://localhost:8081/ops/healthcheck
-        && wget --tries=1 --spider http://localhost:8082/ops/healthcheck || exit 1
-      interval: 5s
-      timeout: 10s
+      test: wget --tries=1 --spider http://localhost:8081/ops/healthcheck || exit 1
       retries: 12
     networks:
       - e2e_default

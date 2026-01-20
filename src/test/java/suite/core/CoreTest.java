@@ -33,8 +33,6 @@ public class CoreTest {
     /**
      * Tests valid attestation request with JWT signing.
      * 
-     * LocalStack 4.x supports KMS Sign operation for RSA keys, so JWTs are generated.
-     * 
      * Since LocalStack generates its own RSA key material,
      * we dynamically fetch the public key from LocalStack's
      * KMS using GetPublicKey API to validate JWT signatures.
