@@ -206,6 +206,9 @@ export async function identityMap(data) {
   const endpoint = '/v2/identity/map';
   if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
     var dii = 100;
+    if (Math.random() < 0.01) {
+      dii = 5000;
+    }
     data.identityMap = await generateIdentityMapRequestWithTime(dii);;
   }
 
