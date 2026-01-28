@@ -205,7 +205,11 @@ export function tokenRefresh(data) {
 export async function identityMap(data) {
   const endpoint = '/v2/identity/map';
   if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
-    data.identityMap = await generateIdentityMapRequestWithTime(100);;
+    var dii = 100;
+    if (Math.random() < 0.01) {
+      dii = 5000;
+    }
+    data.identityMap = await generateIdentityMapRequestWithTime(dii);;
   }
 
   var requestBody = data.identityMap.requestBody;
