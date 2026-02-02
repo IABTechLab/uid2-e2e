@@ -10,6 +10,7 @@ const clientKey = __ENV.CLIENT_KEY;
 const generateRPS = 450000;
 const refreshRPS = 25000;
 const identityMapRPS = 1500;
+const largeBatchChance = 0.02;
 
 const warmUpTime = '10m'
 const testDuration = '20m'
@@ -206,7 +207,7 @@ export async function identityMap(data) {
   const endpoint = '/v2/identity/map';
   if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
     var dii = 100;
-    if (Math.random() < 0.01) {
+    if (Math.random() < largeBatchChance) {
       dii = 5000;
     }
     data.identityMap = await generateIdentityMapRequestWithTime(dii);;
