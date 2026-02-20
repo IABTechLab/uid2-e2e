@@ -9,9 +9,9 @@ const clientKey = __ENV.CLIENT_KEY;
 
 const generateRPS = 50000;
 const refreshRPS = 50000;
-const identityMapRPS = 6000;
+const identityMapRPS = 8000;
 
-const warmUpTime = '10m'
+const warmUpTime = '20m'
 const testDuration = '20m'
 
 export const options = {
@@ -24,7 +24,7 @@ export const options = {
       exec: 'tokenGenerate',      
       timeUnit: '1s',         
       preAllocatedVUs: 200, 
-      maxVUs: 400,  
+      maxVUs: 500,  
       stages: [
         { duration: warmUpTime, target: generateRPS}
       ],
@@ -34,7 +34,7 @@ export const options = {
       exec: 'tokenRefresh',      
       timeUnit: '1s',         
       preAllocatedVUs: 200, 
-      maxVUs: 400,  
+      maxVUs: 500,  
       stages: [
         { duration: warmUpTime, target: refreshRPS}
       ],
@@ -43,8 +43,8 @@ export const options = {
       executor: 'ramping-arrival-rate',
       exec: 'identityMap',      
       timeUnit: '1s',         
-      preAllocatedVUs: 2500, 
-      maxVUs: 5000,  
+      preAllocatedVUs: 3000, 
+      maxVUs: 8000,  
       stages: [
         { duration: warmUpTime, target: identityMapRPS}
       ],
@@ -64,7 +64,7 @@ export const options = {
       rate: generateRPS,
       timeUnit: '1s',
       preAllocatedVUs: 200,
-      maxVUs: 400,
+      maxVUs: 500,
       duration: testDuration,
       gracefulStop: '0s',
       startTime: warmUpTime,
@@ -75,7 +75,7 @@ export const options = {
       rate: refreshRPS,
       timeUnit: '1s',
       preAllocatedVUs: 200,
-      maxVUs: 400,
+      maxVUs: 500,
       duration: testDuration,
       gracefulStop: '0s',
       startTime: warmUpTime,
@@ -85,8 +85,8 @@ export const options = {
       exec: 'identityMap',
       rate: identityMapRPS,
       timeUnit: '1s',
-      preAllocatedVUs: 2500,
-      maxVUs: 5000,
+      preAllocatedVUs: 3000,
+      maxVUs: 8000,
       duration: testDuration,
       gracefulStop: '0s',
       startTime: warmUpTime,
