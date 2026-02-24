@@ -142,9 +142,9 @@ public final class TestData {
         Prometheus prometheus = getPrometheus();
         Set<List<String>> inputs = Set.of(
                 List.of("bad email list policy=1", "{\"email\":[\"abc\",\"user2@example.com\"], \"policy\":1}"),
-                List.of("bad email hash list policy=1", "{\"email_hash\":[\"eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=\",\"abc\"], \"policy\":1}"),
+                List.of("bad email hash list policy=1", "{\"email_hash\":[\"rYsn2sTT1lRlZerX+4DXZMQ+DfcejOXoMVczcF2jCLM=\",\"abc\"], \"policy\":1}"),
                 List.of("bad email list optout_check=1", "{\"email\":[\"abc\",\"user2@example.com\"], \"optout_check\":1}"),
-                List.of("bad email hash list optout_check=1", "{\"email_hash\":[\"eVvLS/Vg+YZ6+z3i0NOpSXYyQAfEXqCZ7BTpAjFUBUc=\",\"abc\"], \"optout_check\":1}")
+                List.of("bad email hash list optout_check=1", "{\"email_hash\":[\"rYsn2sTT1lRlZerX+4DXZMQ+DfcejOXoMVczcF2jCLM=\",\"abc\"], \"optout_check\":1}")
         );
 
         Set<Arguments> args = new HashSet<>();
