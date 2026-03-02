@@ -3,7 +3,7 @@ kind: TestRun
 metadata:
   name: k6-uid2-load-test
 spec:
-  parallelism: 10  # original 4
+  parallelism: 20  # original 4
   arguments: --out experimental-prometheus-rw --tag "testid=replacecomment"
   script:
     configMap:

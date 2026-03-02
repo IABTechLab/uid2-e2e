@@ -8,10 +8,10 @@ const baseUrl = __ENV.OPERATOR_URL;
 const clientSecret = __ENV.CLIENT_SECRET;
 const clientKey = __ENV.CLIENT_KEY;
 const identityMapVUs = 300;
-const identityMapLargeBatchVUs = 10;
+const identityMapLargeBatchVUs = 30;
 
 const generateVUs = vus;
-const testDuration = '5m'
+const testDuration = '15m'
 
 export const options = {
   insecureSkipTLSVerify: true,
@@ -47,9 +47,9 @@ export const options = {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
       vus: identityMapLargeBatchVUs,
-      duration: '300s',
+      duration: testDuration,
       gracefulStop: '0s',
-      startTime: '40s',
+      startTime: '30s',
     },
   },
   // So we get count in the summary, to demonstrate different metrics are different
