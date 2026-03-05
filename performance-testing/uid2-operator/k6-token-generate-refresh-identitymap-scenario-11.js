@@ -189,7 +189,10 @@ export function tokenRefresh(data) {
 
 export async function identityMapV2() {
   // No caching: generate a fresh encrypted request with unique DIIs on every call.
-  const requestData = await generateIdentityMapV2RequestWithTime(50);
+  // 2% of requests use a large 5000-email batch; the rest use 50 emails.
+  const largeBatchChance = 0.02;
+  const emailCount = Math.random() < largeBatchChance ? 5000 : 50;
+  const requestData = await generateIdentityMapV2RequestWithTime(emailCount);
 
   var identityMapData = {
     endpoint: '/v2/identity/map',
