@@ -26,23 +26,23 @@ export const options = {
       ],
       gracefulRampDown: '0s',
     },
-    // Actual testing scenarios
-    // identityMap: {
-    //   executor: 'constant-vus',
-    //   exec: 'identityMap',
-    //   vus: identityMapVUs,
-    //   duration: testDuration,
-    //   gracefulStop: '0s',
-    //   startTime: '40s',
-    // },
-    // identityMapLargeBatchSequential: {
-    //   executor: 'constant-vus',
-    //   exec: 'identityMapLargeBatch',
-    //   vus: 1,
-    //   duration: '300s',
-    //   gracefulStop: '0s',
-    //   startTime: '40s',
-    // },
+    Actual testing scenarios
+    identityMap: {
+      executor: 'constant-vus',
+      exec: 'identityMap',
+      vus: identityMapVUs,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: '40s',
+    },
+    identityMapLargeBatchSequential: {
+      executor: 'constant-vus',
+      exec: 'identityMapLargeBatch',
+      vus: 1,
+      duration: '300s',
+      gracefulStop: '0s',
+      startTime: '40s',
+    },
     identityMapLargeBatch: {
       executor: 'constant-vus',
       exec: 'identityMapLargeBatch',
@@ -94,11 +94,11 @@ export async function setup() {
 }
 
 // Remove this function if you are running manually inside a GCP/Azure/AWS instance using docker
-export function handleSummary(data) {
-  return {
-    'summary.json': JSON.stringify(data),
-  }
-}
+// export function handleSummary(data) {
+//   return {
+//     'summary.json': JSON.stringify(data),
+//   }
+// }
 
 // Scenarios
 export async function tokenGenerate(data) {
