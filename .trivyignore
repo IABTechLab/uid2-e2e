@@ -4,4 +4,4 @@
 
 # UID2-6837
 # plexus-utils directory traversal - comes from Maven installation in base image (maven:3.9.11-eclipse-temurin-21), not from our code dependencies. Not exploitable at runtime.
-CVE-2025-67030 exp:2026-05-01
+CVE-2025-67030 exp:2026-10-01
