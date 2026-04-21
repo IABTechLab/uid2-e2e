@@ -32,4 +32,5 @@ jobs:
       vulnerability_severity: ${{ inputs.vulnerability_severity }}
       java_version: 21
       skip_tests: true
+      merge_environment: ${{ github.ref_protected && 'ci-auto-merge' || '' }}
     secrets: inherit
