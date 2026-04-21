@@ -2,14 +2,17 @@ import encoding from 'k6/encoding';
 import { check } from 'k6';
 import http from 'k6/http';
 
-const vus = 300;
-// Get Key and Secret from: https://start.1password.com/open/i?a=SWHBRR7FURBBXPZORJWBGP5UBM&v=cknem3yiubq6f2guyizd2ifsnm&i=ywhkqovi4p5wzoi7me4564hod4&h=thetradedesk.1password.com
+const vus = 50;
 const baseUrl = __ENV.OPERATOR_URL;
 const clientSecret = __ENV.CLIENT_SECRET;
 const clientKey = __ENV.CLIENT_KEY;
 
-const generateVUs = vus;
-const testDuration = '15m'
+const generateRPS = 50000;
+const refreshRPS = 50000;
+const identityMapRPS = 8000;
+
+const warmUpTime = '20m'
+const testDuration = '20m'
 
 export const options = {
   insecureSkipTLSVerify: true,
@@ -17,22 +20,109 @@ export const options = {
   scenarios: {
     // Warmup scenarios
     tokenGenerateWarmup: {
-      executor: 'ramping-vus',
+      executor: 'ramping-arrival-rate',
       exec: 'tokenGenerate',
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 500,
       stages: [
-        { duration: '30s', target: generateVUs}
+        { duration: warmUpTime, target: generateRPS}
+      ],
+    },
+    tokenRefreshWarmup: {
+      executor: 'ramping-arrival-rate',
+      exec: 'tokenRefresh',
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 500,
+      stages: [
+        { duration: warmUpTime, target: refreshRPS}
+      ],
+    },
+    identityMapWarmup: {
+      executor: 'ramping-arrival-rate',
+      exec: 'identityMap',
+      timeUnit: '1s',
+      preAllocatedVUs: 3000,
+      maxVUs: 8000,
+      stages: [
+        { duration: warmUpTime, target: identityMapRPS}
+      ],
+    },/*
+    keySharingWarmup: {
+      executor: 'ramping-vus',
+      exec: 'keySharing',
+      stages: [
+        { duration: warmUpTime, target: keySharingVUs}
       ],
       gracefulRampDown: '0s',
-    },
+    },*/
     // Actual testing scenarios
     tokenGenerate: {
-      executor: 'constant-vus',
+      executor: 'constant-arrival-rate',
       exec: 'tokenGenerate',
-      vus: generateVUs,
+      rate: generateRPS,
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 500,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
     },
+    tokenRefresh: {
+      executor: 'constant-arrival-rate',
+      exec: 'tokenRefresh',
+      rate: refreshRPS,
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 500,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: warmUpTime,
+    },
+    identityMap: {
+      executor: 'constant-arrival-rate',
+      exec: 'identityMap',
+      rate: identityMapRPS,
+      timeUnit: '1s',
+      preAllocatedVUs: 3000,
+      maxVUs: 8000,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: warmUpTime,
+    },/*
+    keySharing:{
+      executor: 'constant-vus',
+      exec: 'keySharing',
+      vus: keySharingVUs,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: warmUpTime,
+    },*/
+    /*identityMapLargeBatchSequential: {
+      executor: 'constant-vus',
+      exec: 'identityMapLargeBatch',
+      vus: 1,
+      duration: '300s',
+      gracefulStop: '0s',
+      startTime: '970s',
+    },
+    identityMapLargeBatch: {
+      executor: 'constant-vus',
+      exec: 'identityMapLargeBatch',
+      vus: 16,
+      duration: '300s',
+      gracefulStop: '0s',
+      startTime: '1280s',
+    },
+    identityBuckets: {
+      executor: 'constant-vus',
+      exec: 'identityBuckets',
+      vus: 2,
+      duration: '300s',
+      gracefulStop: '0s',
+      startTime: '1590s',
+    },*/
   },
   // So we get count in the summary, to demonstrate different metrics are different
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)', 'count'],
@@ -64,7 +154,8 @@ export async function setup() {
   };
 
   async function generateRefreshRequest() {
-    let request = await createReq( {'optout_check': 1, 'email': 'test5000@example.com'});
+    let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+    let request = await createReq( {'optout_check': 1, 'email': `test${randomSuffix}@example.com`});
     var requestData = {
       endpoint: '/v2/token/generate',
       requestBody: request,
@@ -75,7 +166,6 @@ export async function setup() {
   };
 }
 
-// Remove this function if you are running manually inside a GCP/Azure/AWS instance using docker
 export function handleSummary(data) {
   return {
     'summary.json': JSON.stringify(data),
@@ -101,22 +191,18 @@ export async function tokenGenerate(data) {
   execute(tokenGenerateData, true);
 }
 
-export async function identityMap(data) {
-  const endpoint = '/v2/identity/map';
-  if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
-    data.identityMap = await generateIdentityMapRequestWithTime(2);;
+export function tokenRefresh(data) {
+  var requestBody = data.refreshToken;
+  var refreshData = {
+    endpoint: '/v2/token/refresh',
+    requestBody: requestBody
   }
 
-  var requestBody = data.identityMap.requestBody;
-  var identityData = {
-    endpoint: endpoint,
-    requestBody: requestBody,
-  }
-  execute(identityData, true);
+  execute(refreshData, false);
 }
 
-export async function identityMapLargeBatch(data) {
-  const endpoint = '/v2/identity/map';
+export async function identityMap(data) {
+  const endpoint = '/v3/identity/map';
   if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
     data.identityMap = await generateIdentityMapRequestWithTime(5000);;
   }
@@ -129,6 +215,49 @@ export async function identityMapLargeBatch(data) {
   execute(identityData, true);
 }
 
+export async function identityMapLargeBatch(data) {
+  const endpoint = '/v3/identity/map';
+  if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
+    data.identityMap = await generateIdentityMapRequestWithTime(5000);;
+  }
+
+  var requestBody = data.identityMap.requestBody;
+  var identityData = {
+    endpoint: endpoint,
+    requestBody: requestBody,
+  }
+  execute(identityData, true);
+}
+
+export function identityBuckets(data) {
+  var requestData = data.identityBuckets.requestData;
+  var elementToUse = selectRequestData(requestData);
+
+  var bucketData = {
+    endpoint: data.identityBuckets.endpoint,
+    requestBody: elementToUse.requestBody,
+  }
+  execute(bucketData, true);
+}
+
+export async function keySharing(data) {
+  const endpoint = '/v2/key/sharing';
+  if (data.keySharing == null) {
+    var newData = await generateKeySharingRequestWithTime();
+    data.keySharing = newData;
+  } else if (data.keySharing.time < (Date.now() - 45000)) {
+    data.keySharing = await generateKeySharingRequestWithTime();
+  }
+
+  var requestBody = data.keySharing.requestBody;
+  var keySharingData = {
+    endpoint: endpoint,
+    requestBody: requestBody,
+  }
+
+  execute(keySharingData, true);
+}
+
 // Helpers
 async function createReqWithTimestamp(timestampArr, obj) {
   var envelope = getEnvelopeWithTimestamp(timestampArr, obj);
@@ -137,12 +266,12 @@ async function createReqWithTimestamp(timestampArr, obj) {
 
 function generateIdentityMapRequest(emailCount) {
   var data = {
-    'optout_check': 1,
     "email": []
   };
 
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
   for (var i = 0; i < emailCount; ++i) {
-    data.email.push(`test${i}@example.com`);
+    data.email.push(`test${randomSuffix}${i}@example.com`);
   }
 
   return data;
@@ -209,13 +338,13 @@ async function decryptEnvelope(envelope, clientSecret) {
   const iv = rawData.slice(0, 12);
 
   const decrypted = await crypto.subtle.decrypt(
-      {
-        name: "AES-GCM",
-        iv: iv,
-        tagLength: 128
-      },
-      key,
-      rawData.slice(12)
+    {
+      name: "AES-GCM",
+      iv: iv,
+      tagLength: 128
+    },
+    key,
+    rawData.slice(12)
   );
 
 
@@ -308,7 +437,8 @@ async function generateRequestWithTime(obj) {
 
 
 async function generateTokenGenerateRequestWithTime() {
-  let requestData = { 'optout_check': 1, 'email': 'test500@example.com' };
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+  let requestData = { 'optout_check': 1, 'email': `test${randomSuffix}@example.com` };
   return await generateRequestWithTime(requestData);
 }
 
