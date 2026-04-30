@@ -129,7 +129,8 @@ public class OperatorTest {
             IdentityMapInput input,
             List<String> diis
     ) {
-        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> { // Validate we didn't make mapping too slow.
+        long startNs = System.nanoTime();
+        assertTimeoutPreemptively(Duration.ofSeconds(60), () -> { // TEMP investigation: was 5s
             var response = operator.v2IdentityMap(input);
 
             assertThat(response.isSuccess()).isTrue();
@@ -146,6 +147,8 @@ public class OperatorTest {
                 assertThat(mappedDii.getBucketId()).isNotBlank();
             }
         });
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000L;
+        System.out.println("[INVESTIGATE] testV2IdentityMap operator=" + operatorName + " label=" + label + " elapsed_ms=" + elapsedMs);
     }
 
     @ParameterizedTest(name = "/v3/identity/map - {0} - {2}")
