@@ -5,3 +5,9 @@
 # UID2-6837
 # plexus-utils directory traversal - comes from Maven installation in base image (maven:3.9.11-eclipse-temurin-21), not from our code dependencies. Not exploitable at runtime.
 CVE-2025-67030 exp:2026-10-01
+
+# UID2-6481
+# GnuPG information disclosure / out-of-bounds write in Ubuntu 24.04 base image packages (dirmngr, gnupg, gpg, etc).
+# Fix available in 2.4.4-2ubuntu17.4. Dockerfile already performs apt-get upgrade; will self-resolve
+# once the Ubuntu security update propagates to the build environment.
+CVE-2025-68973 exp:2026-08-01
