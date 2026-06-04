@@ -31,8 +31,62 @@ public class CoreTest {
     }
 
     /**
+     * Tests that an unknown / mistyped operator key is rejected with HTTP 401 and a body that
+     * names the cause (reason=unrecognized_key) instead of a bare "Unauthorized".
+     * This is the 4eyes.ai scenario (UID2-6717 / UID2-7235): a single transcription error in the
+     * operator key. The actionable message propagates verbatim into the operator's startup log.
+     */
+    @ParameterizedTest(name = "/attest unrecognized key - {0}")
+    @MethodSource({
+            "suite.core.TestData#baseArgs"
+    })
+    public void testAttest_UnrecognizedOperatorKey(Core core) {
+        // A well-formed but unknown key - not present in the operators store.
+        String bogusOperatorKey = "UID2-O-L-000-thisKeyDoesNotExist000000000000000000000000=";
+
+        HttpClient.HttpException exception = assertThrows(
+                HttpClient.HttpException.class,
+                () -> core.attestWithApiKey("{\"attestation_request\":\"AA==\"}", bogusOperatorKey)
+        );
+
+        assertEquals(401, exception.getCode(), "unknown operator key should be rejected with 401");
+        JsonNode body = assertDoesNotThrow(exception::getResponseJson);
+        assertAll("401 body should name the rejection cause",
+                () -> assertEquals("unauthorized", body.get("status").asText()),
+                () -> assertEquals("unrecognized_key", body.get("reason").asText()),
+                () -> assertTrue(body.get("message").asText().toLowerCase().contains("not recognized"),
+                        "message should tell the operator the key was not recognized"));
+    }
+
+    /**
+     * Tests that a recognized-but-disabled operator key is rejected with HTTP 401 and reason=key_disabled,
+     * distinguishing it from an unknown key. Relies on the disabled operator key seeded in
+     * uid2-admin localstack (site_id 998, "Disabled Operator (E2E)").
+     */
+    @ParameterizedTest(name = "/attest disabled key - {0}")
+    @MethodSource({
+            "suite.core.TestData#baseArgs"
+    })
+    public void testAttest_DisabledOperatorKey(Core core) {
+        String disabledOperatorKey = "UID2-O-L-998-d1sabledKeyForE2ETestOnly00000000000000000000=";
+
+        HttpClient.HttpException exception = assertThrows(
+                HttpClient.HttpException.class,
+                () -> core.attestWithApiKey("{\"attestation_request\":\"AA==\"}", disabledOperatorKey)
+        );
+
+        assertEquals(401, exception.getCode(), "disabled operator key should be rejected with 401");
+        JsonNode body = assertDoesNotThrow(exception::getResponseJson);
+        assertAll("401 body should identify the key as disabled",
+                () -> assertEquals("unauthorized", body.get("status").asText()),
+                () -> assertEquals("key_disabled", body.get("reason").asText()),
+                () -> assertTrue(body.get("message").asText().toLowerCase().contains("disabled"),
+                        "message should tell the operator the key is disabled"));
+    }
+
+    /**
      * Tests valid attestation request with JWT signing.
-     * 
+     *
      * Since LocalStack generates its own RSA key material,
      * we dynamically fetch the public key from LocalStack's
      * KMS using GetPublicKey API to validate JWT signatures.
