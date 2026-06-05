@@ -32,9 +32,7 @@ public class CoreTest {
 
     /**
      * Tests that an unknown / mistyped operator key is rejected with HTTP 401 and a body that
-     * names the cause (reason=unrecognized_key) instead of a bare "Unauthorized".
-     * This is the 4eyes.ai scenario (UID2-6717 / UID2-7235): a single transcription error in the
-     * operator key. The actionable message propagates verbatim into the operator's startup log.
+     * names the cause (reason=unrecognized_key).
      */
     @ParameterizedTest(name = "/attest unrecognized key - {0}")
     @MethodSource({
