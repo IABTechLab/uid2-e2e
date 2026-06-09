@@ -30,6 +30,11 @@ public class Core extends App {
         return OBJECT_MAPPER.readTree(response);
     }
 
+    public JsonNode attestWithApiKey(String attestationRequest, String apiKey) throws Exception {
+        String response = HttpClient.post(getBaseUrl() + "/attest", attestationRequest, apiKey);
+        return OBJECT_MAPPER.readTree(response);
+    }
+
     public JsonNode getWithCoreApiToken(String path) throws Exception {
         return getWithCoreApiToken(path, false);
     }

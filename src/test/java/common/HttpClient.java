@@ -42,6 +42,10 @@ public final class HttpClient {
             return OBJECT_MAPPER.readTree(response);
         }
 
+        public int getCode() {
+            return code;
+        }
+
         private static String createErrorMessage(HttpMethod method, String url, int code, String message, String response) {
             return "Unsuccessful %s request - URL: %s - Code: %d %s - Response body: %s".formatted(
                     method, url, code, message, response
