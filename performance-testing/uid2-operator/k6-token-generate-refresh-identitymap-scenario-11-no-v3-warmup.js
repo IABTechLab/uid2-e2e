@@ -2,36 +2,106 @@ import encoding from 'k6/encoding';
 import { check } from 'k6';
 import http from 'k6/http';
 
-const vus = 300;
-// Get Key and Secret from: https://start.1password.com/open/i?a=SWHBRR7FURBBXPZORJWBGP5UBM&v=cknem3yiubq6f2guyizd2ifsnm&i=ywhkqovi4p5wzoi7me4564hod4&h=thetradedesk.1password.com
 const baseUrl = __ENV.OPERATOR_URL;
 const clientSecret = __ENV.CLIENT_SECRET;
 const clientKey = __ENV.CLIENT_KEY;
 
-const generateVUs = vus;
-const testDuration = '15m'
+const generateRPS = 25000;
+const refreshRPS = 25000;
+
+// /v2/identity/map: high-throughput, fresh DIIs, mixed batch sizes
+const identityMapV2RPS = 5000;
+
+// /v3/identity/map: scenario-10 conditions — 3 concurrent requests per iteration,
+// each with freshly generated unique DIIs, 10k emails per request, ~1 iteration/s.
+// NOTE: unlike scenario 11, /v3/identity/map has NO warmup phase — it starts cold
+// at t=10m into the test. This simulates prod behaviour where v3 only receives
+// burst traffic and the v3-specific JVM code paths are never JIT-compiled.
+const CONCURRENT_REQUESTS_V3 = 3;
+const identityMapV3IterationsPerSecond = 1; // 1 × 3 = 3 total HTTP requests/s
+
+const warmUpTime = '10m'
+const testDuration = '20m'
 
 export const options = {
   insecureSkipTLSVerify: true,
   noConnectionReuse: false,
   scenarios: {
-    // Warmup scenarios
+    // Warmup scenarios — intentionally excludes identityMapV3Warmup
     tokenGenerateWarmup: {
-      executor: 'ramping-vus',
+      executor: 'ramping-arrival-rate',
       exec: 'tokenGenerate',
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 400,
       stages: [
-        { duration: '30s', target: generateVUs}
+        { duration: warmUpTime, target: generateRPS}
       ],
-      gracefulRampDown: '0s',
+    },
+    tokenRefreshWarmup: {
+      executor: 'ramping-arrival-rate',
+      exec: 'tokenRefresh',
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 400,
+      stages: [
+        { duration: warmUpTime, target: refreshRPS}
+      ],
+    },
+    identityMapV2Warmup: {
+      executor: 'ramping-arrival-rate',
+      exec: 'identityMapV2',
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 200,
+      stages: [
+        { duration: warmUpTime, target: identityMapV2RPS}
+      ],
     },
     // Actual testing scenarios
     tokenGenerate: {
-      executor: 'constant-vus',
+      executor: 'constant-arrival-rate',
       exec: 'tokenGenerate',
-      vus: generateVUs,
+      rate: generateRPS,
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 400,
       duration: testDuration,
       gracefulStop: '0s',
-      startTime: '30s',
+      startTime: warmUpTime,
+    },
+    tokenRefresh: {
+      executor: 'constant-arrival-rate',
+      exec: 'tokenRefresh',
+      rate: refreshRPS,
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 400,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: warmUpTime,
+    },
+    identityMapV2: {
+      executor: 'constant-arrival-rate',
+      exec: 'identityMapV2',
+      rate: identityMapV2RPS,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 200,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: warmUpTime,
+    },
+    identityMapV3: {
+      executor: 'constant-arrival-rate',
+      exec: 'identityMapV3',
+      rate: identityMapV3IterationsPerSecond,
+      timeUnit: '1s',
+      preAllocatedVUs: 5,
+      maxVUs: 10,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: warmUpTime,
     },
   },
   // So we get count in the summary, to demonstrate different metrics are different
@@ -59,12 +129,12 @@ export async function setup() {
   var token = await generateRefreshRequest();
   return {
     tokenGenerate: null,
-    identityMap: null,
     refreshToken: token
   };
 
   async function generateRefreshRequest() {
-    let request = await createReq( {'optout_check': 1, 'email': 'test5000@example.com'});
+    let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+    let request = await createReq( {'optout_check': 1, 'email': `test${randomSuffix}@example.com`});
     var requestData = {
       endpoint: '/v2/token/generate',
       requestBody: request,
@@ -75,7 +145,6 @@ export async function setup() {
   };
 }
 
-// Remove this function if you are running manually inside a GCP/Azure/AWS instance using docker
 export function handleSummary(data) {
   return {
     'summary.json': JSON.stringify(data),
@@ -101,32 +170,47 @@ export async function tokenGenerate(data) {
   execute(tokenGenerateData, true);
 }
 
-export async function identityMap(data) {
-  const endpoint = '/v2/identity/map';
-  if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
-    data.identityMap = await generateIdentityMapRequestWithTime(2);;
+export function tokenRefresh(data) {
+  var requestBody = data.refreshToken;
+  var refreshData = {
+    endpoint: '/v2/token/refresh',
+    requestBody: requestBody
   }
 
-  var requestBody = data.identityMap.requestBody;
-  var identityData = {
-    endpoint: endpoint,
-    requestBody: requestBody,
-  }
-  execute(identityData, true);
+  execute(refreshData, false);
 }
 
-export async function identityMapLargeBatch(data) {
-  const endpoint = '/v2/identity/map';
-  if ((data.identityMap == null) || (data.identityMap.time < (Date.now() - 45000))) {
-    data.identityMap = await generateIdentityMapRequestWithTime(5000);;
+export async function identityMapV2() {
+  // No caching: generate a fresh encrypted request with unique DIIs on every call.
+  // 2% of requests use a large 5000-email batch; the rest use 50 emails.
+  const largeBatchChance = 0.02;
+  const emailCount = Math.random() < largeBatchChance ? 5000 : 50;
+  const requestData = await generateIdentityMapV2RequestWithTime(emailCount);
+
+  var identityMapData = {
+    endpoint: '/v2/identity/map',
+    requestBody: requestData.requestBody,
   }
 
-  var requestBody = data.identityMap.requestBody;
-  var identityData = {
-    endpoint: endpoint,
-    requestBody: requestBody,
+  execute(identityMapData, true);
+}
+
+export async function identityMapV3() {
+  const endpoint = '/v3/identity/map';
+  const authOptions = { headers: { 'Authorization': `Bearer ${clientKey}` } };
+
+  // Generate a separate encrypted request body with unique DIIs for each
+  // concurrent request — no caching, no shared bodies between batch slots.
+  const batchRequests = [];
+  for (let i = 0; i < CONCURRENT_REQUESTS_V3; i++) {
+    const requestData = await generateIdentityMapV3RequestWithTime(10000);
+    batchRequests.push(['POST', `${baseUrl}${endpoint}`, requestData.requestBody, authOptions]);
   }
-  execute(identityData, true);
+
+  const responses = http.batch(batchRequests);
+  for (const r of responses) {
+    check(r, { 'status is 200': res => res.status === 200 });
+  }
 }
 
 // Helpers
@@ -135,14 +219,28 @@ async function createReqWithTimestamp(timestampArr, obj) {
   return encoding.b64encode((await encryptEnvelope(envelope, clientSecret)).buffer);
 }
 
-function generateIdentityMapRequest(emailCount) {
+function generateIdentityMapV2Request(emailCount) {
   var data = {
     'optout_check': 1,
-    "email": []
+    'email': []
   };
 
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
   for (var i = 0; i < emailCount; ++i) {
-    data.email.push(`test${i}@example.com`);
+    data.email.push(`test${randomSuffix}${i}@example.com`);
+  }
+
+  return data;
+}
+
+function generateIdentityMapV3Request(emailCount) {
+  var data = {
+    'email': []
+  };
+
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+  for (var i = 0; i < emailCount; ++i) {
+    data.email.push(`test${randomSuffix}${i}@example.com`);
   }
 
   return data;
@@ -209,13 +307,13 @@ async function decryptEnvelope(envelope, clientSecret) {
   const iv = rawData.slice(0, 12);
 
   const decrypted = await crypto.subtle.decrypt(
-      {
-        name: "AES-GCM",
-        iv: iv,
-        tagLength: 128
-      },
-      key,
-      rawData.slice(12)
+    {
+      name: "AES-GCM",
+      iv: iv,
+      tagLength: 128
+    },
+    key,
+    rawData.slice(12)
   );
 
 
@@ -306,20 +404,20 @@ async function generateRequestWithTime(obj) {
   return element;
 }
 
-
 async function generateTokenGenerateRequestWithTime() {
-  let requestData = { 'optout_check': 1, 'email': 'test500@example.com' };
+  let randomSuffix = Math.floor(Math.random() * 1_000_000_001);
+  let requestData = { 'optout_check': 1, 'email': `test${randomSuffix}@example.com` };
   return await generateRequestWithTime(requestData);
 }
 
-async function generateIdentityMapRequestWithTime(emailCount) {
-  let emails = generateIdentityMapRequest(emailCount);
-  return await generateRequestWithTime(emails);
+async function generateIdentityMapV2RequestWithTime(emailCount) {
+  let data = generateIdentityMapV2Request(emailCount);
+  return await generateRequestWithTime(data);
 }
 
-async function generateKeySharingRequestWithTime() {
-  let requestData = { };
-  return await generateRequestWithTime(requestData);
+async function generateIdentityMapV3RequestWithTime(emailCount) {
+  let data = generateIdentityMapV3Request(emailCount);
+  return await generateRequestWithTime(data);
 }
 
 const generateSinceTimestampStr = () => {

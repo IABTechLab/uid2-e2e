@@ -2,13 +2,15 @@ import encoding from 'k6/encoding';
 import { check } from 'k6';
 import http from 'k6/http';
 
-const vus = 300;
-// Get Key and Secret from: https://start.1password.com/open/i?a=SWHBRR7FURBBXPZORJWBGP5UBM&v=cknem3yiubq6f2guyizd2ifsnm&i=ywhkqovi4p5wzoi7me4564hod4&h=thetradedesk.1password.com
+const vus = 50;
 const baseUrl = __ENV.OPERATOR_URL;
 const clientSecret = __ENV.CLIENT_SECRET;
 const clientKey = __ENV.CLIENT_KEY;
 
-const generateVUs = vus;
+const generateVUs = 300;
+const refreshVUs = vus;
+const identityMapVUs = 30;
+const keySharingVUs = vus;
 const testDuration = '15m'
 
 export const options = {
@@ -24,6 +26,30 @@ export const options = {
       ],
       gracefulRampDown: '0s',
     },
+    // tokenRefreshWarmup: {
+    //   executor: 'ramping-vus',
+    //   exec: 'tokenRefresh',
+    //   stages: [
+    //     { duration: '30s', target: refreshVUs}
+    //   ],
+    //   gracefulRampDown: '0s',
+    // },
+    identityMapWarmup: {
+      executor: 'ramping-vus',
+      exec: 'identityMap',
+      stages: [
+        { duration: '30s', target: generateVUs}
+      ],
+      gracefulRampDown: '0s',
+    },/*
+    keySharingWarmup: {
+      executor: 'ramping-vus',
+      exec: 'keySharing',
+      stages: [
+        { duration: '30s', target: keySharingVUs}
+      ],
+      gracefulRampDown: '0s',
+    },*/
     // Actual testing scenarios
     tokenGenerate: {
       executor: 'constant-vus',
@@ -33,6 +59,55 @@ export const options = {
       gracefulStop: '0s',
       startTime: '30s',
     },
+    // tokenRefresh: {
+    //   executor: 'constant-vus',
+    //   exec: 'tokenRefresh',
+    //   vus: refreshVUs,
+    //   duration: testDuration,
+    //   gracefulStop: '0s',
+    //   startTime: '30s',
+    // },
+    // identityMap: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityMapLargeBatch',
+    //   vus: identityMapVUs,
+    //   duration: testDuration,
+    //   gracefulStop: '0s',
+    //   startTime: '30s',
+    // },
+    /*
+    keySharing:{
+      executor: 'constant-vus',
+      exec: 'keySharing',
+      vus: keySharingVUs,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: '30s',
+    },*/
+    // identityMapLargeBatchSequential: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityMapLargeBatch',
+    //   vus: 1,
+    //   duration: '300s',
+    //   gracefulStop: '0s',
+    //   startTime: '970s',
+    // },
+    identityMapLargeBatch: {
+      executor: 'constant-vus',
+      exec: 'identityMapLargeBatch',
+      vus: identityMapVUs,
+      duration: testDuration,
+      gracefulStop: '0s',
+      startTime: '30s',
+    },
+    // identityBuckets: {
+    //   executor: 'constant-vus',
+    //   exec: 'identityBuckets',
+    //   vus: 2,
+    //   duration: '300s',
+    //   gracefulStop: '0s',
+    //   startTime: '1590s',
+    // },
   },
   // So we get count in the summary, to demonstrate different metrics are different
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)', 'count'],
@@ -75,7 +150,6 @@ export async function setup() {
   };
 }
 
-// Remove this function if you are running manually inside a GCP/Azure/AWS instance using docker
 export function handleSummary(data) {
   return {
     'summary.json': JSON.stringify(data),
@@ -99,6 +173,16 @@ export async function tokenGenerate(data) {
   }
 
   execute(tokenGenerateData, true);
+}
+
+export function tokenRefresh(data) {
+  var requestBody = data.refreshToken;
+  var refreshData = {
+    endpoint: '/v2/token/refresh',
+    requestBody: requestBody
+  }
+
+  execute(refreshData, false);
 }
 
 export async function identityMap(data) {
@@ -127,6 +211,35 @@ export async function identityMapLargeBatch(data) {
     requestBody: requestBody,
   }
   execute(identityData, true);
+}
+
+export function identityBuckets(data) {
+  var requestData = data.identityBuckets.requestData;
+  var elementToUse = selectRequestData(requestData);
+
+  var bucketData = {
+    endpoint: data.identityBuckets.endpoint,
+    requestBody: elementToUse.requestBody,
+  }
+  execute(bucketData, true);
+}
+
+export async function keySharing(data) {
+  const endpoint = '/v2/key/sharing';
+  if (data.keySharing == null) {
+    var newData = await generateKeySharingRequestWithTime();
+    data.keySharing = newData;
+  } else if (data.keySharing.time < (Date.now() - 45000)) {
+    data.keySharing = await generateKeySharingRequestWithTime();
+  }
+
+  var requestBody = data.keySharing.requestBody;
+  var keySharingData = {
+    endpoint: endpoint,
+    requestBody: requestBody,
+  }
+
+  execute(keySharingData, true);
 }
 
 // Helpers
@@ -209,13 +322,13 @@ async function decryptEnvelope(envelope, clientSecret) {
   const iv = rawData.slice(0, 12);
 
   const decrypted = await crypto.subtle.decrypt(
-      {
-        name: "AES-GCM",
-        iv: iv,
-        tagLength: 128
-      },
-      key,
-      rawData.slice(12)
+    {
+      name: "AES-GCM",
+      iv: iv,
+      tagLength: 128
+    },
+    key,
+    rawData.slice(12)
   );
 
 
