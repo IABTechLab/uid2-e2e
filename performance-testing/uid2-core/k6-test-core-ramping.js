@@ -1,17 +1,26 @@
 import http from 'k6/http';
 
-const CORE_API_TOKEN = "UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdEE="; // Mock token for E2E tests
-const CORE_BASE_URL = 'http://localhost:8088';
+const CORE_API_TOKEN = __ENV.OPERATOR_KEY; // Mock token for E2E tests
+const CORE_BASE_URL = __ENV.CORE_URL;
 
 const AUTH_HEADERS = { headers: { 'Authorization': `Bearer ${CORE_API_TOKEN}` }};
 const HEADERS = { headers: { ...AUTH_HEADERS.headers, 'X-UID2-AppVersion': 'uid2-operator=0.0.0-local-load-test' }};
+const vus = 1000;
 
 const STAGE_DURATION = '120s';
 const STAGE_LOAD_MULTIPLIER = [
     1,
-    2,
-    5,
-    10,
+    4,
+    16,
+    64,
+    128,
+    256,
+    512,
+    512,
+    512,
+    512,
+    512,
+    512
 ];
 
 export const options = {
@@ -21,8 +30,8 @@ export const options = {
             exec: 'opsHealthcheck',
             startRate: 4,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(4),
         },
 
@@ -31,8 +40,8 @@ export const options = {
             exec: 'attest',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(1),
         },
 
@@ -41,8 +50,8 @@ export const options = {
             exec: 'clientsRefresh',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(16),
         },
         keysets_refresh: {
@@ -50,8 +59,8 @@ export const options = {
             exec: 'keysetRefresh',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(16),
         },
         keyset_keys_refresh: {
@@ -59,8 +68,8 @@ export const options = {
             exec: 'keysetKeysRefresh',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(16),
         },
         salt_refresh: {
@@ -68,8 +77,8 @@ export const options = {
             exec: 'saltRefresh',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(16),
         },
 
@@ -78,8 +87,8 @@ export const options = {
             exec: 'sitesRefresh',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(9),
         },
         cstg_refresh: {
@@ -87,8 +96,8 @@ export const options = {
             exec: 'clientSideKeypairsRefresh',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(9),
         },
         services_refresh: {
@@ -96,8 +105,8 @@ export const options = {
             exec: 'servicesRefresh',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(9),
         },
         service_links_refresh: {
@@ -105,8 +114,8 @@ export const options = {
             exec: 'serviceLinksRefresh',
             startRate: 1,
             timeUnit: '1s',
-            preAllocatedVUs: 1000,
-            maxVUs: 1000,
+            preAllocatedVUs: vus,
+            maxVUs: vus,
             stages: getStages(9),
         },
     },
