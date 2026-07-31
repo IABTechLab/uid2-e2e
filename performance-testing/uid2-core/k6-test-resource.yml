@@ -1,0 +1,21 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: k6-uid2-load-test
+spec:
+  parallelism: 10  # original 4
+  arguments: --out experimental-prometheus-rw --tag "testid=replacecomment"
+  script:
+    configMap:
+      name: operator-stress-test
+      file: replaced
+  runner:
+    env:
+      - name: K6_PROMETHEUS_RW_SERVER_URL
+        value: "http://prometheus-server.prometheus/api/v1/write"
+      - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+        value: "true"
+      - name: CORE_URL
+        value: "core_url"
+      - name: OPERATOR_KEY
+        value: "operator_key"
