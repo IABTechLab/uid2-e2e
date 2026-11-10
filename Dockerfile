@@ -10,6 +10,13 @@ WORKDIR /app
 COPY ./pom.xml ./pom.xml
 COPY ./src ./src
 
+# Resolve dependencies and compile the tests at build time so container start
+# does not download or compile anything. The group filter matches no test, so
+# surefire and its JUnit provider are resolved while no test runs and the build
+# makes no calls to live endpoints. BasicTest is selected because the suite
+# classes fail with NoTestsDiscoveredException when a filter excludes all tests.
+RUN mvn -B test -Dtest=BasicTest -Dgroups=no-such-tag
+
 ######################
 # Configure env vars #
 ######################
